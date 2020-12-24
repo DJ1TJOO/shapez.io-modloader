@@ -41,7 +41,7 @@ class LoaderImpl {
             if (!missingSpriteIds[key]) {
                 // Only show error once
                 missingSpriteIds[key] = true;
-                logger.error("Sprite '" + key + "' not found!");
+                /*logger.error("Sprite '" + key + "' not found!");*/ // Will be fixed right now it just spams errors
             }
             return this.spriteNotFoundSprite;
         }

@@ -222,6 +222,10 @@ export class InGameState extends GameState {
 
             this.core.initializeRoot(this, this.savegame);
 
+            this.core.root.modMgr.addMods(["http://thomasbrants.nl:3000/mods/test_mods/test_mod.js"], () => {
+                this.core.root.modMgr.loadMods();
+            });
+
             if (this.savegame.hasGameDump()) {
                 this.stage4bResumeGame();
             } else {

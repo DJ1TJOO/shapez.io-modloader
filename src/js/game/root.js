@@ -28,6 +28,7 @@ import { DynamicTickrate } from "./dynamic_tickrate";
 import { KeyActionMapper } from "./key_action_mapper";
 import { Vector } from "../core/vector";
 import { GameMode } from "./game_mode";
+import { ModManager } from "../modloader/mod";
 /* typehints:end */
 
 const logger = createLogger("game/root");
@@ -133,6 +134,9 @@ export class GameRoot {
 
         /** @type {GameMode} */
         this.gameMode = null;
+
+        /** @type {ModManager} */
+        this.modMgr = null;
 
         this.signals = {
             // Entities

@@ -27,23 +27,23 @@ export const gBuildingVariants = {
 
 /**
  * Mapping from 'metaBuildingId/variant/rotationVariant' to building code
- * @type {Map<string, number>}
+ * @type {object}
  */
-const variantsCache = new Map();
+const variantsCache = {};
 
 /**
  * Registers a new variant
- * @param {number} code
  * @param {typeof MetaBuilding} meta
  * @param {string} variant
  * @param {number} rotationVariant
  */
 export function registerBuildingVariant(
-    code,
     meta,
-    variant = "default" /* @TODO: Circular dependency, actually its defaultBuildingVariant */,
+    variant = "default" /* @TODO: Circular dependency, actually its defaultBuildingVariant */ ,
     rotationVariant = 0
 ) {
+    const args_Meta = meta.name.match(/[A-Z][a-z]+/g);
+    let code = args_Meta.slice(1).join("") + "/" + variant + "/" + rotationVariant.toString();
     assert(!gBuildingVariants[code], "Duplicate id: " + code);
     gBuildingVariants[code] = {
         metaClass: meta,
@@ -71,7 +71,7 @@ export function buildBuildingCodeCache() {
     for (const code in gBuildingVariants) {
         const data = gBuildingVariants[code];
         const hash = data.metaInstance.getId() + "/" + data.variant + "/" + data.rotationVariant;
-        variantsCache.set(hash, +code);
+        variantsCache[hash] = code;
     }
 }
 
@@ -84,10 +84,9 @@ export function buildBuildingCodeCache() {
  */
 export function getCodeFromBuildingData(metaBuilding, variant, rotationVariant) {
     const hash = metaBuilding.getId() + "/" + variant + "/" + rotationVariant;
-    const result = variantsCache.get(hash);
+    const result = variantsCache[hash];
     if (G_IS_DEV) {
         if (!result) {
-            console.warn("Known hashes:", Array.from(variantsCache.keys()));
             assertAlways(false, "Building not found by data: " + hash);
         }
     }

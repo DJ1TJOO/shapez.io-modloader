@@ -17,6 +17,7 @@ import { Rectangle } from "../core/rectangle";
 import { ORIGINAL_SPRITE_SCALE } from "../core/sprites";
 import { lerp, randomInt, round2Digits } from "../core/utils";
 import { Vector } from "../core/vector";
+import { ModManager } from "../modloader/mod";
 import { Savegame } from "../savegame/savegame";
 import { SavegameSerializer } from "../savegame/savegame_serializer";
 import { AutomaticSave } from "./automatic_save";
@@ -121,6 +122,7 @@ export class GameCore {
         root.hubGoals = new HubGoals(root);
         root.productionAnalytics = new ProductionAnalytics(root);
         root.buffers = new BufferMaintainer(root);
+        root.modMgr = new ModManager(root);
 
         // Initialize the hud once everything is loaded
         this.root.hud.initialize();
@@ -402,9 +404,7 @@ export class GameCore {
         // Transform to world space
 
         if (G_IS_DEV && globalConfig.debug.testClipping) {
-            params.visibleRect = params.visibleRect.expandedInAllDirections(
-                -200 / this.root.camera.zoomLevel
-            );
+            params.visibleRect = params.visibleRect.expandedInAllDirections(-200 / this.root.camera.zoomLevel);
         }
 
         root.camera.transform(context);
@@ -501,11 +501,11 @@ export class GameCore {
             context.fillStyle = "blue";
             context.fillText(
                 "Atlas: " +
-                    desiredAtlasScale +
-                    " / Zoom: " +
-                    round2Digits(zoomLevel) +
-                    " / Effective Zoom: " +
-                    round2Digits(effectiveZoomLevel),
+                desiredAtlasScale +
+                " / Zoom: " +
+                round2Digits(zoomLevel) +
+                " / Effective Zoom: " +
+                round2Digits(effectiveZoomLevel),
                 20,
                 600
             );
@@ -514,31 +514,31 @@ export class GameCore {
 
             context.fillText(
                 "Maintained Buffers: " +
-                    stats.rootKeys +
-                    " root keys / " +
-                    stats.subKeys +
-                    " buffers / VRAM: " +
-                    round2Digits(stats.vramBytes / (1024 * 1024)) +
-                    " MB",
+                stats.rootKeys +
+                " root keys / " +
+                stats.subKeys +
+                " buffers / VRAM: " +
+                round2Digits(stats.vramBytes / (1024 * 1024)) +
+                " MB",
                 20,
                 620
             );
             const internalStats = getBufferStats();
             context.fillText(
                 "Total Buffers: " +
-                    internalStats.bufferCount +
-                    " buffers / " +
-                    internalStats.backlogSize +
-                    " backlog / " +
-                    internalStats.backlogKeys +
-                    " keys in backlog / VRAM " +
-                    round2Digits(internalStats.vramUsage / (1024 * 1024)) +
-                    " MB / Backlog " +
-                    round2Digits(internalStats.backlogVramUsage / (1024 * 1024)) +
-                    " MB / Created " +
-                    internalStats.numCreated +
-                    " / Reused " +
-                    internalStats.numReused,
+                internalStats.bufferCount +
+                " buffers / " +
+                internalStats.backlogSize +
+                " backlog / " +
+                internalStats.backlogKeys +
+                " keys in backlog / VRAM " +
+                round2Digits(internalStats.vramUsage / (1024 * 1024)) +
+                " MB / Backlog " +
+                round2Digits(internalStats.backlogVramUsage / (1024 * 1024)) +
+                " MB / Created " +
+                internalStats.numCreated +
+                " / Reused " +
+                internalStats.numReused,
                 20,
                 640
             );

@@ -50,8 +50,7 @@ export class MetaAnalyzerBuilding extends MetaBuilding {
     setupEntityComponents(entity) {
         entity.addComponent(
             new WiredPinsComponent({
-                slots: [
-                    {
+                slots: [{
                         pos: new Vector(0, 0),
                         direction: enumDirection.left,
                         type: enumPinSlotType.logicalEjector,
