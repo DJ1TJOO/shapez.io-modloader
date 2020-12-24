@@ -107,6 +107,8 @@ module.exports = ({ watch = false, standalone = false }) => {
         output: {
             filename: "bundle.js",
             path: path.resolve(__dirname, "..", "build"),
+            libraryTarget: "umd",
+            library: "testing",
         },
     };
 };
