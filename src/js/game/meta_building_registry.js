@@ -26,7 +26,7 @@ import { enumUndergroundBeltVariants, MetaUndergroundBeltBuilding } from "./buil
 import { enumVirtualProcessorVariants, MetaVirtualProcessorBuilding } from "./buildings/virtual_processor";
 import { MetaWireBuilding } from "./buildings/wire";
 import { MetaWireTunnelBuilding } from "./buildings/wire_tunnel";
-import { buildBuildingCodeCache, gBuildingVariants, registerBuildingVariant } from "./building_codes";
+import { gBuildingVariants, registerBuildingVariant } from "./building_codes";
 import { enumWireVariant } from "./components/wire";
 import { KEYMAPPINGS } from "./key_action_mapper";
 import { defaultBuildingVariant } from "./meta_building";
@@ -229,7 +229,4 @@ export function initBuildingCodesAfterResourcesLoaded() {
             variant.rotationVariant
         );
     }
-
-    // Update caches
-    buildBuildingCodeCache();
 }

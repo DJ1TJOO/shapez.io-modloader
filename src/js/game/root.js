@@ -135,9 +135,6 @@ export class GameRoot {
         /** @type {GameMode} */
         this.gameMode = null;
 
-        /** @type {ModManager} */
-        this.modMgr = null;
-
         this.signals = {
             // Entities
             entityManuallyPlaced: /** @type {TypedSignal<[Entity]>} */ (new Signal()),

@@ -26,12 +26,6 @@ export const gBuildingVariants = {
 };
 
 /**
- * Mapping from 'metaBuildingId/variant/rotationVariant' to building code
- * @type {object}
- */
-const variantsCache = {};
-
-/**
  * Registers a new variant
  * @param {typeof MetaBuilding} meta
  * @param {string} variant
@@ -42,8 +36,8 @@ export function registerBuildingVariant(
     variant = "default" /* @TODO: Circular dependency, actually its defaultBuildingVariant */ ,
     rotationVariant = 0
 ) {
-    const args_Meta = meta.name.match(/[A-Z][a-z]+/g);
-    let code = args_Meta.slice(1).join("") + "/" + variant + "/" + rotationVariant.toString();
+    // @ts-ignore
+    let code = getCodeFromBuildingData(new meta(), variant, rotationVariant);
     assert(!gBuildingVariants[code], "Duplicate id: " + code);
     gBuildingVariants[code] = {
         metaClass: meta,
@@ -56,7 +50,7 @@ export function registerBuildingVariant(
 
 /**
  *
- * @param {number} code
+ * @param {String} code
  * @returns {BuildingVariantIdentifier}
  */
 export function getBuildingDataFromCode(code) {
@@ -65,30 +59,12 @@ export function getBuildingDataFromCode(code) {
 }
 
 /**
- * Builds the cache for the codes
- */
-export function buildBuildingCodeCache() {
-    for (const code in gBuildingVariants) {
-        const data = gBuildingVariants[code];
-        const hash = data.metaInstance.getId() + "/" + data.variant + "/" + data.rotationVariant;
-        variantsCache[hash] = code;
-    }
-}
-
-/**
  * Finds the code for a given variant
  * @param {MetaBuilding} metaBuilding
  * @param {string} variant
  * @param {number} rotationVariant
- * @returns {number}
+ * @returns {String}
  */
 export function getCodeFromBuildingData(metaBuilding, variant, rotationVariant) {
-    const hash = metaBuilding.getId() + "/" + variant + "/" + rotationVariant;
-    const result = variantsCache[hash];
-    if (G_IS_DEV) {
-        if (!result) {
-            assertAlways(false, "Building not found by data: " + hash);
-        }
-    }
-    return result;
+    return metaBuilding.getId() + "/" + variant + "/" + rotationVariant;
 }

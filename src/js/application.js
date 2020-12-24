@@ -30,6 +30,7 @@ import { PreloadState } from "./states/preload";
 import { SettingsState } from "./states/settings";
 import { ShapezGameAnalytics } from "./platform/browser/game_analytics";
 import { RestrictionManager } from "./core/restriction_manager";
+import { ModManager } from "./modloader/mod";
 
 /**
  * @typedef {import("./platform/game_analytics").GameAnalyticsInterface} GameAnalyticsInterface
@@ -311,8 +312,9 @@ export class Application {
     /**
      * Boots the application
      */
-    boot() {
+    async boot() {
         console.log("Booting ...");
+
         this.registerStates();
         this.registerEventListeners();
 

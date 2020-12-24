@@ -21,22 +21,18 @@ const INFOType = {
     gameVersion: 0,
     dependencies: [],
     incompatible: [],
-    main: modApi => {},
+    main: () => {},
 };
-
-import { GameRoot } from "../game/root";
+/* typehints:start */
+import { Application } from "../application";
+/* typehints:end */
 
 export class ModManager {
-    /**
-     * @param {GameRoot} root
-     */
-    constructor(root) {
+    constructor() {
         /** @type {Map<String, ModInfo>} */
         this.mods = new Map();
 
-        this.root = root;
-
-        this.modAPI = new ModAPI(this.root);
+        window["shapezAPI"] = new ShapezAPI();
 
         /**
          * Registers a mod
@@ -48,7 +44,7 @@ export class ModManager {
     }
 
     registerMod(mod) {
-        //TODO: add more checks like is id a uuid
+        //TODO: add more checks like is id a uuid and check dependecies and incompatiablile
         for (const key in INFOType) {
             if (!INFOType.hasOwnProperty(key)) continue;
             if (mod.hasOwnProperty(key)) continue;
@@ -99,7 +95,7 @@ export class ModManager {
      * Loads all mods in the mods list
      */
     loadMods() {
-        this.modAPI.mods = this.mods;
+        window["shapezAPI"].mods = this.mods;
         for (const [id, mod] of this.mods.entries()) {
             this.loadMod(id);
         }
@@ -110,17 +106,12 @@ export class ModManager {
      * @param {String} id
      */
     loadMod(id) {
-        this.mods.get(id).main(this.modAPI);
+        this.mods.get(id).main();
     }
 }
 
-export class ModAPI {
-    /**
-     * @param {GameRoot} root
-     */
-    constructor(root) {
-        this.root = root;
-
+export class ShapezAPI {
+    constructor() {
         this.exports = {
             //class name: import
         };

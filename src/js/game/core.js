@@ -17,7 +17,6 @@ import { Rectangle } from "../core/rectangle";
 import { ORIGINAL_SPRITE_SCALE } from "../core/sprites";
 import { lerp, randomInt, round2Digits } from "../core/utils";
 import { Vector } from "../core/vector";
-import { ModManager } from "../modloader/mod";
 import { Savegame } from "../savegame/savegame";
 import { SavegameSerializer } from "../savegame/savegame_serializer";
 import { AutomaticSave } from "./automatic_save";
@@ -122,7 +121,6 @@ export class GameCore {
         root.hubGoals = new HubGoals(root);
         root.productionAnalytics = new ProductionAnalytics(root);
         root.buffers = new BufferMaintainer(root);
-        root.modMgr = new ModManager(root);
 
         // Initialize the hud once everything is loaded
         this.root.hud.initialize();

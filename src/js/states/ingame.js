@@ -8,6 +8,10 @@ import { KeyActionMapper } from "../game/key_action_mapper";
 import { Savegame } from "../savegame/savegame";
 import { GameCore } from "../game/core";
 import { MUSIC } from "../platform/sound";
+import { initComponentRegistry } from "../game/component_registry";
+import { initGameSpeedRegistry } from "../game/game_speed_registry";
+import { initItemRegistry } from "../game/item_registry";
+import { initMetaBuildingRegistry } from "../game/meta_building_registry";
 
 const logger = createLogger("state/ingame");
 
@@ -221,10 +225,6 @@ export class InGameState extends GameState {
             this.core = new GameCore(this.app);
 
             this.core.initializeRoot(this, this.savegame);
-
-            this.core.root.modMgr.addMods(["http://thomasbrants.nl:3000/mods/test_mods/test_mod.js"], () => {
-                this.core.root.modMgr.loadMods();
-            });
 
             if (this.savegame.hasGameDump()) {
                 this.stage4bResumeGame();
