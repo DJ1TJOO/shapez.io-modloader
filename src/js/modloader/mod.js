@@ -23,9 +23,10 @@ const INFOType = {
     incompatible: [],
     main: () => {},
 };
-/* typehints:start */
-import { Application } from "../application";
-/* typehints:end */
+import { Vector } from "../core/vector";
+import { MetaBuilding } from "../game/meta_building";
+
+const Toposort = require("toposort-class");
 
 export class ModManager {
     constructor() {
@@ -55,6 +56,11 @@ export class ModManager {
             return;
         }
 
+        if (!mod.id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)) {
+            console.log("Mod with mod id: " + mod.id + " has no uuid");
+            return;
+        }
+
         if (this.mods.has(mod.id)) {
             console.log("Mod with mod id: " + mod.id + " already registerd");
             return;
@@ -66,29 +72,69 @@ export class ModManager {
     /**
      * Adds a mod to the page
      * @param {String} url
+     * @returns {Promise}
      */
     addMod(url) {
-        return new Promise((resolve, reject) => {
-            var mod = document.createElement("script");
-            mod.setAttribute("src", url);
-            mod.setAttribute("crossorigin", "anonymous");
-            mod.addEventListener("load", ev => resolve());
-            document.body.appendChild(mod);
-        });
+        return Promise.race([
+                new Promise((resolve, reject) => {
+                    setTimeout(reject, 60 * 1000);
+                }),
+                fetch(url, {
+                    method: "GET",
+                    cache: "no-cache",
+                }),
+            ])
+            .then(res => res.text())
+            .catch(err => {
+                err(this, "Failed to load mod:", err);
+                return Promise.reject("Downloading from '" + url + "' timed out");
+            })
+            .then(modCode => {
+                return Promise.race([
+                    new Promise((resolve, reject) => {
+                        setTimeout(reject, 60 * 1000);
+                    }),
+                    new Promise((resolve, reject) => {
+                        this.nextModResolver = resolve;
+                        this.nextModRejector = reject;
+
+                        const modScript = document.createElement("script");
+                        modScript.textContent = modCode;
+                        modScript.type = "text/javascript";
+                        try {
+                            document.head.appendChild(modScript);
+                            resolve();
+                        } catch (ex) {
+                            console.error("Failed to insert mod, bad js:", ex);
+                            this.nextModResolver = null;
+                            this.nextModRejector = null;
+                            reject("Mod is invalid");
+                        }
+                    }),
+                ]);
+            })
+            .catch(err => {
+                err(this, "Failed to initializing mod:", err);
+                return Promise.reject("Initializing mod failed: " + err);
+            });
     }
 
     /**
      * Adds a mod to the page
      * @param {Array<String>} urls
-     * @param {any} callback
      */
-    async addMods(urls, callback) {
-        var calls = [];
-        for (let i = 0; i < urls.length; i++) {
+    addMods(urls) {
+        let promise = Promise.resolve(null);
+
+        for (let i = 0; i < urls.length; ++i) {
             const url = urls[i];
-            calls.push(this.addMod(url));
+
+            promise = promise.then(() => {
+                return this.addMod(url);
+            });
         }
-        await Promise.all(calls).then(() => callback());
+
+        return promise;
     }
 
     /**
@@ -96,8 +142,15 @@ export class ModManager {
      */
     loadMods() {
         window["shapezAPI"].mods = this.mods;
+
+        var sorter = new Toposort();
         for (const [id, mod] of this.mods.entries()) {
-            this.loadMod(id);
+            sorter.add(id, mod.dependencies);
+        }
+
+        var sortedKeys = sorter.sort().reverse();
+        for (let i = 0; i < sortedKeys.length; i++) {
+            this.loadMod(sortedKeys[i]);
         }
     }
 
@@ -106,15 +159,22 @@ export class ModManager {
      * @param {String} id
      */
     loadMod(id) {
-        this.mods.get(id).main();
+        var mod = this.mods.get(id);
+        for (const [id, currentMod] of this.mods.entries()) {
+            if (mod.incompatible.indexOf(id) >= 0) {
+                console.log(
+                    "Mod with mod id: " + mod.id + " is disabled because it's incompatible with " + id
+                );
+                return;
+            }
+        }
+        mod.main();
     }
 }
 
 export class ShapezAPI {
     constructor() {
-        this.exports = {
-            //class name: import
-        };
+        this.exports = { MetaBuilding, Vector };
 
         this.mods = new Map();
 

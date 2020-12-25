@@ -2,7 +2,7 @@ import { gMetaBuildingRegistry } from "../core/global_registries";
 import { createLogger } from "../core/logging";
 import { T } from "../translations";
 import { MetaAnalyzerBuilding } from "./buildings/analyzer";
-import { enumBalancerVariants, MetaBalancerBuilding } from "./buildings/balancer";
+import { MetaBalancerBuilding } from "./buildings/balancer";
 import { MetaBeltBuilding } from "./buildings/belt";
 import { MetaComparatorBuilding } from "./buildings/comparator";
 import { MetaConstantSignalBuilding } from "./buildings/constant_signal";
@@ -33,8 +33,48 @@ import { defaultBuildingVariant } from "./meta_building";
 
 const logger = createLogger("building_registry");
 
+export function addVanillaBuildingsToAPI() {
+    var vanillaBuildings = [MetaBalancerBuilding];
+    for (let i = 0; i < vanillaBuildings.length; i++) {
+        window["shapezAPI"].ingame.buildings[new vanillaBuildings[i]().getId()] = vanillaBuildings[i];
+    }
+}
+
 export function initMetaBuildingRegistry() {
-    gMetaBuildingRegistry.register(MetaBalancerBuilding);
+    for (const buildingClassKey in window["shapezAPI"].ingame.buildings) {
+        const buildingClass = window["shapezAPI"].ingame.buildings[buildingClassKey];
+        gMetaBuildingRegistry.register(buildingClass);
+
+        if (buildingClass.rotationVariants) {
+            for (const rotationVariant in buildingClass.rotationVariants) {
+                if (!buildingClass.rotationVariants.hasOwnProperty(rotationVariant)) continue;
+                registerBuildingVariant(
+                    buildingClass,
+                    defaultBuildingVariant,
+                    buildingClass.rotationVariants[rotationVariant]
+                );
+            }
+        } else {
+            registerBuildingVariant(buildingClass, defaultBuildingVariant);
+        }
+
+        for (const variant in buildingClass.variants) {
+            if (!buildingClass.variants.hasOwnProperty(variant)) continue;
+            if (buildingClass.rotationVariants) {
+                for (const rotationVariant in buildingClass.rotationVariants) {
+                    if (!buildingClass.rotationVariants.hasOwnProperty(rotationVariant)) continue;
+                    registerBuildingVariant(
+                        buildingClass,
+                        buildingClass.variants[variant],
+                        buildingClass.rotationVariants[rotationVariant]
+                    );
+                }
+            } else {
+                registerBuildingVariant(buildingClass, buildingClass.variants[variant]);
+            }
+        }
+    }
+
     gMetaBuildingRegistry.register(MetaMinerBuilding);
     gMetaBuildingRegistry.register(MetaCutterBuilding);
     gMetaBuildingRegistry.register(MetaRotaterBuilding);
@@ -64,13 +104,6 @@ export function initMetaBuildingRegistry() {
     registerBuildingVariant(MetaBeltBuilding, defaultBuildingVariant, 0);
     registerBuildingVariant(MetaBeltBuilding, defaultBuildingVariant, 1);
     registerBuildingVariant(MetaBeltBuilding, defaultBuildingVariant, 2);
-
-    // Balancer
-    registerBuildingVariant(MetaBalancerBuilding);
-    registerBuildingVariant(MetaBalancerBuilding, enumBalancerVariants.merger);
-    registerBuildingVariant(MetaBalancerBuilding, enumBalancerVariants.mergerInverse);
-    registerBuildingVariant(MetaBalancerBuilding, enumBalancerVariants.splitter);
-    registerBuildingVariant(MetaBalancerBuilding, enumBalancerVariants.splitterInverse);
 
     // Miner
     registerBuildingVariant(MetaMinerBuilding);
@@ -133,7 +166,7 @@ export function initMetaBuildingRegistry() {
     registerBuildingVariant(MetaLogicGateBuilding, enumLogicGateVariants.or);
 
     // Transistor
-    registerBuildingVariant(MetaTransistorBuilding, defaultBuildingVariant);
+    registerBuildingVariant(MetaTransistorBuilding);
     registerBuildingVariant(MetaTransistorBuilding, enumTransistorVariants.mirrored);
 
     // Lever
@@ -185,7 +218,8 @@ export function initMetaBuildingRegistry() {
     }
 
     // Check for valid keycodes
-    if (G_IS_DEV) {
+    if (false) {
+        //mods can have non registerd buildings
         gMetaBuildingRegistry.entries.forEach(metaBuilding => {
             const id = metaBuilding.getId();
             if (!["hub"].includes(id)) {

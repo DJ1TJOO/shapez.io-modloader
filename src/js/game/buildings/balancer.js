@@ -10,39 +10,13 @@ import { T } from "../../translations";
 import { formatItemsPerSecond, generateMatrixRotations } from "../../core/utils";
 import { BeltUnderlaysComponent } from "../components/belt_underlays";
 
-/** @enum {string} */
-export const enumBalancerVariants = {
-    merger: "merger",
-    mergerInverse: "merger-inverse",
-    splitter: "splitter",
-    splitterInverse: "splitter-inverse",
-};
-
-const overlayMatrices = {
-    [defaultBuildingVariant]: null,
-    [enumBalancerVariants.merger]: generateMatrixRotations([0, 1, 0, 0, 1, 1, 0, 1, 0]),
-    [enumBalancerVariants.mergerInverse]: generateMatrixRotations([0, 1, 0, 1, 1, 0, 0, 1, 0]),
-    [enumBalancerVariants.splitter]: generateMatrixRotations([0, 1, 0, 0, 1, 1, 0, 1, 0]),
-    [enumBalancerVariants.splitterInverse]: generateMatrixRotations([0, 1, 0, 1, 1, 0, 0, 1, 0]),
-};
-
 export class MetaBalancerBuilding extends MetaBuilding {
     constructor() {
         super("balancer");
     }
 
     getDimensions(variant) {
-        switch (variant) {
-            case defaultBuildingVariant:
-                return new Vector(2, 1);
-            case enumBalancerVariants.merger:
-            case enumBalancerVariants.mergerInverse:
-            case enumBalancerVariants.splitter:
-            case enumBalancerVariants.splitterInverse:
-                return new Vector(1, 1);
-            default:
-                assertAlways(false, "Unknown balancer variant: " + variant);
-        }
+        return MetaBalancerBuilding.dimensions[variant];
     }
 
     /**
@@ -53,7 +27,7 @@ export class MetaBalancerBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        const matrix = overlayMatrices[variant];
+        const matrix = MetaBalancerBuilding.overlayMatrices[variant];
         if (matrix) {
             return matrix[rotation];
         }
@@ -66,36 +40,31 @@ export class MetaBalancerBuilding extends MetaBuilding {
      * @returns {Array<[string, string]>}
      */
     getAdditionalStatistics(root, variant) {
-        let speedMultiplier = 2;
-        switch (variant) {
-            case enumBalancerVariants.merger:
-            case enumBalancerVariants.mergerInverse:
-            case enumBalancerVariants.splitter:
-            case enumBalancerVariants.splitterInverse:
-                speedMultiplier = 1;
-        }
+        const speedMultiplier = MetaBalancerBuilding.additionalStatistics[variant];
 
         const speed =
             (root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.balancer) / 2) * speedMultiplier;
-        return [[T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(speed)]];
+        return [
+            [T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(speed)]
+        ];
     }
 
     getSilhouetteColor() {
-        return "#555759";
+        return MetaBalancerBuilding.silhouetteColor; //I can't browse on files... please go into one of the components and component registery xd
     }
 
     /**
      * @param {GameRoot} root
      */
     getAvailableVariants(root) {
-        let available = [defaultBuildingVariant];
+        const variants = MetaBalancerBuilding.avaibleVariants;
 
-        if (root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_merger)) {
-            available.push(enumBalancerVariants.merger, enumBalancerVariants.mergerInverse);
-        }
-
-        if (root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_splitter)) {
-            available.push(enumBalancerVariants.splitter, enumBalancerVariants.splitterInverse);
+        let available = [];
+        for (const variant in variants) {
+            const reward = variants[variant];
+            // @ts-ignore
+            if (reward !== true && !root.hubGoals.isRewardUnlocked(reward)) continue;
+            available.push(variant);
         }
 
         return available;
@@ -105,7 +74,7 @@ export class MetaBalancerBuilding extends MetaBuilding {
      * @param {GameRoot} root
      */
     getIsUnlocked(root) {
-        return root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_balancer);
+        return root.hubGoals.isRewardUnlocked(MetaBalancerBuilding.avaibleVariants[defaultBuildingVariant]);
     }
 
     /**
@@ -143,89 +112,156 @@ export class MetaBalancerBuilding extends MetaBuilding {
      * @param {string} variant
      */
     updateVariants(entity, rotationVariant, variant) {
-        switch (variant) {
-            case defaultBuildingVariant: {
-                entity.components.ItemAcceptor.setSlots([
-                    {
-                        pos: new Vector(0, 0),
-                        directions: [enumDirection.bottom],
-                    },
-                    {
-                        pos: new Vector(1, 0),
-                        directions: [enumDirection.bottom],
-                    },
-                ]);
+        const componentVariations = MetaBalancerBuilding.componentVariations[variant];
+        for (const componentVariation in componentVariations) {
+            const comp = componentVariation.split("_")[0];
+            const func = componentVariation.split("_")[1];
 
-                entity.components.ItemEjector.setSlots([
-                    { pos: new Vector(0, 0), direction: enumDirection.top },
-                    { pos: new Vector(1, 0), direction: enumDirection.top },
-                ]);
-
-                entity.components.BeltUnderlays.underlays = [
-                    { pos: new Vector(0, 0), direction: enumDirection.top },
-                    { pos: new Vector(1, 0), direction: enumDirection.top },
-                ];
-
-                break;
+            if (!func) {
+                console.log(componentVariations);
+                continue;
             }
-            case enumBalancerVariants.merger:
-            case enumBalancerVariants.mergerInverse: {
-                entity.components.ItemAcceptor.setSlots([
-                    {
-                        pos: new Vector(0, 0),
-                        directions: [enumDirection.bottom],
-                    },
-                    {
-                        pos: new Vector(0, 0),
-                        directions: [
-                            variant === enumBalancerVariants.mergerInverse
-                                ? enumDirection.left
-                                : enumDirection.right,
-                        ],
-                    },
-                ]);
 
-                entity.components.ItemEjector.setSlots([
-                    { pos: new Vector(0, 0), direction: enumDirection.top },
-                ]);
-
-                entity.components.BeltUnderlays.underlays = [
-                    { pos: new Vector(0, 0), direction: enumDirection.top },
-                ];
-
-                break;
+            if (typeof entity.components[comp][func] == "function") {
+                entity.components[comp][func](componentVariations[componentVariation]);
+            } else {
+                entity.components[comp][func] = componentVariations[componentVariation];
             }
-            case enumBalancerVariants.splitter:
-            case enumBalancerVariants.splitterInverse: {
-                entity.components.ItemAcceptor.setSlots([
-                    {
-                        pos: new Vector(0, 0),
-                        directions: [enumDirection.bottom],
-                    },
-                ]);
-
-                entity.components.ItemEjector.setSlots([
-                    {
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.top,
-                    },
-                    {
-                        pos: new Vector(0, 0),
-                        direction:
-                            variant === enumBalancerVariants.splitterInverse
-                                ? enumDirection.left
-                                : enumDirection.right,
-                    },
-                ]);
-
-                entity.components.BeltUnderlays.underlays = [
-                    { pos: new Vector(0, 0), direction: enumDirection.top },
-                ];
-
-                break;
-            }
-            default:
-                assertAlways(false, "Unknown balancer variant: " + variant);
         }
     }
 }
+
+MetaBalancerBuilding.variants = {
+    merger: "merger",
+    mergerInverse: "merger-inverse",
+    splitter: "splitter",
+    splitterInverse: "splitter-inverse",
+};
+
+MetaBalancerBuilding.overlayMatrices = {
+    [defaultBuildingVariant]: null,
+    [MetaBalancerBuilding.variants.merger]: generateMatrixRotations([0, 1, 0, 0, 1, 1, 0, 1, 0]),
+    [MetaBalancerBuilding.variants.mergerInverse]: generateMatrixRotations([0, 1, 0, 1, 1, 0, 0, 1, 0]),
+    [MetaBalancerBuilding.variants.splitter]: generateMatrixRotations([0, 1, 0, 0, 1, 1, 0, 1, 0]),
+    [MetaBalancerBuilding.variants.splitterInverse]: generateMatrixRotations([0, 1, 0, 1, 1, 0, 0, 1, 0]),
+};
+
+MetaBalancerBuilding.avaibleVariants = {
+    [defaultBuildingVariant]: enumHubGoalRewards.reward_balancer,
+    [MetaBalancerBuilding.variants.merger]: enumHubGoalRewards.reward_merger,
+    [MetaBalancerBuilding.variants.mergerInverse]: enumHubGoalRewards.reward_merger,
+    [MetaBalancerBuilding.variants.splitter]: enumHubGoalRewards.reward_splitter,
+    [MetaBalancerBuilding.variants.splitterInverse]: enumHubGoalRewards.reward_splitter,
+};
+
+MetaBalancerBuilding.dimensions = {
+    [defaultBuildingVariant]: new Vector(2, 1),
+    [MetaBalancerBuilding.variants.merger]: new Vector(1, 1),
+    [MetaBalancerBuilding.variants.mergerInverse]: new Vector(1, 1),
+    [MetaBalancerBuilding.variants.splitter]: new Vector(1, 1),
+    [MetaBalancerBuilding.variants.splitterInverse]: new Vector(1, 1),
+};
+
+MetaBalancerBuilding.additionalStatistics = {
+    [defaultBuildingVariant]: 2,
+    [MetaBalancerBuilding.variants.merger]: 1,
+    [MetaBalancerBuilding.variants.mergerInverse]: 1,
+    [MetaBalancerBuilding.variants.splitter]: 1,
+    [MetaBalancerBuilding.variants.splitterInverse]: 1,
+};
+
+MetaBalancerBuilding.componentVariations = {
+    [defaultBuildingVariant]: {
+        ItemAcceptor_setSlots: [{
+                pos: new Vector(0, 0),
+                directions: [enumDirection.bottom],
+            },
+            {
+                pos: new Vector(1, 0),
+                directions: [enumDirection.bottom],
+            },
+        ],
+
+        ItemEjector_setSlots: [
+            { pos: new Vector(0, 0), direction: enumDirection.top },
+            { pos: new Vector(1, 0), direction: enumDirection.top },
+        ],
+
+        BeltUnderlays_underlays: [
+            { pos: new Vector(0, 0), direction: enumDirection.top },
+            { pos: new Vector(1, 0), direction: enumDirection.top },
+        ],
+    },
+
+    [MetaBalancerBuilding.variants.merger]: {
+        ItemAcceptor_setSlots: [{
+                pos: new Vector(0, 0),
+                directions: [enumDirection.bottom],
+            },
+            {
+                pos: new Vector(0, 0),
+                directions: [enumDirection.right],
+            },
+        ],
+
+        ItemEjector_setSlots: [{ pos: new Vector(0, 0), direction: enumDirection.top }],
+
+        BeltUnderlays_underlays: [{ pos: new Vector(0, 0), direction: enumDirection.top }],
+    },
+
+    [MetaBalancerBuilding.variants.mergerInverse]: {
+        ItemAcceptor_setSlots: [{
+                pos: new Vector(0, 0),
+                directions: [enumDirection.bottom],
+            },
+            {
+                pos: new Vector(0, 0),
+                directions: [enumDirection.left],
+            },
+        ],
+
+        ItemEjector_setSlots: [{ pos: new Vector(0, 0), direction: enumDirection.top }],
+
+        BeltUnderlays_underlays: [{ pos: new Vector(0, 0), direction: enumDirection.top }],
+    },
+
+    [MetaBalancerBuilding.variants.splitter]: {
+        ItemAcceptor_setSlots: [{
+            pos: new Vector(0, 0),
+            directions: [enumDirection.bottom],
+        }, ],
+
+        ItemEjector_setSlots: [{
+                pos: new Vector(0, 0),
+                direction: enumDirection.top,
+            },
+            {
+                pos: new Vector(0, 0),
+                direction: enumDirection.right,
+            },
+        ],
+
+        BeltUnderlays_underlays: [{ pos: new Vector(0, 0), direction: enumDirection.top }],
+    },
+
+    [MetaBalancerBuilding.variants.splitterInverse]: {
+        ItemAcceptor_setSlots: [{
+            pos: new Vector(0, 0),
+            directions: [enumDirection.bottom],
+        }, ],
+
+        ItemEjector_setSlots: [{
+                pos: new Vector(0, 0),
+                direction: enumDirection.top,
+            },
+            {
+                pos: new Vector(0, 0),
+                direction: enumDirection.left,
+            },
+        ],
+
+        BeltUnderlays_underlays: [{ pos: new Vector(0, 0), direction: enumDirection.top }],
+    },
+};
+
+MetaBalancerBuilding.silhouetteColor = "#555759";

@@ -1,6 +1,6 @@
 import { gMetaBuildingRegistry } from "../../core/global_registries.js";
 import { createLogger } from "../../core/logging.js";
-import { enumBalancerVariants, MetaBalancerBuilding } from "../../game/buildings/balancer.js";
+import { MetaBalancerBuilding } from "../../game/buildings/balancer.js";
 import { MetaBeltBuilding } from "../../game/buildings/belt.js";
 import { enumCutterVariants, MetaCutterBuilding } from "../../game/buildings/cutter.js";
 import { MetaHubBuilding } from "../../game/buildings/hub.js";
@@ -63,11 +63,11 @@ export class SavegameInterface_V1006 extends SavegameInterface_V1005 {
             "sprites/blueprints/splitter.png": findCode(MetaBalancerBuilding),
             "sprites/blueprints/splitter-compact.png": findCode(
                 MetaBalancerBuilding,
-                enumBalancerVariants.merger
+                MetaBalancerBuilding.variants.merger
             ),
             "sprites/blueprints/splitter-compact-inverse.png": findCode(
                 MetaBalancerBuilding,
-                enumBalancerVariants.mergerInverse
+                MetaBalancerBuilding.variants.mergerInverse
             ),
 
             // Underground belt

@@ -8,10 +8,6 @@ import { KeyActionMapper } from "../game/key_action_mapper";
 import { Savegame } from "../savegame/savegame";
 import { GameCore } from "../game/core";
 import { MUSIC } from "../platform/sound";
-import { initComponentRegistry } from "../game/component_registry";
-import { initGameSpeedRegistry } from "../game/game_speed_registry";
-import { initItemRegistry } from "../game/item_registry";
-import { initMetaBuildingRegistry } from "../game/meta_building_registry";
 
 const logger = createLogger("state/ingame");
 
