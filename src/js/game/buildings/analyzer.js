@@ -7,15 +7,13 @@ import { MetaBuilding } from "../meta_building";
 import { GameRoot } from "../root";
 import { enumHubGoalRewards } from "../tutorial_goals";
 
-const overlayMatrix = generateMatrixRotations([1, 1, 0, 1, 1, 1, 0, 1, 0]);
-
 export class MetaAnalyzerBuilding extends MetaBuilding {
     constructor() {
         super("analyzer");
     }
 
     getSilhouetteColor() {
-        return "#3a52bc";
+        return MetaAnalyzerBuilding.silhouetteColor;
     }
 
     /**
@@ -31,7 +29,7 @@ export class MetaAnalyzerBuilding extends MetaBuilding {
     }
 
     getDimensions() {
-        return new Vector(1, 1);
+        return MetaAnalyzerBuilding.dimensions;
     }
 
     getRenderPins() {
@@ -40,7 +38,7 @@ export class MetaAnalyzerBuilding extends MetaBuilding {
     }
 
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant) {
-        return overlayMatrix[rotation];
+        return MetaAnalyzerBuilding.overlayMatrices[rotation];
     }
 
     /**
@@ -76,3 +74,11 @@ export class MetaAnalyzerBuilding extends MetaBuilding {
         );
     }
 }
+
+MetaAnalyzerBuilding.overlayMatrices = generateMatrixRotations([1, 1, 0, 1, 1, 1, 0, 1, 0]);
+
+MetaAnalyzerBuilding.avaibleVariants = enumHubGoalRewards.reward_balancer;
+
+MetaAnalyzerBuilding.dimensions = new Vector(1, 1);
+
+MetaAnalyzerBuilding.silhouetteColor = "#555759";

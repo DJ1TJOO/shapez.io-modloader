@@ -41,9 +41,12 @@ export class MapChunkView extends MapChunk {
      */
     drawBackgroundLayer(parameters) {
         const systems = this.root.systemMgr.systems;
-        systems.mapResources.drawChunk(parameters, this);
-        systems.beltUnderlays.drawChunk(parameters, this);
-        systems.belt.drawChunk(parameters, this);
+        for (const systemKey in systems) {
+            if (!systems.hasOwnProperty(systemKey)) continue;
+            const system = systems[systemKey];
+            if (typeof system.drawChunk_BackgroundLayer !== "function") continue;
+            system.drawChunk_BackgroundLayer(parameters, this);
+        }
     }
 
     /**
@@ -52,10 +55,12 @@ export class MapChunkView extends MapChunk {
      */
     drawForegroundDynamicLayer(parameters) {
         const systems = this.root.systemMgr.systems;
-
-        systems.itemEjector.drawChunk(parameters, this);
-        systems.itemAcceptor.drawChunk(parameters, this);
-        systems.miner.drawChunk(parameters, this);
+        for (const systemKey in systems) {
+            if (!systems.hasOwnProperty(systemKey)) continue;
+            const system = systems[systemKey];
+            if (typeof system.drawChunk_ForegroundDynamicLayer !== "function") continue;
+            system.drawChunk_ForegroundDynamicLayer(parameters, this);
+        }
     }
 
     /**
@@ -64,12 +69,12 @@ export class MapChunkView extends MapChunk {
      */
     drawForegroundStaticLayer(parameters) {
         const systems = this.root.systemMgr.systems;
-
-        systems.staticMapEntities.drawChunk(parameters, this);
-        systems.lever.drawChunk(parameters, this);
-        systems.display.drawChunk(parameters, this);
-        systems.storage.drawChunk(parameters, this);
-        systems.itemProcessorOverlays.drawChunk(parameters, this);
+        for (const systemKey in systems) {
+            if (!systems.hasOwnProperty(systemKey)) continue;
+            const system = systems[systemKey];
+            if (typeof system.drawChunk_ForegroundStaticLayer !== "function") continue;
+            system.drawChunk_ForegroundStaticLayer(parameters, this);
+        }
     }
 
     /**
@@ -131,9 +136,9 @@ export class MapChunkView extends MapChunk {
      */
     generateOverlayBuffer(canvas, context, w, h, dpi) {
         context.fillStyle =
-            this.containedEntities.length > 0
-                ? THEME.map.chunkOverview.filled
-                : THEME.map.chunkOverview.empty;
+            this.containedEntities.length > 0 ?
+            THEME.map.chunkOverview.filled :
+            THEME.map.chunkOverview.empty;
         context.fillRect(0, 0, w, h);
 
         if (this.root.app.settings.getAllSettings().displayChunkBorders) {
@@ -291,8 +296,11 @@ export class MapChunkView extends MapChunk {
      */
     drawWiresForegroundLayer(parameters) {
         const systems = this.root.systemMgr.systems;
-        systems.wire.drawChunk(parameters, this);
-        systems.staticMapEntities.drawWiresChunk(parameters, this);
-        systems.wiredPins.drawChunk(parameters, this);
+        for (const systemKey in systems) {
+            if (!systems.hasOwnProperty(systemKey)) continue;
+            const system = systems[systemKey];
+            if (typeof system.drawChunk_WiresForegroundLayer !== "function") continue;
+            system.drawChunk_WiresForegroundLayer(parameters, this);
+        }
     }
 }

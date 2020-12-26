@@ -130,6 +130,7 @@ mainMenu:
     play: Play
     continue: Continue
     newGame: New Game
+    createmods: Create mod
     changelog: Changelog
     subreddit: Reddit
     importSavegame: Import

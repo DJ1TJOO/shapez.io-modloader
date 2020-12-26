@@ -12,6 +12,10 @@ export class FilterSystem extends GameSystemWithFilter {
         super(root, [FilterComponent]);
     }
 
+    static getId() {
+        return "filter";
+    }
+
     update() {
         const progress =
             this.root.dynamicTickrate.deltaSeconds *

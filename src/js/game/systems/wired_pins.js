@@ -29,6 +29,10 @@ export class WiredPinsSystem extends GameSystemWithFilter {
         this.root.signals.freeEntityAreaBeforeBuild.add(this.freeEntityAreaBeforeBuild, this);
     }
 
+    static getId() {
+        return "wiredPins";
+    }
+
     /**
      * Performs pre-placement checks
      * @param {Entity} entity
@@ -154,7 +158,7 @@ export class WiredPinsSystem extends GameSystemWithFilter {
      * @param {DrawParameters} parameters
      * @param {MapChunkView} chunk
      */
-    drawChunk(parameters, chunk) {
+    drawChunk_WiresForegroundLayer(parameters, chunk) {
         const contents = chunk.containedEntities;
 
         for (let i = 0; i < contents.length; ++i) {
@@ -178,9 +182,7 @@ export class WiredPinsSystem extends GameSystemWithFilter {
                 const worldPos = tile.toWorldSpaceCenterOfTile();
 
                 // Culling
-                if (
-                    !parameters.visibleRect.containsCircle(worldPos.x, worldPos.y, globalConfig.halfTileSize)
-                ) {
+                if (!parameters.visibleRect.containsCircle(worldPos.x, worldPos.y, globalConfig.halfTileSize)) {
                     continue;
                 }
 

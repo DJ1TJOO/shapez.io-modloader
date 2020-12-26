@@ -54,3 +54,5 @@ gulp/package-lock.json
 gulp/yarn.lock
 package-lock.json
 yarn.lock
+modloader/runnable-texturepacker.jar
+modloader/modloader.rar

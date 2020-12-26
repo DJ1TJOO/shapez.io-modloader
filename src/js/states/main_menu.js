@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { cachebust } from "../core/cachebust";
 import { A_B_TESTING_LINK_TYPE, globalConfig, THIRDPARTY_URLS } from "../core/config";
 import { GameState } from "../core/game_state";
@@ -275,6 +276,12 @@ export class MainMenuState extends GameState {
                 T.mainMenu.newGame
             );
             this.trackClicks(newGameButton, this.onPlayButtonClicked);
+            const CreateModButton = makeButton(
+                this.htmlElement.querySelector(".mainContainer .outer"),
+                ["CreateModButton", "styledButton"],
+                T.mainMenu.createmods
+            );
+            this.trackClicks(CreateModButton, this.onCreateButtonClicked);
         } else {
             // New game
             const playBtn = makeButton(buttonContainer, ["playButton", "styledButton"], T.mainMenu.play);
@@ -550,6 +557,13 @@ export class MainMenuState extends GameState {
             });
             this.app.analytics.trackUiClick("startgame_adcomplete");
         });
+    }
+
+    onCreateButtonClicked() {
+        this.app.analytics.trackUiClick("create_mod");
+        const data = "http://thomasbrants.nl:3000/mods/"; //change to pull current basic mods file and download
+        const filename = "Basic_mod_layout.js";
+        generateFileDownload(filename, data);
     }
 
     onContinueButtonClicked() {

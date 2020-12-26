@@ -5,12 +5,13 @@ import "./core/error_handler";
 import { createLogger, logSection } from "./core/logging";
 import { Application } from "./application";
 import { IS_DEBUG } from "./core/config";
-import { initComponentRegistry } from "./game/component_registry";
+import { addVanillaComponentsToAPI, initComponentRegistry } from "./game/component_registry";
 import { initDrawUtils } from "./core/draw_utils";
 import { initItemRegistry } from "./game/item_registry";
 import { addVanillaBuildingsToAPI, initMetaBuildingRegistry } from "./game/meta_building_registry";
 import { initGameSpeedRegistry } from "./game/game_speed_registry";
 import { ModManager } from "./modloader/mod";
+import { addVanillaSystemsToAPI } from "./game/game_system_manager";
 const logger = createLogger("main");
 (async() => {
     if (window.coreThreadLoadedCb) {
@@ -79,8 +80,10 @@ const logger = createLogger("main");
 
     var modMgr = new ModManager();
     addVanillaBuildingsToAPI();
+    addVanillaComponentsToAPI();
+    addVanillaSystemsToAPI();
     await modMgr.addMods([
-        "http://thomasbrants.nl:3000/mods/test_mods/test_mod.js",
+        "http://thomasbrants.nl:3000/mods/test_mods/mod1/modloader/bundle.js",
         "http://thomasbrants.nl:3000/mods/test_mods/test_mod2.js",
         "http://thomasbrants.nl:3000/mods/test_mods/test_mod3.js",
     ]);

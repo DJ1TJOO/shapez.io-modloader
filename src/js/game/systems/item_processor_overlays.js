@@ -20,6 +20,10 @@ export class ItemProcessorOverlaysSystem extends GameSystem {
         this.root.signals.gameFrameStarted.add(this.clearDrawnUids, this);
     }
 
+    static getId() {
+        return "itemProcessorOverlays";
+    }
+
     clearDrawnUids() {
         this.drawnUids.clear();
     }
@@ -29,7 +33,7 @@ export class ItemProcessorOverlaysSystem extends GameSystem {
      * @param {import("../../core/draw_utils").DrawParameters} parameters
      * @param {MapChunkView} chunk
      */
-    drawChunk(parameters, chunk) {
+    drawChunk_ForegroundStaticLayer(parameters, chunk) {
         const contents = chunk.containedEntitiesByLayer.regular;
         for (let i = 0; i < contents.length; ++i) {
             const entity = contents[i];
@@ -49,10 +53,11 @@ export class ItemProcessorOverlaysSystem extends GameSystem {
                 this.drawnUids.add(entity.uid);
 
                 switch (requirement) {
-                    case enumItemProcessorRequirements.painterQuad: {
-                        this.drawConnectedSlotRequirement(parameters, entity, { drawIfFalse: true });
-                        break;
-                    }
+                    case enumItemProcessorRequirements.painterQuad:
+                        {
+                            this.drawConnectedSlotRequirement(parameters, entity, { drawIfFalse: true });
+                            break;
+                        }
                 }
 
                 if (processorComp.type === enumItemProcessorTypes.reader) {

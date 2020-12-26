@@ -29,6 +29,10 @@ export class LogicGateSystem extends GameSystemWithFilter {
         };
     }
 
+    static getId() {
+        return "logicGate";
+    }
+
     update() {
         for (let i = 0; i < this.allEntities.length; ++i) {
             const entity = this.allEntities[i];
@@ -100,9 +104,9 @@ export class LogicGateSystem extends GameSystemWithFilter {
      */
     compute_AND(parameters) {
         assert(parameters.length === 2, "bad parameter count for AND");
-        return isTruthyItem(parameters[0]) && isTruthyItem(parameters[1])
-            ? BOOL_TRUE_SINGLETON
-            : BOOL_FALSE_SINGLETON;
+        return isTruthyItem(parameters[0]) && isTruthyItem(parameters[1]) ?
+            BOOL_TRUE_SINGLETON :
+            BOOL_FALSE_SINGLETON;
     }
 
     /**
@@ -119,9 +123,9 @@ export class LogicGateSystem extends GameSystemWithFilter {
      */
     compute_XOR(parameters) {
         assert(parameters.length === 2, "bad parameter count for XOR");
-        return isTruthyItem(parameters[0]) !== isTruthyItem(parameters[1])
-            ? BOOL_TRUE_SINGLETON
-            : BOOL_FALSE_SINGLETON;
+        return isTruthyItem(parameters[0]) !== isTruthyItem(parameters[1]) ?
+            BOOL_TRUE_SINGLETON :
+            BOOL_FALSE_SINGLETON;
     }
 
     /**
@@ -130,9 +134,9 @@ export class LogicGateSystem extends GameSystemWithFilter {
      */
     compute_OR(parameters) {
         assert(parameters.length === 2, "bad parameter count for OR");
-        return isTruthyItem(parameters[0]) || isTruthyItem(parameters[1])
-            ? BOOL_TRUE_SINGLETON
-            : BOOL_FALSE_SINGLETON;
+        return isTruthyItem(parameters[0]) || isTruthyItem(parameters[1]) ?
+            BOOL_TRUE_SINGLETON :
+            BOOL_FALSE_SINGLETON;
     }
 
     /**
@@ -222,12 +226,12 @@ export class LogicGateSystem extends GameSystemWithFilter {
         const definition = /** @type {ShapeItem} */ (item).definition;
         const result = this.root.shapeDefinitionMgr.shapeActionCutHalf(definition);
         return [
-            result[0].isEntirelyEmpty()
-                ? null
-                : this.root.shapeDefinitionMgr.getShapeItemFromDefinition(result[0]),
-            result[1].isEntirelyEmpty()
-                ? null
-                : this.root.shapeDefinitionMgr.getShapeItemFromDefinition(result[1]),
+            result[0].isEntirelyEmpty() ?
+            null :
+            this.root.shapeDefinitionMgr.getShapeItemFromDefinition(result[0]),
+            result[1].isEntirelyEmpty() ?
+            null :
+            this.root.shapeDefinitionMgr.getShapeItemFromDefinition(result[1]),
         ];
     }
 
@@ -254,9 +258,9 @@ export class LogicGateSystem extends GameSystemWithFilter {
             lowerLayers.length > 0 ? new ShapeDefinition({ layers: lowerLayers }) : null;
 
         return [
-            lowerLayerDefinition
-                ? this.root.shapeDefinitionMgr.getShapeItemFromDefinition(lowerLayerDefinition)
-                : null,
+            lowerLayerDefinition ?
+            this.root.shapeDefinitionMgr.getShapeItemFromDefinition(lowerLayerDefinition) :
+            null,
             this.root.shapeDefinitionMgr.getShapeItemFromDefinition(upperLayerDefinition),
         ];
     }
@@ -280,8 +284,10 @@ export class LogicGateSystem extends GameSystemWithFilter {
         }
 
         const stackedShape = this.root.shapeDefinitionMgr.shapeActionStack(
-            /** @type {ShapeItem} */ (lowerItem).definition,
-            /** @type {ShapeItem} */ (upperItem).definition
+            /** @type {ShapeItem} */
+            (lowerItem).definition,
+            /** @type {ShapeItem} */
+            (upperItem).definition
         );
 
         return this.root.shapeDefinitionMgr.getShapeItemFromDefinition(stackedShape);
@@ -306,8 +312,10 @@ export class LogicGateSystem extends GameSystemWithFilter {
         }
 
         const coloredShape = this.root.shapeDefinitionMgr.shapeActionPaintWith(
-            /** @type {ShapeItem} */ (shape).definition,
-            /** @type {ColorItem} */ (color).color
+            /** @type {ShapeItem} */
+            (shape).definition,
+            /** @type {ColorItem} */
+            (color).color
         );
 
         return this.root.shapeDefinitionMgr.getShapeItemFromDefinition(coloredShape);
@@ -332,27 +340,32 @@ export class LogicGateSystem extends GameSystemWithFilter {
         }
 
         switch (itemA.getItemType()) {
-            case "shape": {
-                return /** @type {ShapeItem} */ (itemA).definition.getHash() ===
-                    /** @type {ShapeItem} */ (itemB).definition.getHash()
-                    ? BOOL_TRUE_SINGLETON
-                    : BOOL_FALSE_SINGLETON;
-            }
-            case "color": {
-                return /** @type {ColorItem} */ (itemA).color === /** @type {ColorItem} */ (itemB).color
-                    ? BOOL_TRUE_SINGLETON
-                    : BOOL_FALSE_SINGLETON;
-            }
+            case "shape":
+                {
+                    return /** @type {ShapeItem} */ (itemA).definition.getHash() ===
+                        /** @type {ShapeItem} */
+                        (itemB).definition.getHash() ?
+                        BOOL_TRUE_SINGLETON :
+                        BOOL_FALSE_SINGLETON;
+                }
+            case "color":
+                {
+                    return /** @type {ColorItem} */ (itemA).color === /** @type {ColorItem} */ (itemB).color ?
+                        BOOL_TRUE_SINGLETON :
+                        BOOL_FALSE_SINGLETON;
+                }
 
-            case "boolean": {
-                return /** @type {BooleanItem} */ (itemA).value === /** @type {BooleanItem} */ (itemB).value
-                    ? BOOL_TRUE_SINGLETON
-                    : BOOL_FALSE_SINGLETON;
-            }
+            case "boolean":
+                {
+                    return /** @type {BooleanItem} */ (itemA).value === /** @type {BooleanItem} */ (itemB).value ?
+                        BOOL_TRUE_SINGLETON :
+                        BOOL_FALSE_SINGLETON;
+                }
 
-            default: {
-                assertAlways(false, "Bad item type: " + itemA.getItemType());
-            }
+            default:
+                {
+                    assertAlways(false, "Bad item type: " + itemA.getItemType());
+                }
         }
     }
 }

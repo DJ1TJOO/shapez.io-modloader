@@ -6,12 +6,16 @@ import { THEME } from "../theme";
 import { drawSpriteClipped } from "../../core/draw_utils";
 
 export class MapResourcesSystem extends GameSystem {
+    static getId() {
+        return "mapResources";
+    }
+
     /**
      * Draws the map resources
      * @param {DrawParameters} parameters
      * @param {MapChunkView} chunk
      */
-    drawChunk(parameters, chunk) {
+    drawChunk_BackgroundLayer(parameters, chunk) {
         const basicChunkBackground = this.root.buffers.getForKey({
             key: "mapresourcebg",
             subKey: chunk.renderKey,

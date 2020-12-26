@@ -15,6 +15,9 @@ export class MetaBalancerBuilding extends MetaBuilding {
         super("balancer");
     }
 
+    /**
+     * @param {String} variant
+     */
     getDimensions(variant) {
         return MetaBalancerBuilding.dimensions[variant];
     }

@@ -13,6 +13,10 @@ export class StaticMapEntitySystem extends GameSystem {
         this.root.signals.gameFrameStarted.add(this.clearUidList, this);
     }
 
+    static getId() {
+        return "staticMapEntities";
+    }
+
     /**
      * Clears the uid list when a new frame started
      */
@@ -25,7 +29,7 @@ export class StaticMapEntitySystem extends GameSystem {
      * @param {DrawParameters} parameters
      * @param {MapChunkView} chunk
      */
-    drawChunk(parameters, chunk) {
+    drawChunk_ForegroundStaticLayer(parameters, chunk) {
         if (G_IS_DEV && globalConfig.debug.doNotRenderStatics) {
             return;
         }
@@ -54,7 +58,7 @@ export class StaticMapEntitySystem extends GameSystem {
      * @param {DrawParameters} parameters
      * @param {MapChunkView} chunk
      */
-    drawWiresChunk(parameters, chunk) {
+    drawChunk_WiresForegroundLayer(parameters, chunk) {
         if (G_IS_DEV && globalConfig.debug.doNotRenderStatics) {
             return;
         }

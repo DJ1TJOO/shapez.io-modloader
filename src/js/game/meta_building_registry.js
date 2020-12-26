@@ -34,11 +34,11 @@ import { defaultBuildingVariant } from "./meta_building";
 const logger = createLogger("building_registry");
 
 export function addVanillaBuildingsToAPI() {
-    var vanillaBuildings = [MetaBalancerBuilding];
+    var vanillaBuildings = [MetaAnalyzerBuilding, MetaBalancerBuilding];
     for (let i = 0; i < vanillaBuildings.length; i++) {
         window["shapezAPI"].ingame.buildings[new vanillaBuildings[i]().getId()] = vanillaBuildings[i];
     }
-}
+} // Why don't we just define it inside balancer.js ??? Instead of doing this...
 
 export function initMetaBuildingRegistry() {
     for (const buildingClassKey in window["shapezAPI"].ingame.buildings) {
@@ -58,19 +58,21 @@ export function initMetaBuildingRegistry() {
             registerBuildingVariant(buildingClass, defaultBuildingVariant);
         }
 
-        for (const variant in buildingClass.variants) {
-            if (!buildingClass.variants.hasOwnProperty(variant)) continue;
-            if (buildingClass.rotationVariants) {
-                for (const rotationVariant in buildingClass.rotationVariants) {
-                    if (!buildingClass.rotationVariants.hasOwnProperty(rotationVariant)) continue;
-                    registerBuildingVariant(
-                        buildingClass,
-                        buildingClass.variants[variant],
-                        buildingClass.rotationVariants[rotationVariant]
-                    );
+        if (buildingClass.variants) {
+            for (const variant in buildingClass.variants) {
+                if (!buildingClass.variants.hasOwnProperty(variant)) continue;
+                if (buildingClass.rotationVariants) {
+                    for (const rotationVariant in buildingClass.rotationVariants) {
+                        if (!buildingClass.rotationVariants.hasOwnProperty(rotationVariant)) continue;
+                        registerBuildingVariant(
+                            buildingClass,
+                            buildingClass.variants[variant],
+                            buildingClass.rotationVariants[rotationVariant]
+                        );
+                    }
+                } else {
+                    registerBuildingVariant(buildingClass, buildingClass.variants[variant]);
                 }
-            } else {
-                registerBuildingVariant(buildingClass, buildingClass.variants[variant]);
             }
         }
     }
@@ -96,7 +98,6 @@ export function initMetaBuildingRegistry() {
     gMetaBuildingRegistry.register(MetaVirtualProcessorBuilding);
     gMetaBuildingRegistry.register(MetaReaderBuilding);
     gMetaBuildingRegistry.register(MetaTransistorBuilding);
-    gMetaBuildingRegistry.register(MetaAnalyzerBuilding);
     gMetaBuildingRegistry.register(MetaComparatorBuilding);
     gMetaBuildingRegistry.register(MetaItemProducerBuilding);
 
@@ -190,7 +191,6 @@ export function initMetaBuildingRegistry() {
 
     // Analyzer
     registerBuildingVariant(MetaComparatorBuilding);
-    registerBuildingVariant(MetaAnalyzerBuilding);
 
     // Reader
     registerBuildingVariant(MetaReaderBuilding);

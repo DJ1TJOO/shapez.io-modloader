@@ -19,8 +19,14 @@ export class DisplaySystem extends GameSystemWithFilter {
             if (colorId === enumColors.uncolored) {
                 continue;
             }
-            this.displaySprites[colorId] = Loader.getSprite("sprites/wires/display/" + colorId + ".png");
+            DisplaySystem.displaySprites[colorId] = Loader.getSprite(
+                "sprites/wires/display/" + colorId + ".png"
+            );
         }
+    }
+
+    static getId() {
+        return "display";
     }
 
     /**
@@ -33,23 +39,7 @@ export class DisplaySystem extends GameSystemWithFilter {
             return null;
         }
 
-        switch (value.getItemType()) {
-            case "boolean": {
-                return isTrueItem(value) ? COLOR_ITEM_SINGLETONS[enumColors.white] : null;
-            }
-
-            case "color": {
-                const item = /**@type {ColorItem} */ (value);
-                return item.color === enumColors.uncolored ? null : item;
-            }
-
-            case "shape": {
-                return value;
-            }
-
-            default:
-                assertAlways(false, "Unknown item type: " + value.getItemType());
-        }
+        return DisplaySystem.displayItem[value.getItemType()](value);
     }
 
     /**
@@ -77,7 +67,7 @@ export class DisplaySystem extends GameSystemWithFilter {
 
                 const origin = entity.components.StaticMapEntity.origin;
                 if (value.getItemType() === "color") {
-                    this.displaySprites[/** @type {ColorItem} */ (value).color].drawCachedCentered(
+                    DisplaySystem.displaySprites[ /** @type {ColorItem} */ (value).color].drawCachedCentered(
                         parameters,
                         (origin.x + 0.5) * globalConfig.tileSize,
                         (origin.y + 0.5) * globalConfig.tileSize,
@@ -95,3 +85,15 @@ export class DisplaySystem extends GameSystemWithFilter {
         }
     }
 }
+
+DisplaySystem.displaySprites = [];
+
+DisplaySystem.displayItem = {
+    boolean: value => (isTrueItem(value) ? COLOR_ITEM_SINGLETONS[enumColors.white] : null),
+
+    color: value =>
+        /**@type {ColorItem} */
+        (value).color === enumColors.uncolored ? null : /**@type {ColorItem} */ (value),
+
+    shape: value => value,
+};

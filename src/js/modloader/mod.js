@@ -23,8 +23,92 @@ const INFOType = {
     incompatible: [],
     main: () => {},
 };
-import { Vector } from "../core/vector";
-import { MetaBuilding } from "../game/meta_building";
+import { AtlasDefinition } from "../core/atlas_definitions";
+import { ClickDetector } from "../core/click_detector";
+import { Loader } from "../core/loader";
+import { AtlasSprite, RegularSprite, SpriteAtlasLink } from "../core/sprites";
+import { generateMatrixRotations } from "../core/utils";
+import {
+    enumAngleToDirection,
+    enumDirection,
+    enumDirectionToAngle,
+    enumDirectionToVector,
+    enumInvertedDirections,
+    Vector,
+} from "../core/vector";
+import { enumSavePriority } from "../game/automatic_save";
+import { BaseItem } from "../game/base_item";
+import { enumCutterVariants } from "../game/buildings/cutter";
+import { enumMouseButton } from "../game/camera";
+import {
+    enumColorMixingResults,
+    enumColors,
+    enumColorsToHexCode,
+    enumColorToShortcode,
+} from "../game/colors";
+import { Component } from "../game/component";
+import { BeltComponent } from "../game/components/belt";
+import { BeltReaderComponent } from "../game/components/belt_reader";
+import { BeltUnderlaysComponent, enumClippedBeltUnderlayType } from "../game/components/belt_underlays";
+import { ConstantSignalComponent } from "../game/components/constant_signal";
+import { DisplayComponent } from "../game/components/display";
+import { FilterComponent } from "../game/components/filter";
+import { HubComponent } from "../game/components/hub";
+import { ItemAcceptorComponent } from "../game/components/item_acceptor";
+import { ItemEjectorComponent } from "../game/components/item_ejector";
+import {
+    enumItemProcessorRequirements,
+    enumItemProcessorTypes,
+    ItemProcessorComponent,
+} from "../game/components/item_processor";
+import { ItemProducerComponent } from "../game/components/item_producer";
+import { LeverComponent } from "../game/components/lever";
+import { enumLogicGateType, LogicGateComponent } from "../game/components/logic_gate";
+import { MinerComponent } from "../game/components/miner";
+import { StaticMapEntityComponent } from "../game/components/static_map_entity";
+import { StorageComponent } from "../game/components/storage";
+import { UndergroundBeltComponent } from "../game/components/underground_belt";
+import { WireComponent } from "../game/components/wire";
+import { WiredPinsComponent } from "../game/components/wired_pins";
+import { WireTunnelComponent } from "../game/components/wire_tunnel";
+import { EntityComponentStorage } from "../game/entity_components";
+import { GameSystem } from "../game/game_system";
+import { GameSystemWithFilter } from "../game/game_system_with_filter";
+import { HubGoals } from "../game/hub_goals";
+import { HUDBuildingsToolbar } from "../game/hud/parts/buildings_toolbar";
+import { enumNotificationType } from "../game/hud/parts/notifications";
+import { enumDisplayMode } from "../game/hud/parts/statistics_handle";
+import { HUDWiresToolbar } from "../game/hud/parts/wires_toolbar";
+import { KEYMAPPINGS } from "../game/key_action_mapper";
+import { defaultBuildingVariant, MetaBuilding } from "../game/meta_building";
+import { enumAnalyticsDataSource } from "../game/production_analytics";
+import { BeltSystem } from "../game/systems/belt";
+import { BeltReaderSystem } from "../game/systems/belt_reader";
+import { BeltUnderlaysSystem } from "../game/systems/belt_underlays";
+import { ConstantSignalSystem } from "../game/systems/constant_signal";
+import { DisplaySystem } from "../game/systems/display";
+import { FilterSystem } from "../game/systems/filter";
+import { HubSystem } from "../game/systems/hub";
+import { ItemAcceptorSystem } from "../game/systems/item_acceptor";
+import { ItemEjectorSystem } from "../game/systems/item_ejector";
+import { ItemProcessorSystem } from "../game/systems/item_processor";
+import { ItemProcessorOverlaysSystem } from "../game/systems/item_processor_overlays";
+import { ItemProducerSystem } from "../game/systems/item_producer";
+import { LeverSystem } from "../game/systems/lever";
+import { LogicGateSystem } from "../game/systems/logic_gate";
+import { MapResourcesSystem } from "../game/systems/map_resources";
+import { MinerSystem } from "../game/systems/miner";
+import { StaticMapEntitySystem } from "../game/systems/static_map_entity";
+import { StorageSystem } from "../game/systems/storage";
+import { UndergroundBeltSystem } from "../game/systems/underground_belt";
+import { WireSystem } from "../game/systems/wire";
+import { WiredPinsSystem } from "../game/systems/wired_pins";
+import { enumHubGoalRewards } from "../game/tutorial_goals";
+import { enumHubGoalRewardsToContentUnlocked } from "../game/tutorial_goals_mappings";
+import { enumCategories } from "../profile/application_settings";
+import { enumLocalSavegameStatus } from "../savegame/savegame_manager";
+import { types } from "../savegame/serialization";
+import { T } from "../translations";
 
 const Toposort = require("toposort-class");
 
@@ -45,7 +129,6 @@ export class ModManager {
     }
 
     registerMod(mod) {
-        //TODO: add more checks like is id a uuid and check dependecies and incompatiablile
         for (const key in INFOType) {
             if (!INFOType.hasOwnProperty(key)) continue;
             if (mod.hasOwnProperty(key)) continue;
@@ -172,20 +255,238 @@ export class ModManager {
     }
 }
 
+/**
+ *
+ * @param {HTMLImageElement} img
+ */
+function getDataUrl(img) {
+    // Create canvas
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    // Set width and height
+    canvas.width = img.width;
+    canvas.height = img.height;
+    // Draw the image
+    ctx.drawImage(img, 0, 0);
+    return canvas.toDataURL("image/png");
+}
+
 export class ShapezAPI {
     constructor() {
-        this.exports = { MetaBuilding, Vector };
+        this.exports = {
+            MetaBuilding,
+            Vector,
+            Component,
+            BaseItem,
+            GameSystemWithFilter,
+            GameSystem,
+
+            //Variables
+            defaultBuildingVariant,
+            types,
+
+            //Systems
+            ItemAcceptorSystem,
+            BeltSystem,
+            UndergroundBeltSystem,
+            MinerSystem,
+            StorageSystem,
+            ItemProcessorSystem,
+            FilterSystem,
+            ItemProducerSystem,
+            ItemEjectorSystem,
+            MapResourcesSystem,
+            HubSystem,
+            StaticMapEntitySystem,
+            WiredPinsSystem,
+            BeltUnderlaysSystem,
+            ConstantSignalSystem,
+            LeverSystem,
+            WireSystem,
+            LogicGateSystem,
+            BeltReaderSystem,
+            DisplaySystem,
+            ItemProcessorOverlaysSystem,
+
+            //Components
+            BeltReaderComponent,
+            BeltUnderlaysComponent,
+            BeltComponent,
+            ConstantSignalComponent,
+            DisplayComponent,
+            FilterComponent,
+            HubComponent,
+            ItemAcceptorComponent,
+            ItemEjectorComponent,
+            ItemProcessorComponent,
+            ItemProducerComponent,
+            LeverComponent,
+            LogicGateComponent,
+            MinerComponent,
+            StaticMapEntityComponent,
+            StorageComponent,
+            UndergroundBeltComponent,
+            WireTunnelComponent,
+            WireComponent,
+            WiredPinsComponent,
+
+            //Enums
+            enumHubGoalRewards,
+            enumAnalyticsDataSource,
+            enumAngleToDirection,
+            enumCategories,
+            enumClippedBeltUnderlayType,
+            enumColorMixingResults,
+            enumColors,
+            enumColorsToHexCode,
+            enumColorToShortcode,
+            enumDirection,
+            enumDirectionToAngle,
+            enumDirectionToVector,
+            enumDisplayMode,
+            enumHubGoalRewardsToContentUnlocked,
+            enumInvertedDirections,
+            enumItemProcessorRequirements,
+            enumItemProcessorTypes,
+            enumLocalSavegameStatus,
+            enumMouseButton,
+            enumNotificationType,
+            enumSavePriority,
+        };
+
+        this.KEYMAPPINGS = KEYMAPPINGS;
+        this.KEYMAPPINGS.key = str => str.toUpperCase().charCodeAt(0);
+
+        //TODO: mutliple languages
+        this.translations = T;
 
         this.mods = new Map();
 
         this.ingame = {
             buildings: {},
             components: {},
-            systems: {},
+            //Must be array because of update order
+            systems: [],
             items: {},
             levels: {},
             themes: {},
-            hub_goals: {},
+            hub_goals: HubGoals,
         };
+
+        this.toolbars = {
+            buildings: HUDBuildingsToolbar.bar,
+            wires: HUDWiresToolbar.bar,
+        };
+
+        this.clickDetectors = [];
+    }
+
+    /**
+     * Generates rotated variants of the matrix
+     * @param {Array<number>} originalMatrix
+     * @returns {Object<number, Array<number>>}
+     */
+    generateMatrixRotations(originalMatrix) {
+        return generateMatrixRotations(originalMatrix);
+    }
+
+    /**
+     * Registers a new sprite
+     * @param {string} spriteId
+     * @param {HTMLImageElement|HTMLCanvasElement} sourceImage
+     * @returns {RegularSprite}
+     */
+    registerSprite(spriteId, sourceImage) {
+        const sprite = new RegularSprite(sourceImage, sourceImage.width, sourceImage.height);
+        assertAlways(!Loader.sprites[spriteId], "Can not override builtin sprite: " + spriteId);
+        Loader.sprites[spriteId] = sprite;
+        return sprite;
+    }
+
+    /**
+     * Returns a regular sprite by its id
+     * @param {string} id
+     * @returns {RegularSprite}
+     */
+    getRegularSprite(id) {
+        return Loader.getRegularSprite(id);
+    }
+
+    /**
+     * Registers a new atlas
+     * @param {string} atlasDataString
+     */
+    registerAtlas(atlasDataString) {
+        var atlasData = JSON.parse(atlasDataString);
+        var sourceImage = new Image();
+        sourceImage.crossOrigin = "anonymous";
+        sourceImage.onload = () => {
+            // @ts-ignore
+            Loader.internalParseAtlas({
+                    meta: atlasData.atlasData.meta,
+                    sourceData: atlasData.atlasData.frames,
+                },
+                sourceImage
+            );
+        };
+        sourceImage.src = atlasData.src;
+    }
+
+    /**
+     * Registers a new atlases
+     * @param {string[]} atlasDataStrings
+     */
+    registerAtlases(...atlasDataStrings) {
+        for (let i = 0; i < atlasDataStrings.length; i++) {
+            this.registerAtlas(atlasDataStrings[i]);
+        }
+    }
+
+    /**
+     * Registers a new icon
+     * @param {string} buildingId
+     * @param {string} iconDataURL
+     */
+    registerBuildingIcon(buildingId, iconDataURL) {
+        var css = ``;
+        var style = undefined;
+        if (!(style = document.getElementById("mod-loader-icons"))) {
+            var head = document.head || document.getElementsByTagName("head")[0];
+            style = document.createElement("style");
+            style.id = "mod-loader-icons";
+            style.appendChild(document.createTextNode(css));
+            head.appendChild(style);
+        }
+        var css = `
+            [data-icon="building_icons/${buildingId}.png"] {
+                background-image: url(${iconDataURL}) !important;
+            }
+        `;
+        style.appendChild(document.createTextNode(css));
+    }
+
+    registerBuilding(buildingClass, iconDataURL, key, keyBindingName, buildingInfoText) {
+        var id = new buildingClass().getId();
+        this.ingame.buildings[id] = buildingClass;
+        this.registerBuildingIcon(id, iconDataURL);
+        this.KEYMAPPINGS.buildings[id] = { keyCode: this.KEYMAPPINGS.key(key), id: id };
+        //TODO: multiple translations
+        this.translations.keybindings.mappings[id] = keyBindingName;
+        this.translations.buildings[id] = buildingInfoText;
+    }
+
+    /**
+     * Tracks clicks on a element (e.g. button). Useful because you should both support
+     * touch and mouse events.
+     * @param {HTMLElement} element
+     * @param {function} clickHandler
+     */
+    trackClicks(element, clickHandler) {
+        const clickDetector = new ClickDetector(element, {
+            consumeEvents: true,
+            preventDefault: true,
+        });
+        clickDetector.click.add(clickHandler);
+        this.clickDetectors.push(clickDetector);
     }
 }

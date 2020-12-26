@@ -66,6 +66,10 @@ export class BeltSystem extends GameSystemWithFilter {
         this.beltPaths = [];
     }
 
+    static getId() {
+        return "belt";
+    }
+
     /**
      * Serializes all belt paths
      * @returns {Array<object>}
@@ -490,7 +494,7 @@ export class BeltSystem extends GameSystemWithFilter {
      * @param {DrawParameters} parameters
      * @param {MapChunkView} chunk
      */
-    drawChunk(parameters, chunk) {
+    drawChunk_BackgroundLayer(parameters, chunk) {
         // Limit speed to avoid belts going backwards
         const speedMultiplier = Math.min(this.root.hubGoals.getBeltBaseSpeed(), 10);
 
@@ -498,7 +502,7 @@ export class BeltSystem extends GameSystemWithFilter {
         // 126 / 42 is the exact animation speed of the png animation
         const animationIndex = Math.floor(
             ((this.root.time.realtimeNow() * speedMultiplier * BELT_ANIM_COUNT * 126) / 42) *
-                globalConfig.itemSpacingOnBelts
+            globalConfig.itemSpacingOnBelts
         );
         const contents = chunk.containedEntitiesByLayer.regular;
 

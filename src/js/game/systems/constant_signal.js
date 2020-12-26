@@ -22,6 +22,10 @@ export class ConstantSignalSystem extends GameSystemWithFilter {
         );
     }
 
+    static getId() {
+        return "constantSignal";
+    }
+
     update() {
         // Set signals
         for (let i = 0; i < this.allEntities.length; ++i) {

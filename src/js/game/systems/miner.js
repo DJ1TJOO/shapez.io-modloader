@@ -18,6 +18,10 @@ export class MinerSystem extends GameSystemWithFilter {
         this.root.signals.entityDestroyed.add(this.onEntityChanged, this);
     }
 
+    static getId() {
+        return "miner";
+    }
+
     /**
      * Called whenever an entity got changed
      * @param {Entity} entity
@@ -162,7 +166,7 @@ export class MinerSystem extends GameSystemWithFilter {
      * @param {DrawParameters} parameters
      * @param {MapChunkView} chunk
      */
-    drawChunk(parameters, chunk) {
+    drawChunk_ForegroundDynamicLayer(parameters, chunk) {
         const contents = chunk.containedEntitiesByLayer.regular;
 
         for (let i = 0; i < contents.length; ++i) {

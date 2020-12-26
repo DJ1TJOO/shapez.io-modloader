@@ -24,84 +24,74 @@ import { ItemProcessorOverlaysSystem } from "./systems/item_processor_overlays";
 import { BeltReaderSystem } from "./systems/belt_reader";
 import { FilterSystem } from "./systems/filter";
 import { ItemProducerSystem } from "./systems/item_producer";
+import { ItemAcceptorComponent } from "./components/item_acceptor";
+import { GameSystem } from "./game_system";
 
 const logger = createLogger("game_system_manager");
 
+export function addVanillaSystemsToAPI() {
+    window["shapezAPI"].ingame["systems"] = [
+        // Order is important!
+
+        // IMPORTANT: Item acceptor must be before the belt, because it may not tick after the belt
+        // has put in the item into the acceptor animation, otherwise its off
+
+        ItemAcceptorSystem,
+
+        BeltSystem,
+
+        UndergroundBeltSystem,
+
+        MinerSystem,
+
+        StorageSystem,
+
+        ItemProcessorSystem,
+
+        FilterSystem,
+
+        ItemProducerSystem,
+
+        ItemEjectorSystem,
+
+        MapResourcesSystem,
+
+        HubSystem,
+
+        StaticMapEntitySystem,
+
+        WiredPinsSystem,
+
+        BeltUnderlaysSystem,
+
+        ConstantSignalSystem,
+
+        // WIRES section
+        LeverSystem,
+
+        // Wires must be before all gate, signal etc logic!
+        WireSystem,
+
+        // IMPORTANT: We have 2 phases: In phase 1 we compute the output values of all gates,
+        // processors etc. In phase 2 we propagate it through the wires network
+        LogicGateSystem,
+        BeltReaderSystem,
+
+        DisplaySystem,
+
+        ItemProcessorOverlaysSystem,
+    ];
+}
+
 export class GameSystemManager {
     /**
-     *
      * @param {GameRoot} root
      */
     constructor(root) {
         this.root = root;
 
-        this.systems = {
-            /* typehints:start */
-            /** @type {BeltSystem} */
-            belt: null,
+        this.systems = {};
 
-            /** @type {ItemEjectorSystem} */
-            itemEjector: null,
-
-            /** @type {MapResourcesSystem} */
-            mapResources: null,
-
-            /** @type {MinerSystem} */
-            miner: null,
-
-            /** @type {ItemProcessorSystem} */
-            itemProcessor: null,
-
-            /** @type {UndergroundBeltSystem} */
-            undergroundBelt: null,
-
-            /** @type {HubSystem} */
-            hub: null,
-
-            /** @type {StaticMapEntitySystem} */
-            staticMapEntities: null,
-
-            /** @type {ItemAcceptorSystem} */
-            itemAcceptor: null,
-
-            /** @type {StorageSystem} */
-            storage: null,
-
-            /** @type {WiredPinsSystem} */
-            wiredPins: null,
-
-            /** @type {BeltUnderlaysSystem} */
-            beltUnderlays: null,
-
-            /** @type {WireSystem} */
-            wire: null,
-
-            /** @type {ConstantSignalSystem} */
-            constantSignal: null,
-
-            /** @type {LogicGateSystem} */
-            logicGate: null,
-
-            /** @type {LeverSystem} */
-            lever: null,
-
-            /** @type {DisplaySystem} */
-            display: null,
-
-            /** @type {ItemProcessorOverlaysSystem} */
-            itemProcessorOverlays: null,
-
-            /** @type {BeltReaderSystem} */
-            beltReader: null,
-
-            /** @type {FilterSystem} */
-            filter: null,
-
-            /** @type {ItemProducerSystem} */
-            itemProducer: null,
-
-            /* typehints:end */
-        };
         this.systemUpdateOrder = [];
 
         this.internalInitSystems();
@@ -111,59 +101,12 @@ export class GameSystemManager {
      * Initializes all systems
      */
     internalInitSystems() {
-        const add = (id, systemClass) => {
-            this.systems[id] = new systemClass(this.root);
-            this.systemUpdateOrder.push(id);
-        };
-
-        // Order is important!
-
-        // IMPORTANT: Item acceptor must be before the belt, because it may not tick after the belt
-        // has put in the item into the acceptor animation, otherwise its off
-        add("itemAcceptor", ItemAcceptorSystem);
-
-        add("belt", BeltSystem);
-
-        add("undergroundBelt", UndergroundBeltSystem);
-
-        add("miner", MinerSystem);
-
-        add("storage", StorageSystem);
-
-        add("itemProcessor", ItemProcessorSystem);
-
-        add("filter", FilterSystem);
-
-        add("itemProducer", ItemProducerSystem);
-
-        add("itemEjector", ItemEjectorSystem);
-
-        add("mapResources", MapResourcesSystem);
-
-        add("hub", HubSystem);
-
-        add("staticMapEntities", StaticMapEntitySystem);
-
-        add("wiredPins", WiredPinsSystem);
-
-        add("beltUnderlays", BeltUnderlaysSystem);
-
-        add("constantSignal", ConstantSignalSystem);
-
-        // WIRES section
-        add("lever", LeverSystem);
-
-        // Wires must be before all gate, signal etc logic!
-        add("wire", WireSystem);
-
-        // IMPORTANT: We have 2 phases: In phase 1 we compute the output values of all gates,
-        // processors etc. In phase 2 we propagate it through the wires network
-        add("logicGate", LogicGateSystem);
-        add("beltReader", BeltReaderSystem);
-
-        add("display", DisplaySystem);
-
-        add("itemProcessorOverlays", ItemProcessorOverlaysSystem);
+        const systems = window["shapezAPI"].ingame["systems"];
+        for (let i = 0; i < systems.length; i++) {
+            const system = systems[i];
+            this.systems[system.getId()] = new system(this.root);
+            this.systemUpdateOrder.push(system.getId());
+        }
 
         logger.log("📦 There are", this.systemUpdateOrder.length, "game systems");
     }

@@ -1,0 +1,14 @@
+{
+    "name": "shapezio-modloader",
+    "version": "0.1.0",
+    "description": "The package to create shapezio mods for the modloader",
+    "main": "atlas.js",
+    "scripts": {
+        "start": "node make.js"
+    },
+    "author": "DJ1TJOO",
+    "license": "UNLICENSED",
+    "dependencies": {
+        "merge-files": "^0.1.2"
+    }
+}
