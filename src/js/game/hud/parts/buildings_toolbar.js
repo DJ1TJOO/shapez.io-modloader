@@ -19,8 +19,6 @@ import { queryParamOptions } from "../../../core/query_parameters";
 
 export class HUDBuildingsToolbar extends HUDBaseToolbar {
     constructor(root) {
-        // Changed it to bar because of window isn't a thing
-        console.log(window["shapezAPI"]);
         super(root, {
             primaryBuildings: HUDBuildingsToolbar.bar.primaryBuildings,
             secondaryBuildings: HUDBuildingsToolbar.bar.secondaryBuildings,

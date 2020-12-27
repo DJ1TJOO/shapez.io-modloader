@@ -8,21 +8,13 @@ import { enumHubGoalRewards } from "../tutorial_goals";
 import { T } from "../../translations";
 import { formatItemsPerSecond, generateMatrixRotations } from "../../core/utils";
 
-/** @enum {string} */
-export const enumMinerVariants = { chainable: "chainable" };
-
-const overlayMatrix = {
-    [defaultBuildingVariant]: generateMatrixRotations([1, 1, 1, 1, 0, 1, 1, 1, 1]),
-    [enumMinerVariants.chainable]: generateMatrixRotations([0, 1, 0, 1, 1, 1, 1, 1, 1]),
-};
-
 export class MetaMinerBuilding extends MetaBuilding {
     constructor() {
         super("miner");
     }
 
     getSilhouetteColor() {
-        return "#b37dcd";
+        return MetaMinerBuilding.silhouetteColor;
     }
 
     /**
@@ -32,7 +24,9 @@ export class MetaMinerBuilding extends MetaBuilding {
      */
     getAdditionalStatistics(root, variant) {
         const speed = root.hubGoals.getMinerBaseSpeed();
-        return [[T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(speed)]];
+        return [
+            [T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(speed)]
+        ];
     }
 
     /**
@@ -40,10 +34,24 @@ export class MetaMinerBuilding extends MetaBuilding {
      * @param {GameRoot} root
      */
     getAvailableVariants(root) {
-        if (root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_miner_chainable)) {
-            return [enumMinerVariants.chainable];
+        const variants = MetaMinerBuilding.avaibleVariants;
+
+        let available = [];
+        for (const variant in variants) {
+            const reward = variants[variant];
+            if (typeof reward === "function") {
+                console.log(reward);
+                // @ts-ignore
+                if (!reward(root)) continue;
+                available.push(variant);
+            } else {
+                // @ts-ignore
+                if (reward !== true && !root.hubGoals.isRewardUnlocked(reward)) continue;
+                available.push(variant);
+            }
         }
-        return super.getAvailableVariants(root);
+
+        return available;
     }
 
     /**
@@ -53,7 +61,7 @@ export class MetaMinerBuilding extends MetaBuilding {
      * @param {Entity} entity
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        return overlayMatrix[variant][rotation];
+        return MetaMinerBuilding.overlayMatrix[variant][rotation];
     }
 
     /**
@@ -76,6 +84,23 @@ export class MetaMinerBuilding extends MetaBuilding {
      * @param {string} variant
      */
     updateVariants(entity, rotationVariant, variant) {
-        entity.components.Miner.chainable = variant === enumMinerVariants.chainable;
+        entity.components.Miner.chainable = variant === MetaMinerBuilding.variants.chainable;
     }
 }
+
+MetaMinerBuilding.silhouetteColor = "#b37dcd";
+
+MetaMinerBuilding.variants = {
+    chainable: "chainable",
+};
+
+MetaMinerBuilding.overlayMatrix = {
+    [defaultBuildingVariant]: generateMatrixRotations([1, 1, 1, 1, 0, 1, 1, 1, 1]),
+    [MetaMinerBuilding.variants.chainable]: generateMatrixRotations([0, 1, 0, 1, 1, 1, 1, 1, 1]),
+};
+
+MetaMinerBuilding.avaibleVariants = {
+    [defaultBuildingVariant]: root =>
+        !root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_miner_chainable),
+    [MetaMinerBuilding.variants.chainable]: enumHubGoalRewards.reward_miner_chainable,
+};

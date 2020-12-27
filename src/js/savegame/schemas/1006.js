@@ -4,7 +4,7 @@ import { MetaBalancerBuilding } from "../../game/buildings/balancer.js";
 import { MetaBeltBuilding } from "../../game/buildings/belt.js";
 import { enumCutterVariants, MetaCutterBuilding } from "../../game/buildings/cutter.js";
 import { MetaHubBuilding } from "../../game/buildings/hub.js";
-import { enumMinerVariants, MetaMinerBuilding } from "../../game/buildings/miner.js";
+import { MetaMinerBuilding } from "../../game/buildings/miner.js";
 import { MetaMixerBuilding } from "../../game/buildings/mixer.js";
 import { enumPainterVariants, MetaPainterBuilding } from "../../game/buildings/painter.js";
 import { enumRotaterVariants, MetaRotaterBuilding } from "../../game/buildings/rotater.js";
@@ -97,7 +97,7 @@ export class SavegameInterface_V1006 extends SavegameInterface_V1005 {
             "sprites/blueprints/miner.png": findCode(MetaMinerBuilding),
             "sprites/blueprints/miner-chainable.png": findCode(
                 MetaMinerBuilding,
-                enumMinerVariants.chainable,
+                MetaMinerBuilding.variants.chainable,
                 0
             ),
 

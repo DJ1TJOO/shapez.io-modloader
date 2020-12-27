@@ -9,27 +9,17 @@ import { defaultBuildingVariant, MetaBuilding } from "../meta_building";
 import { GameRoot } from "../root";
 import { enumHubGoalRewards } from "../tutorial_goals";
 
-/** @enum {string} */
-export const enumCutterVariants = { quad: "quad" };
-
 export class MetaCutterBuilding extends MetaBuilding {
     constructor() {
         super("cutter");
     }
 
     getSilhouetteColor() {
-        return "#7dcda2";
+        return MetaCutterBuilding.silhouetteColor;
     }
 
     getDimensions(variant) {
-        switch (variant) {
-            case defaultBuildingVariant:
-                return new Vector(2, 1);
-            case enumCutterVariants.quad:
-                return new Vector(4, 1);
-            default:
-                assertAlways(false, "Unknown cutter variant: " + variant);
-        }
+        return MetaCutterBuilding.dimensions[variant];
     }
 
     /**
@@ -39,11 +29,21 @@ export class MetaCutterBuilding extends MetaBuilding {
      */
     getAdditionalStatistics(root, variant) {
         const speed = root.hubGoals.getProcessorBaseSpeed(
-            variant === enumCutterVariants.quad
-                ? enumItemProcessorTypes.cutterQuad
-                : enumItemProcessorTypes.cutter
+            variant === MetaCutterBuilding.variants.quad ?
+            enumItemProcessorTypes.cutterQuad :
+            enumItemProcessorTypes.cutter
         );
-        return [[T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(speed)]];
+        return [
+            [T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(speed)]
+        ];
+
+        /*const speedMultiplier = MetaCutterBuilding.additionalStatistics[variant];
+
+        const speed =
+            (root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.balancer) / 2) * speedMultiplier;
+        return [
+            [T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(speed)]
+        ];*/ // BRB in 30 min
     }
 
     /**
@@ -51,7 +51,7 @@ export class MetaCutterBuilding extends MetaBuilding {
      */
     getAvailableVariants(root) {
         if (root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_cutter_quad)) {
-            return [defaultBuildingVariant, enumCutterVariants.quad];
+            return [defaultBuildingVariant, MetaCutterBuilding.variants.quad];
         }
         return super.getAvailableVariants(root);
     }
@@ -77,13 +77,11 @@ export class MetaCutterBuilding extends MetaBuilding {
         entity.addComponent(new ItemEjectorComponent({}));
         entity.addComponent(
             new ItemAcceptorComponent({
-                slots: [
-                    {
-                        pos: new Vector(0, 0),
-                        directions: [enumDirection.bottom],
-                        filter: "shape",
-                    },
-                ],
+                slots: [{
+                    pos: new Vector(0, 0),
+                    directions: [enumDirection.bottom],
+                    filter: "shape",
+                }, ],
             })
         );
     }
@@ -96,27 +94,47 @@ export class MetaCutterBuilding extends MetaBuilding {
      */
     updateVariants(entity, rotationVariant, variant) {
         switch (variant) {
-            case defaultBuildingVariant: {
-                entity.components.ItemEjector.setSlots([
-                    { pos: new Vector(0, 0), direction: enumDirection.top },
-                    { pos: new Vector(1, 0), direction: enumDirection.top },
-                ]);
-                entity.components.ItemProcessor.type = enumItemProcessorTypes.cutter;
-                break;
-            }
-            case enumCutterVariants.quad: {
-                entity.components.ItemEjector.setSlots([
-                    { pos: new Vector(0, 0), direction: enumDirection.top },
-                    { pos: new Vector(1, 0), direction: enumDirection.top },
-                    { pos: new Vector(2, 0), direction: enumDirection.top },
-                    { pos: new Vector(3, 0), direction: enumDirection.top },
-                ]);
-                entity.components.ItemProcessor.type = enumItemProcessorTypes.cutterQuad;
-                break;
-            }
+            case defaultBuildingVariant:
+                {
+                    entity.components.ItemEjector.setSlots([
+                        { pos: new Vector(0, 0), direction: enumDirection.top },
+                        { pos: new Vector(1, 0), direction: enumDirection.top },
+                    ]);
+                    entity.components.ItemProcessor.type = enumItemProcessorTypes.cutter;
+                    break;
+                }
+            case MetaCutterBuilding.variants.quad:
+                {
+                    entity.components.ItemEjector.setSlots([
+                        { pos: new Vector(0, 0), direction: enumDirection.top },
+                        { pos: new Vector(1, 0), direction: enumDirection.top },
+                        { pos: new Vector(2, 0), direction: enumDirection.top },
+                        { pos: new Vector(3, 0), direction: enumDirection.top },
+                    ]);
+                    entity.components.ItemProcessor.type = enumItemProcessorTypes.cutterQuad;
+                    break;
+                }
 
             default:
                 assertAlways(false, "Unknown painter variant: " + variant);
         }
     }
 }
+MetaCutterBuilding.variants = {
+    quad: "quad",
+};
+
+MetaCutterBuilding.dimensions = {
+    defaultBuildingVariant: new Vector(2, 1),
+    [MetaCutterBuilding.variants.quad]: new Vector(4, 1),
+};
+
+MetaBalancerBuilding.additionalStatistics = {
+    [defaultBuildingVariant]: 2,
+    [MetaBalancerBuilding.variants.merger]: 1,
+    [MetaBalancerBuilding.variants.mergerInverse]: 1,
+    [MetaBalancerBuilding.variants.splitter]: 1,
+    [MetaBalancerBuilding.variants.splitterInverse]: 1,
+};
+
+MetaCutterBuilding.silhouetteColor = "#7dcda2";

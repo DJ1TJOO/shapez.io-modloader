@@ -56,3 +56,12 @@ package-lock.json
 yarn.lock
 modloader/runnable-texturepacker.jar
 modloader/modloader.rar
+modloader/atlas/atlas0_hq.atlas
+modloader/atlas/atlas0_hq.json
+modloader/atlas/atlas0_lq.atlas
+modloader/atlas/atlas0_lq.json
+modloader/atlas/atlas0_hq.png
+modloader/atlas/atlas0_lq.png
+modloader/atlas/atlas0_mq.atlas
+modloader/atlas/atlas0_mq.json
+modloader/atlas/atlas0_mq.png

@@ -40,10 +40,11 @@ export class MapChunkView extends MapChunk {
      * @param {DrawParameters} parameters
      */
     drawBackgroundLayer(parameters) {
+        const systemUpdateOrder = JSON.parse(JSON.stringify(this.root.systemMgr.systemUpdateOrder));
+        systemUpdateOrder.reverse();
         const systems = this.root.systemMgr.systems;
-        for (const systemKey in systems) {
-            if (!systems.hasOwnProperty(systemKey)) continue;
-            const system = systems[systemKey];
+        for (let i = 0; i < systemUpdateOrder.length; i++) {
+            const system = systems[systemUpdateOrder[i]];
             if (typeof system.drawChunk_BackgroundLayer !== "function") continue;
             system.drawChunk_BackgroundLayer(parameters, this);
         }
@@ -54,10 +55,11 @@ export class MapChunkView extends MapChunk {
      * @param {DrawParameters} parameters
      */
     drawForegroundDynamicLayer(parameters) {
+        const systemUpdateOrder = JSON.parse(JSON.stringify(this.root.systemMgr.systemUpdateOrder));
+        systemUpdateOrder.reverse();
         const systems = this.root.systemMgr.systems;
-        for (const systemKey in systems) {
-            if (!systems.hasOwnProperty(systemKey)) continue;
-            const system = systems[systemKey];
+        for (let i = 0; i < systemUpdateOrder.length; i++) {
+            const system = systems[systemUpdateOrder[i]];
             if (typeof system.drawChunk_ForegroundDynamicLayer !== "function") continue;
             system.drawChunk_ForegroundDynamicLayer(parameters, this);
         }
@@ -68,10 +70,11 @@ export class MapChunkView extends MapChunk {
      * @param {DrawParameters} parameters
      */
     drawForegroundStaticLayer(parameters) {
+        const systemUpdateOrder = JSON.parse(JSON.stringify(this.root.systemMgr.systemUpdateOrder));
+        systemUpdateOrder.reverse();
         const systems = this.root.systemMgr.systems;
-        for (const systemKey in systems) {
-            if (!systems.hasOwnProperty(systemKey)) continue;
-            const system = systems[systemKey];
+        for (let i = 0; i < systemUpdateOrder.length; i++) {
+            const system = systems[systemUpdateOrder[i]];
             if (typeof system.drawChunk_ForegroundStaticLayer !== "function") continue;
             system.drawChunk_ForegroundStaticLayer(parameters, this);
         }
@@ -295,10 +298,11 @@ export class MapChunkView extends MapChunk {
      * @param {DrawParameters} parameters
      */
     drawWiresForegroundLayer(parameters) {
+        const systemUpdateOrder = JSON.parse(JSON.stringify(this.root.systemMgr.systemUpdateOrder));
+        systemUpdateOrder.reverse();
         const systems = this.root.systemMgr.systems;
-        for (const systemKey in systems) {
-            if (!systems.hasOwnProperty(systemKey)) continue;
-            const system = systems[systemKey];
+        for (let i = 0; i < systemUpdateOrder.length; i++) {
+            const system = systems[systemUpdateOrder[i]];
             if (typeof system.drawChunk_WiresForegroundLayer !== "function") continue;
             system.drawChunk_WiresForegroundLayer(parameters, this);
         }

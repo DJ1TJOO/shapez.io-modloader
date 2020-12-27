@@ -5,7 +5,7 @@ import { enumCutterVariants, MetaCutterBuilding } from "./buildings/cutter";
 import { MetaDisplayBuilding } from "./buildings/display";
 import { MetaFilterBuilding } from "./buildings/filter";
 import { MetaLogicGateBuilding } from "./buildings/logic_gate";
-import { enumMinerVariants, MetaMinerBuilding } from "./buildings/miner";
+import { MetaMinerBuilding } from "./buildings/miner";
 import { MetaMixerBuilding } from "./buildings/mixer";
 import { enumPainterVariants, MetaPainterBuilding } from "./buildings/painter";
 import { MetaReaderBuilding } from "./buildings/reader";
@@ -57,7 +57,7 @@ export const enumHubGoalRewardsToContentUnlocked = {
         [MetaRotaterBuilding, enumRotaterVariants.rotate180]
     ]),
     [enumHubGoalRewards.reward_miner_chainable]: typed([
-        [MetaMinerBuilding, enumMinerVariants.chainable]
+        [MetaMinerBuilding, MetaMinerBuilding.variants.chainable],
     ]),
     [enumHubGoalRewards.reward_underground_belt_tier_2]: typed([
         [MetaUndergroundBeltBuilding, enumUndergroundBeltVariants.tier2],

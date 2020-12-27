@@ -7,7 +7,7 @@ import { AtlasSprite } from "../../core/sprites";
 import { fastArrayDeleteValue } from "../../core/utils";
 import { enumDirection, enumDirectionToVector, enumInvertedDirections, Vector } from "../../core/vector";
 import { BeltPath } from "../belt_path";
-import { arrayBeltVariantToRotation, MetaBeltBuilding } from "../buildings/belt";
+import { MetaBeltBuilding } from "../buildings/belt";
 import { getCodeFromBuildingData } from "../building_codes";
 import { BeltComponent } from "../components/belt";
 import { Entity } from "../entity";
@@ -166,7 +166,7 @@ export class BeltSystem extends GameSystemWithFilter {
                     });
 
                     // Compute delta to see if anything changed
-                    const newDirection = arrayBeltVariantToRotation[rotationVariant];
+                    const newDirection = MetaBeltBuilding.arrayBeltVariantToRotation[rotationVariant];
 
                     if (targetStaticComp.rotation !== rotation || newDirection !== targetBeltComp.direction) {
                         const originalPath = targetBeltComp.assignedPath;

@@ -13,7 +13,7 @@ import { MetaHubBuilding } from "./buildings/hub";
 import { MetaItemProducerBuilding } from "./buildings/item_producer";
 import { MetaLeverBuilding } from "./buildings/lever";
 import { enumLogicGateVariants, MetaLogicGateBuilding } from "./buildings/logic_gate";
-import { enumMinerVariants, MetaMinerBuilding } from "./buildings/miner";
+import { MetaMinerBuilding } from "./buildings/miner";
 import { MetaMixerBuilding } from "./buildings/mixer";
 import { enumPainterVariants, MetaPainterBuilding } from "./buildings/painter";
 import { MetaReaderBuilding } from "./buildings/reader";
@@ -34,11 +34,11 @@ import { defaultBuildingVariant } from "./meta_building";
 const logger = createLogger("building_registry");
 
 export function addVanillaBuildingsToAPI() {
-    var vanillaBuildings = [MetaAnalyzerBuilding, MetaBalancerBuilding];
+    var vanillaBuildings = [MetaAnalyzerBuilding, MetaBalancerBuilding, MetaBeltBuilding, MetaMinerBuilding];
     for (let i = 0; i < vanillaBuildings.length; i++) {
         window["shapezAPI"].ingame.buildings[new vanillaBuildings[i]().getId()] = vanillaBuildings[i];
     }
-} // Why don't we just define it inside balancer.js ??? Instead of doing this...
+}
 
 export function initMetaBuildingRegistry() {
     for (const buildingClassKey in window["shapezAPI"].ingame.buildings) {
@@ -77,7 +77,6 @@ export function initMetaBuildingRegistry() {
         }
     }
 
-    gMetaBuildingRegistry.register(MetaMinerBuilding);
     gMetaBuildingRegistry.register(MetaCutterBuilding);
     gMetaBuildingRegistry.register(MetaRotaterBuilding);
     gMetaBuildingRegistry.register(MetaStackerBuilding);
@@ -85,7 +84,6 @@ export function initMetaBuildingRegistry() {
     gMetaBuildingRegistry.register(MetaPainterBuilding);
     gMetaBuildingRegistry.register(MetaTrashBuilding);
     gMetaBuildingRegistry.register(MetaStorageBuilding);
-    gMetaBuildingRegistry.register(MetaBeltBuilding);
     gMetaBuildingRegistry.register(MetaUndergroundBeltBuilding);
     gMetaBuildingRegistry.register(MetaHubBuilding);
     gMetaBuildingRegistry.register(MetaWireBuilding);
@@ -100,15 +98,6 @@ export function initMetaBuildingRegistry() {
     gMetaBuildingRegistry.register(MetaTransistorBuilding);
     gMetaBuildingRegistry.register(MetaComparatorBuilding);
     gMetaBuildingRegistry.register(MetaItemProducerBuilding);
-
-    // Belt
-    registerBuildingVariant(MetaBeltBuilding, defaultBuildingVariant, 0);
-    registerBuildingVariant(MetaBeltBuilding, defaultBuildingVariant, 1);
-    registerBuildingVariant(MetaBeltBuilding, defaultBuildingVariant, 2);
-
-    // Miner
-    registerBuildingVariant(MetaMinerBuilding);
-    registerBuildingVariant(MetaMinerBuilding, enumMinerVariants.chainable);
 
     // Cutter
     registerBuildingVariant(MetaCutterBuilding);

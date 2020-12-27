@@ -53,7 +53,7 @@ export class MetaBalancerBuilding extends MetaBuilding {
     }
 
     getSilhouetteColor() {
-        return MetaBalancerBuilding.silhouetteColor; //I can't browse on files... please go into one of the components and component registery xd
+        return MetaBalancerBuilding.silhouetteColor;
     }
 
     /**
@@ -65,9 +65,15 @@ export class MetaBalancerBuilding extends MetaBuilding {
         let available = [];
         for (const variant in variants) {
             const reward = variants[variant];
-            // @ts-ignore
-            if (reward !== true && !root.hubGoals.isRewardUnlocked(reward)) continue;
-            available.push(variant);
+            if (typeof reward === "function") {
+                // @ts-ignore
+                if (reward() !== true && !root.hubGoals.isRewardUnlocked(reward())) continue;
+                available.push(variant);
+            } else {
+                // @ts-ignore
+                if (reward !== true && !root.hubGoals.isRewardUnlocked(reward)) continue;
+                available.push(variant);
+            }
         }
 
         return available;

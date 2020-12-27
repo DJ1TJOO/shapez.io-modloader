@@ -9,21 +9,13 @@ import { MetaBuilding } from "../meta_building";
 import { GameRoot } from "../root";
 import { THEME } from "../theme";
 
-export const arrayBeltVariantToRotation = [enumDirection.top, enumDirection.left, enumDirection.right];
-
-export const beltOverlayMatrices = {
-    [enumDirection.top]: generateMatrixRotations([0, 1, 0, 0, 1, 0, 0, 1, 0]),
-    [enumDirection.left]: generateMatrixRotations([0, 0, 0, 1, 1, 0, 0, 1, 0]),
-    [enumDirection.right]: generateMatrixRotations([0, 0, 0, 0, 1, 1, 0, 1, 0]),
-};
-
 export class MetaBeltBuilding extends MetaBuilding {
     constructor() {
         super("belt");
     }
 
     getSilhouetteColor() {
-        return THEME.map.chunkOverview.beltColor;
+        return MetaBeltBuilding.silhouetteColor;
     }
 
     getPlacementSound() {
@@ -56,40 +48,50 @@ export class MetaBeltBuilding extends MetaBuilding {
      */
     getAdditionalStatistics(root, variant) {
         const beltSpeed = root.hubGoals.getBeltBaseSpeed();
-        return [[T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(beltSpeed)]];
+        return [
+            [T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(beltSpeed)]
+        ];
     }
 
     getPreviewSprite(rotationVariant) {
-        switch (arrayBeltVariantToRotation[rotationVariant]) {
-            case enumDirection.top: {
-                return Loader.getSprite("sprites/buildings/belt_top.png");
-            }
-            case enumDirection.left: {
-                return Loader.getSprite("sprites/buildings/belt_left.png");
-            }
-            case enumDirection.right: {
-                return Loader.getSprite("sprites/buildings/belt_right.png");
-            }
-            default: {
-                assertAlways(false, "Invalid belt rotation variant");
-            }
+        switch (MetaBeltBuilding.arrayBeltVariantToRotation[rotationVariant]) {
+            case enumDirection.top:
+                {
+                    return Loader.getSprite("sprites/buildings/belt_top.png");
+                }
+            case enumDirection.left:
+                {
+                    return Loader.getSprite("sprites/buildings/belt_left.png");
+                }
+            case enumDirection.right:
+                {
+                    return Loader.getSprite("sprites/buildings/belt_right.png");
+                }
+            default:
+                {
+                    assertAlways(false, "Invalid belt rotation variant");
+                }
         }
     }
 
     getBlueprintSprite(rotationVariant) {
-        switch (arrayBeltVariantToRotation[rotationVariant]) {
-            case enumDirection.top: {
-                return Loader.getSprite("sprites/blueprints/belt_top.png");
-            }
-            case enumDirection.left: {
-                return Loader.getSprite("sprites/blueprints/belt_left.png");
-            }
-            case enumDirection.right: {
-                return Loader.getSprite("sprites/blueprints/belt_right.png");
-            }
-            default: {
-                assertAlways(false, "Invalid belt rotation variant");
-            }
+        switch (MetaBeltBuilding.arrayBeltVariantToRotation[rotationVariant]) {
+            case enumDirection.top:
+                {
+                    return Loader.getSprite("sprites/blueprints/belt_top.png");
+                }
+            case enumDirection.left:
+                {
+                    return Loader.getSprite("sprites/blueprints/belt_left.png");
+                }
+            case enumDirection.right:
+                {
+                    return Loader.getSprite("sprites/blueprints/belt_right.png");
+                }
+            default:
+                {
+                    assertAlways(false, "Invalid belt rotation variant");
+                }
         }
     }
 
@@ -101,7 +103,7 @@ export class MetaBeltBuilding extends MetaBuilding {
      * @param {Entity} entity
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        return beltOverlayMatrices[entity.components.Belt.direction][rotation];
+        return MetaBeltBuilding.beltOverlayMatrices[entity.components.Belt.direction][rotation];
     }
 
     /**
@@ -122,7 +124,7 @@ export class MetaBeltBuilding extends MetaBuilding {
      * @param {number} rotationVariant
      */
     updateVariants(entity, rotationVariant) {
-        entity.components.Belt.direction = arrayBeltVariantToRotation[rotationVariant];
+        entity.components.Belt.direction = MetaBeltBuilding.arrayBeltVariantToRotation[rotationVariant];
     }
 
     /**
@@ -227,3 +229,14 @@ export class MetaBeltBuilding extends MetaBuilding {
         };
     }
 }
+MetaBeltBuilding.silhouetteColor = THEME.map.chunkOverview.beltColor;
+
+MetaBeltBuilding.arrayBeltVariantToRotation = [enumDirection.top, enumDirection.left, enumDirection.right];
+
+MetaBeltBuilding.beltOverlayMatrices = {
+    [enumDirection.top]: generateMatrixRotations([0, 1, 0, 0, 1, 0, 0, 1, 0]),
+    [enumDirection.left]: generateMatrixRotations([0, 0, 0, 1, 1, 0, 0, 1, 0]),
+    [enumDirection.right]: generateMatrixRotations([0, 0, 0, 0, 1, 1, 0, 1, 0]),
+};
+
+MetaBeltBuilding.rotationVariants = [0, 1, 2];
