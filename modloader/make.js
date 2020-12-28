@@ -35,3 +35,14 @@ webpack(
     }),
     () => {}
 );
+
+const cors = require("cors");
+const express = require("express");
+
+var server = express();
+server.use(cors());
+server.use("/mod", express.static(__dirname + "/build/bundle.js"));
+
+server.listen(3006, () => {
+    console.log("Listening on port 3006");
+});
