@@ -1,7 +1,7 @@
 import { TrasherComponent } from "../components/trasher";
 
 const MAX_QUEUED_CHARGES = 2;
-export class TrasherSystem extends window["shapezAPI"].exports.GameSystemWithFilter {
+export class TrasherSystem extends shapezAPI.exports.GameSystemWithFilter {
     constructor(root) {
         super(root, [TrasherComponent]);
         /* typehints:start */
@@ -41,10 +41,7 @@ export class TrasherSystem extends window["shapezAPI"].exports.GameSystemWithFil
                     for (let j = 0; j < itemsToEject.length; ++j) {
                         const { item, requiredSlot, preferredSlot } = itemsToEject[j];
 
-                        window["assert"](
-                            ejectorComp,
-                            "To eject items, the building needs to have an ejector"
-                        );
+                        assert(ejectorComp, "To eject items, the building needs to have an ejector");
 
                         let slot = null;
                         if (requiredSlot !== null && requiredSlot !== undefined) {
@@ -67,7 +64,7 @@ export class TrasherSystem extends window["shapezAPI"].exports.GameSystemWithFil
                         if (slot !== null) {
                             // Alright, we can actually eject
                             if (!ejectorComp.tryEject(slot, item)) {
-                                window["assert"](false, "Failed to eject");
+                                assert(false, "Failed to eject");
                             } else {
                                 itemsToEject.splice(j, 1);
                                 j -= 1;

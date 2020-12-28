@@ -83,10 +83,10 @@ const logger = createLogger("main");
     addVanillaComponentsToAPI();
     addVanillaSystemsToAPI();
     await modMgr.addMods([
-        // "http://thomasbrants.nl:3000/mods/test_mods/mod1/bundle.js",
-        // "http://thomasbrants.nl:3000/mods/test_mods/test_mod2.js",
-        // "http://thomasbrants.nl:3000/mods/test_mods/test_mod3.js",
-        "http://localhost:3006/mod",
+        "http://thomasbrants.nl:3000/mods/test_mods/mod1/bundle.js",
+        "http://thomasbrants.nl:3000/mods/test_mods/test_mod2.js",
+        "http://thomasbrants.nl:3000/mods/test_mods/test_mod3.js",
+        //"http://localhost:3006/mod",
     ]);
     modMgr.loadMods();
 

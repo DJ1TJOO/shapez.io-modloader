@@ -1,8 +1,8 @@
 import { TrasherComponent } from "../components/trasher";
 
-const overlayMatrix = window["shapezAPI"].generateMatrixRotations([1, 1, 0, 1, 1, 1, 0, 1, 1]);
+const overlayMatrix = shapezAPI.generateMatrixRotations([1, 1, 0, 1, 1, 1, 0, 1, 1]);
 
-export class MetaTrasherBuilding extends window["shapezAPI"].exports.MetaBuilding {
+export class MetaTrasherBuilding extends shapezAPI.exports.MetaBuilding {
     constructor() {
         super("trasher");
     }
@@ -16,7 +16,7 @@ export class MetaTrasherBuilding extends window["shapezAPI"].exports.MetaBuildin
     }
 
     getDimensions() {
-        return new window["shapezAPI"].exports.Vector(1, 1);
+        return new shapezAPI.exports.Vector(1, 1);
     }
 
     getSpecialOverlayRenderMatrix(rotation) {
@@ -25,7 +25,7 @@ export class MetaTrasherBuilding extends window["shapezAPI"].exports.MetaBuildin
 
     getIsUnlocked(root) {
         return root.hubGoals.isRewardUnlocked(
-            MetaTrasherBuilding.avaibleVariants[window["shapezAPI"].exports.defaultBuildingVariant]
+            MetaTrasherBuilding.avaibleVariants[shapezAPI.exports.defaultBuildingVariant]
         );
     }
 
@@ -45,14 +45,14 @@ export class MetaTrasherBuilding extends window["shapezAPI"].exports.MetaBuildin
 
     setupEntityComponents(entity) {
         entity.addComponent(
-            new window["shapezAPI"].exports.ItemAcceptorComponent({
+            new shapezAPI.exports.ItemAcceptorComponent({
                 slots: [{
-                    pos: new window["shapezAPI"].exports.Vector(0, 0),
+                    pos: new shapezAPI.exports.Vector(0, 0),
                     directions: [
-                        window["shapezAPI"].exports.enumDirection.top,
-                        window["shapezAPI"].exports.enumDirection.right,
-                        window["shapezAPI"].exports.enumDirection.bottom,
-                        window["shapezAPI"].exports.enumDirection.left,
+                        shapezAPI.exports.enumDirection.top,
+                        shapezAPI.exports.enumDirection.right,
+                        shapezAPI.exports.enumDirection.bottom,
+                        shapezAPI.exports.enumDirection.left,
                     ],
                 }, ],
             })
@@ -71,6 +71,6 @@ MetaTrasherBuilding.variants = {
 };
 
 MetaTrasherBuilding.avaibleVariants = {
-    [window["shapezAPI"].exports.defaultBuildingVariant]: window["shapezAPI"].exports.enumHubGoalRewards.reward_cutter_and_trash,
-    [MetaTrasherBuilding.variants.pink]: window["shapezAPI"].exports.enumHubGoalRewards.reward_cutter_and_trash,
+    [shapezAPI.exports.defaultBuildingVariant]: shapezAPI.exports.enumHubGoalRewards.reward_cutter_and_trash,
+    [MetaTrasherBuilding.variants.pink]: shapezAPI.exports.enumHubGoalRewards.reward_cutter_and_trash,
 };

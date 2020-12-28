@@ -3,8 +3,8 @@ import { TrasherComponent } from "./components/trasher";
 import { AboutModloaderState } from "./states/about";
 import { TrasherSystem } from "./systems/trasher";
 
-var modId = "7079f8cb-b943-4b09-b263-a32b9ed63d36";
-window["registerMod"]({
+const modId = "7079f8cb-b943-4b09-b263-a32b9ed63d36";
+registerMod({
     title: "test",
     id: modId,
     description: "Test mod",
@@ -17,17 +17,13 @@ window["registerMod"]({
     main: () => {
         console.log("main test 1");
 
-        window["shapezAPI"].injectCss("**{css}**", modId);
+        shapezAPI.injectCss("**{css}**", modId);
 
-        window["shapezAPI"].states["AboutModloaderState"] = AboutModloaderState;
+        shapezAPI.states["AboutModloaderState"] = AboutModloaderState;
 
-        window["shapezAPI"].registerAtlases(
-            "**{atlas_atlas0_hq}**",
-            "**{atlas_atlas0_mq}**",
-            "**{atlas_atlas0_lq}**"
-        );
+        shapezAPI.registerAtlases("**{atlas_atlas0_hq}**", "**{atlas_atlas0_mq}**", "**{atlas_atlas0_lq}**");
 
-        window["shapezAPI"].registerBuilding(MetaTrasherBuilding, "**{icons_trasher}**", "K", "Trasher", {
+        shapezAPI.registerBuilding(MetaTrasherBuilding, "**{icons_trasher}**", "K", "Trasher", {
             default: {
                 name: "Trasher",
                 description: "Accepts inputs from all sides and destroys them. Forever.",
@@ -38,16 +34,16 @@ window["registerMod"]({
                 description: "Accepts inputs from all sides and destroys them. Forever.",
             },
         });
-        window["shapezAPI"].toolbars.buildings.primaryBuildings.push(MetaTrasherBuilding);
+        shapezAPI.toolbars.buildings.primaryBuildings.push(MetaTrasherBuilding);
 
-        window["shapezAPI"].ingame.components[TrasherComponent.getId()] = TrasherComponent;
+        shapezAPI.ingame.components[TrasherComponent.getId()] = TrasherComponent;
 
-        window["shapezAPI"].ingame.systems.splice(
-            window["shapezAPI"].ingame.systems.indexOf(window["shapezAPI"].exports.ItemProcessorSystem),
+        shapezAPI.ingame.systems.splice(
+            shapezAPI.ingame.systems.indexOf(shapezAPI.exports.ItemProcessorSystem),
             0,
             TrasherSystem
         );
-        window["shapezAPI"].exports.ItemEjectorSystem.tryPassOverItemComponents["Trasher"] = (
+        shapezAPI.exports.ItemEjectorSystem.tryPassOverItemComponents["Trasher"] = (
             comp,
             item,
             receiver,
@@ -67,6 +63,6 @@ window["registerMod"]({
             return false;
         };
 
-        console.log(window["shapezAPI"]);
+        console.log(shapezAPI);
     },
 });

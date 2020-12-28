@@ -178,7 +178,7 @@ export class ModManager {
             ])
             .then(res => res.text())
             .catch(err => {
-                err(this, "Failed to load mod:", err);
+                assert(this, "Failed to load mod:", err);
                 return Promise.reject("Downloading from '" + url + "' timed out");
             })
             .then(modCode => {
@@ -206,7 +206,7 @@ export class ModManager {
                 ]);
             })
             .catch(err => {
-                err(this, "Failed to initializing mod:", err);
+                assert(this, "Failed to initializing mod:", err);
                 return Promise.reject("Initializing mod failed: " + err);
             });
     }

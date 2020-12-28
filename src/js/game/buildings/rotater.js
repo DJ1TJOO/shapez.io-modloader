@@ -104,7 +104,7 @@ export class MetaRotaterBuilding extends MetaBuilding {
             return root.hubGoals.isRewardUnlocked(reward);
         } else {
             return false;
-        } // TODO: Test this
+        }
     }
 
     /**
@@ -182,7 +182,7 @@ MetaRotaterBuilding.overlayMatrices = {
 };
 
 MetaRotaterBuilding.avaibleVariants = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: enumHubGoalRewards.reward_rotater,
     [MetaRotaterBuilding.variants.ccw]: enumHubGoalRewards.reward_rotater_ccw,
     [MetaRotaterBuilding.variants.rotate180]: enumHubGoalRewards.reward_rotater_180,
 };
@@ -201,5 +201,3 @@ MetaRotaterBuilding.additionalStatistics = {
     },
 };
 MetaRotaterBuilding.silhouetteColor = "#7dc6cd";
-
-MetaRotaterBuilding;

@@ -1,4 +1,4 @@
-export class AboutModloaderState extends window["shapezAPI"].exports.TextualGameState {
+export class AboutModloaderState extends shapezAPI.exports.TextualGameState {
     constructor() {
         super("AboutModloaderState");
         /* typehist:start */
@@ -13,7 +13,7 @@ export class AboutModloaderState extends window["shapezAPI"].exports.TextualGame
     getMainContentHTML() {
         return `
             <div class="head">
-                <img src="${window["shapezAPI"].exports.cachebust("res/logo.png")}" alt="shapez.io Logo">
+                <img src="${shapezAPI.exports.cachebust("res/logo.png")}" alt="shapez.io Logo">
             </div>
             <div class="text">
             This is the about page for the modloader
@@ -28,7 +28,7 @@ export class AboutModloaderState extends window["shapezAPI"].exports.TextualGame
     }
 }
 
-window["shapezAPI"].exports.SettingsState.trackClicks.push({
+shapezAPI.exports.SettingsState.trackClicks.push({
     htmlElement: ".aboutModloader",
     state: "AboutModloaderState",
     options: {
@@ -36,7 +36,7 @@ window["shapezAPI"].exports.SettingsState.trackClicks.push({
     },
 });
 
-window["shapezAPI"].exports.SettingsState.getMainContentHTML = self => {
+shapezAPI.exports.SettingsState.getMainContentHTML = self => {
         return `<div class="sidebar">
         ${self.getCategoryButtonsHtml()}
 
@@ -44,7 +44,7 @@ window["shapezAPI"].exports.SettingsState.getMainContentHTML = self => {
             self.app.platformWrapper.getSupportsKeyboard()
                 ? `
         <button class="styledButton categoryButton editKeybindings">
-        ${window["shapezAPI"].translations.keybindings.title}
+        ${shapezAPI.translations.keybindings.title}
         </button>`
                 : ""
         }
@@ -54,10 +54,10 @@ window["shapezAPI"].exports.SettingsState.getMainContentHTML = self => {
         </div>
 
         <div class="other">
-            <button class="styledButton about">${window["shapezAPI"].translations.about.title}</button>
+            <button class="styledButton about">${shapezAPI.translations.about.title}</button>
 
             <div class="versionbar">
-                <div class="buildVersion">${window["shapezAPI"].translations.global.loading} ...</div>
+                <div class="buildVersion">${shapezAPI.translations.global.loading} ...</div>
             </div>
         </div>
     </div>

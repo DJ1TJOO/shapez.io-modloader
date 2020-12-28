@@ -3,7 +3,7 @@ import { enumDirection, Vector } from "../../core/vector";
 import { enumLogicGateType, LogicGateComponent } from "../components/logic_gate";
 import { enumPinSlotType, WiredPinsComponent } from "../components/wired_pins";
 import { Entity } from "../entity";
-import { MetaBuilding } from "../meta_building";
+import { defaultBuildingVariant, MetaBuilding } from "../meta_building";
 import { GameRoot } from "../root";
 import { enumHubGoalRewards } from "../tutorial_goals";
 
@@ -20,7 +20,24 @@ export class MetaAnalyzerBuilding extends MetaBuilding {
      * @param {GameRoot} root
      */
     getIsUnlocked(root) {
-        return root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_virtual_processing);
+        const reward = MetaAnalyzerBuilding.avaibleVariants[defaultBuildingVariant];
+
+        if (typeof reward === "function") {
+            // @ts-ignore
+            if (reward() !== true && !root.hubGoals.isRewardUnlocked(reward())) return false;
+            // @ts-ignore
+            return root.hubGoals.isRewardUnlocked(reward());
+        } else if (typeof reward === "boolean") {
+            // @ts-ignore
+            return reward;
+        } else if (root.hubGoals.isRewardUnlocked(reward) != undefined) {
+            // @ts-ignore
+            if (reward !== true && !root.hubGoals.isRewardUnlocked(reward)) return false;
+            // @ts-ignore
+            return root.hubGoals.isRewardUnlocked(reward);
+        } else {
+            return false;
+        }
     }
 
     /** @returns {"wires"} **/
@@ -77,7 +94,9 @@ export class MetaAnalyzerBuilding extends MetaBuilding {
 
 MetaAnalyzerBuilding.overlayMatrices = generateMatrixRotations([1, 1, 0, 1, 1, 1, 0, 1, 0]);
 
-MetaAnalyzerBuilding.avaibleVariants = enumHubGoalRewards.reward_balancer;
+MetaAnalyzerBuilding.avaibleVariants = {
+    [defaultBuildingVariant]: enumHubGoalRewards.reward_virtual_processing,
+};
 
 MetaAnalyzerBuilding.dimensions = new Vector(1, 1);
 

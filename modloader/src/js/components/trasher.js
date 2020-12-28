@@ -1,11 +1,11 @@
-export class TrasherComponent extends window["shapezAPI"].exports.Component {
+export class TrasherComponent extends shapezAPI.exports.Component {
     static getId() {
         return "Trasher";
     }
 
     static getSchema() {
         return {
-            nextOutputSlot: window["shapezAPI"].exports.types.uint,
+            nextOutputSlot: shapezAPI.exports.types.uint,
         };
     }
 
