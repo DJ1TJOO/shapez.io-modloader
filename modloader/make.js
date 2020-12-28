@@ -1,5 +1,5 @@
-const webpackConfig = require("./webpack.config");
-const atlasLoader = require("./atlas");
+const webpackConfig = require("./make/webpack.config");
+const atlasLoader = require("./make/atlas");
 const sass = require("node-sass");
 const webpack = require("webpack");
 
@@ -9,7 +9,7 @@ const mainJsFile = "./src/js/main.js";
 
 const mainCssFile = "./src/css/main.scss";
 
-const atlasConfig = "./atlas.json";
+const atlasConfig = "./make/atlas.json";
 const atlasRaw = "./atlas_raw";
 const atlas = "./atlas";
 const icons = "./icons";
