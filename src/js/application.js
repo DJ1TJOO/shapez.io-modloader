@@ -30,7 +30,6 @@ import { PreloadState } from "./states/preload";
 import { SettingsState } from "./states/settings";
 import { ShapezGameAnalytics } from "./platform/browser/game_analytics";
 import { RestrictionManager } from "./core/restriction_manager";
-import { ModManager } from "./modloader/mod";
 
 /**
  * @typedef {import("./platform/game_analytics").GameAnalyticsInterface} GameAnalyticsInterface
@@ -144,20 +143,8 @@ export class Application {
      * Registers all game states
      */
     registerStates() {
-        /** @type {Array<typeof GameState>} */
-        const states = [
-            PreloadState,
-            MobileWarningState,
-            MainMenuState,
-            InGameState,
-            SettingsState,
-            KeybindingsState,
-            AboutState,
-            ChangelogState,
-        ];
-
-        for (let i = 0; i < states.length; ++i) {
-            this.stateMgr.register(states[i]);
+        for (let i = 0; i < Application.states.length; ++i) {
+            this.stateMgr.register(Application.states[i]);
         }
     }
 
@@ -415,3 +402,15 @@ export class Application {
         this.checkResize(true);
     }
 }
+
+/** @type {Array<typeof GameState>} */
+Application.states = [
+    PreloadState,
+    MobileWarningState,
+    MainMenuState,
+    InGameState,
+    SettingsState,
+    KeybindingsState,
+    AboutState,
+    ChangelogState,
+];

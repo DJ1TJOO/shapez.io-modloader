@@ -23,10 +23,13 @@ const INFOType = {
     incompatible: [],
     main: () => {},
 };
-import { AtlasDefinition } from "../core/atlas_definitions";
+import { Application } from "../application";
+import { cachebust } from "../core/cachebust";
 import { ClickDetector } from "../core/click_detector";
+import { GameState } from "../core/game_state";
 import { Loader } from "../core/loader";
-import { AtlasSprite, RegularSprite, SpriteAtlasLink } from "../core/sprites";
+import { RegularSprite } from "../core/sprites";
+import { TextualGameState } from "../core/textual_game_state";
 import { generateMatrixRotations } from "../core/utils";
 import {
     enumAngleToDirection,
@@ -38,7 +41,6 @@ import {
 } from "../core/vector";
 import { enumSavePriority } from "../game/automatic_save";
 import { BaseItem } from "../game/base_item";
-import { enumCutterVariants } from "../game/buildings/cutter";
 import { enumMouseButton } from "../game/camera";
 import {
     enumColorMixingResults,
@@ -63,7 +65,7 @@ import {
 } from "../game/components/item_processor";
 import { ItemProducerComponent } from "../game/components/item_producer";
 import { LeverComponent } from "../game/components/lever";
-import { enumLogicGateType, LogicGateComponent } from "../game/components/logic_gate";
+import { LogicGateComponent } from "../game/components/logic_gate";
 import { MinerComponent } from "../game/components/miner";
 import { StaticMapEntityComponent } from "../game/components/static_map_entity";
 import { StorageComponent } from "../game/components/storage";
@@ -71,7 +73,6 @@ import { UndergroundBeltComponent } from "../game/components/underground_belt";
 import { WireComponent } from "../game/components/wire";
 import { WiredPinsComponent } from "../game/components/wired_pins";
 import { WireTunnelComponent } from "../game/components/wire_tunnel";
-import { EntityComponentStorage } from "../game/entity_components";
 import { GameSystem } from "../game/game_system";
 import { GameSystemWithFilter } from "../game/game_system_with_filter";
 import { HubGoals } from "../game/hub_goals";
@@ -133,19 +134,19 @@ export class ModManager {
             if (!INFOType.hasOwnProperty(key)) continue;
             if (mod.hasOwnProperty(key)) continue;
 
-            if (mod.id) console.log("Mod with mod id: " + mod.id + " has no " + key + " specified");
-            else console.log("Unknown mod has no " + key + " specified");
+            if (mod.id) console.warn("Mod with mod id: " + mod.id + " has no " + key + " specified");
+            else console.warn("Unknown mod has no " + key + " specified");
 
             return;
         }
 
         if (!mod.id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)) {
-            console.log("Mod with mod id: " + mod.id + " has no uuid");
+            console.warn("Mod with mod id: " + mod.id + " has no uuid");
             return;
         }
 
         if (this.mods.has(mod.id)) {
-            console.log("Mod with mod id: " + mod.id + " already registerd");
+            console.warn("Mod with mod id: " + mod.id + " already registerd");
             return;
         }
 
@@ -228,7 +229,24 @@ export class ModManager {
 
         var sorter = new Toposort();
         for (const [id, mod] of this.mods.entries()) {
-            sorter.add(id, mod.dependencies);
+            let isMissingDependecie = false;
+            let missingDependecie = "";
+            for (let i = 0; i < mod.dependencies.length; i++) {
+                const dependencie = mod.dependencies[i];
+                if (this.mods.has(dependencie)) continue;
+                isMissingDependecie = true;
+                missingDependecie = dependencie;
+            }
+
+            if (isMissingDependecie) {
+                console.warn(
+                    "Mod with mod id: " +
+                    mod.id +
+                    " is disabled because it's missings the dependecie " +
+                    missingDependecie
+                );
+                continue;
+            } else sorter.add(id, mod.dependencies);
         }
 
         var sortedKeys = sorter.sort().reverse();
@@ -245,7 +263,7 @@ export class ModManager {
         var mod = this.mods.get(id);
         for (const [id, currentMod] of this.mods.entries()) {
             if (mod.incompatible.indexOf(id) >= 0) {
-                console.log(
+                console.warn(
                     "Mod with mod id: " + mod.id + " is disabled because it's incompatible with " + id
                 );
                 return;
@@ -264,6 +282,11 @@ export class ShapezAPI {
             BaseItem,
             GameSystemWithFilter,
             GameSystem,
+            GameState,
+            TextualGameState,
+
+            //Functions,
+            cachebust,
 
             //Variables
             defaultBuildingVariant,
@@ -362,6 +385,8 @@ export class ShapezAPI {
             wires: HUDWiresToolbar.bar,
         };
 
+        this.states = Application.states;
+
         this.clickDetectors = [];
     }
 
@@ -424,6 +449,20 @@ export class ShapezAPI {
         for (let i = 0; i < atlasDataStrings.length; i++) {
             this.registerAtlas(atlasDataStrings[i]);
         }
+    }
+
+    /**
+     * Adds css to the page
+     * @param {string} css
+     */
+    injectCss(css, id) {
+        var head = document.head || document.getElementsByTagName("head")[0];
+        var style = document.createElement("style");
+        style.id = id;
+
+        head.appendChild(style);
+
+        style.appendChild(document.createTextNode(css));
     }
 
     /**

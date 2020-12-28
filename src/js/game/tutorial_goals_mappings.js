@@ -1,7 +1,7 @@
 import { T } from "../translations";
 import { MetaBalancerBuilding } from "./buildings/balancer";
 import { MetaConstantSignalBuilding } from "./buildings/constant_signal";
-import { enumCutterVariants, MetaCutterBuilding } from "./buildings/cutter";
+import { MetaCutterBuilding } from "./buildings/cutter";
 import { MetaDisplayBuilding } from "./buildings/display";
 import { MetaFilterBuilding } from "./buildings/filter";
 import { MetaLogicGateBuilding } from "./buildings/logic_gate";
@@ -69,7 +69,7 @@ export const enumHubGoalRewardsToContentUnlocked = {
         [MetaBalancerBuilding, MetaBalancerBuilding.variants.merger]
     ]),
     [enumHubGoalRewards.reward_cutter_quad]: typed([
-        [MetaCutterBuilding, enumCutterVariants.quad]
+        [MetaCutterBuilding, MetaCutterBuilding.variants.quad]
     ]),
     [enumHubGoalRewards.reward_painter_double]: typed([
         [MetaPainterBuilding, enumPainterVariants.double]

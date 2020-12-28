@@ -6,7 +6,7 @@ import { MetaBalancerBuilding } from "./buildings/balancer";
 import { MetaBeltBuilding } from "./buildings/belt";
 import { MetaComparatorBuilding } from "./buildings/comparator";
 import { MetaConstantSignalBuilding } from "./buildings/constant_signal";
-import { enumCutterVariants, MetaCutterBuilding } from "./buildings/cutter";
+import { MetaCutterBuilding } from "./buildings/cutter";
 import { MetaDisplayBuilding } from "./buildings/display";
 import { MetaFilterBuilding } from "./buildings/filter";
 import { MetaHubBuilding } from "./buildings/hub";
@@ -34,7 +34,13 @@ import { defaultBuildingVariant } from "./meta_building";
 const logger = createLogger("building_registry");
 
 export function addVanillaBuildingsToAPI() {
-    var vanillaBuildings = [MetaAnalyzerBuilding, MetaBalancerBuilding, MetaBeltBuilding, MetaMinerBuilding];
+    var vanillaBuildings = [
+        MetaAnalyzerBuilding,
+        MetaBalancerBuilding,
+        MetaBeltBuilding,
+        MetaMinerBuilding,
+        MetaCutterBuilding,
+    ];
     for (let i = 0; i < vanillaBuildings.length; i++) {
         window["shapezAPI"].ingame.buildings[new vanillaBuildings[i]().getId()] = vanillaBuildings[i];
     }
@@ -77,7 +83,6 @@ export function initMetaBuildingRegistry() {
         }
     }
 
-    gMetaBuildingRegistry.register(MetaCutterBuilding);
     gMetaBuildingRegistry.register(MetaRotaterBuilding);
     gMetaBuildingRegistry.register(MetaStackerBuilding);
     gMetaBuildingRegistry.register(MetaMixerBuilding);
@@ -98,10 +103,6 @@ export function initMetaBuildingRegistry() {
     gMetaBuildingRegistry.register(MetaTransistorBuilding);
     gMetaBuildingRegistry.register(MetaComparatorBuilding);
     gMetaBuildingRegistry.register(MetaItemProducerBuilding);
-
-    // Cutter
-    registerBuildingVariant(MetaCutterBuilding);
-    registerBuildingVariant(MetaCutterBuilding, enumCutterVariants.quad);
 
     // Rotater
     registerBuildingVariant(MetaRotaterBuilding);

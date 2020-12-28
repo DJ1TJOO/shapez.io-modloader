@@ -43,10 +43,14 @@ export class MetaBalancerBuilding extends MetaBuilding {
      * @returns {Array<[string, string]>}
      */
     getAdditionalStatistics(root, variant) {
-        const speedMultiplier = MetaBalancerBuilding.additionalStatistics[variant];
-
-        const speed =
-            (root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.balancer) / 2) * speedMultiplier;
+        let speed = 0;
+        if (typeof MetaBalancerBuilding.additionalStatistics[variant] === "function") {
+            // @ts-ignore
+            speed = MetaBalancerBuilding.additionalStatistics[variant](root);
+        } else {
+            // @ts-ignore
+            speed = MetaBalancerBuilding.additionalStatistics[variant];
+        }
         return [
             [T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(speed)]
         ];
@@ -121,22 +125,7 @@ export class MetaBalancerBuilding extends MetaBuilding {
      * @param {string} variant
      */
     updateVariants(entity, rotationVariant, variant) {
-        const componentVariations = MetaBalancerBuilding.componentVariations[variant];
-        for (const componentVariation in componentVariations) {
-            const comp = componentVariation.split("_")[0];
-            const func = componentVariation.split("_")[1];
-
-            if (!func) {
-                console.log(componentVariations);
-                continue;
-            }
-
-            if (typeof entity.components[comp][func] == "function") {
-                entity.components[comp][func](componentVariations[componentVariation]);
-            } else {
-                entity.components[comp][func] = componentVariations[componentVariation];
-            }
-        }
+        MetaBalancerBuilding.componentVariations[variant](entity);
     }
 }
 
@@ -172,16 +161,21 @@ MetaBalancerBuilding.dimensions = {
 };
 
 MetaBalancerBuilding.additionalStatistics = {
-    [defaultBuildingVariant]: 2,
-    [MetaBalancerBuilding.variants.merger]: 1,
-    [MetaBalancerBuilding.variants.mergerInverse]: 1,
-    [MetaBalancerBuilding.variants.splitter]: 1,
-    [MetaBalancerBuilding.variants.splitterInverse]: 1,
+    [defaultBuildingVariant]: root =>
+        (root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.balancer) / 2) * 2,
+    [MetaBalancerBuilding.variants.merger]: root =>
+        (root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.balancer) / 2) * 1,
+    [MetaBalancerBuilding.variants.mergerInverse]: root =>
+        (root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.balancer) / 2) * 1,
+    [MetaBalancerBuilding.variants.splitter]: root =>
+        (root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.balancer) / 2) * 1,
+    [MetaBalancerBuilding.variants.splitterInverse]: root =>
+        (root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.balancer) / 2) * 1,
 };
 
 MetaBalancerBuilding.componentVariations = {
-    [defaultBuildingVariant]: {
-        ItemAcceptor_setSlots: [{
+    [defaultBuildingVariant]: entity => {
+        entity.components.ItemAcceptor.setSlots([{
                 pos: new Vector(0, 0),
                 directions: [enumDirection.bottom],
             },
@@ -189,21 +183,21 @@ MetaBalancerBuilding.componentVariations = {
                 pos: new Vector(1, 0),
                 directions: [enumDirection.bottom],
             },
-        ],
+        ]);
 
-        ItemEjector_setSlots: [
+        entity.components.ItemEjector.setSlots([
             { pos: new Vector(0, 0), direction: enumDirection.top },
             { pos: new Vector(1, 0), direction: enumDirection.top },
-        ],
+        ]);
 
-        BeltUnderlays_underlays: [
+        entity.components.BeltUnderlays.underlays = [
             { pos: new Vector(0, 0), direction: enumDirection.top },
             { pos: new Vector(1, 0), direction: enumDirection.top },
-        ],
+        ];
     },
 
-    [MetaBalancerBuilding.variants.merger]: {
-        ItemAcceptor_setSlots: [{
+    [MetaBalancerBuilding.variants.merger]: entity => {
+        entity.components.ItemAcceptor.setSlots([{
                 pos: new Vector(0, 0),
                 directions: [enumDirection.bottom],
             },
@@ -211,15 +205,15 @@ MetaBalancerBuilding.componentVariations = {
                 pos: new Vector(0, 0),
                 directions: [enumDirection.right],
             },
-        ],
+        ]);
 
-        ItemEjector_setSlots: [{ pos: new Vector(0, 0), direction: enumDirection.top }],
+        entity.components.ItemEjector.setSlots([{ pos: new Vector(0, 0), direction: enumDirection.top }]);
 
-        BeltUnderlays_underlays: [{ pos: new Vector(0, 0), direction: enumDirection.top }],
+        entity.components.BeltUnderlays.underlays = [{ pos: new Vector(0, 0), direction: enumDirection.top }];
     },
 
-    [MetaBalancerBuilding.variants.mergerInverse]: {
-        ItemAcceptor_setSlots: [{
+    [MetaBalancerBuilding.variants.mergerInverse]: entity => {
+        entity.components.ItemAcceptor.setSlots([{
                 pos: new Vector(0, 0),
                 directions: [enumDirection.bottom],
             },
@@ -227,49 +221,57 @@ MetaBalancerBuilding.componentVariations = {
                 pos: new Vector(0, 0),
                 directions: [enumDirection.left],
             },
-        ],
+        ]);
 
-        ItemEjector_setSlots: [{ pos: new Vector(0, 0), direction: enumDirection.top }],
+        entity.components.ItemEjector.setSlots([{ pos: new Vector(0, 0), direction: enumDirection.top }]);
 
-        BeltUnderlays_underlays: [{ pos: new Vector(0, 0), direction: enumDirection.top }],
+        entity.components.BeltUnderlays.underlays = [{ pos: new Vector(0, 0), direction: enumDirection.top }];
     },
 
-    [MetaBalancerBuilding.variants.splitter]: {
-        ItemAcceptor_setSlots: [{
-            pos: new Vector(0, 0),
-            directions: [enumDirection.bottom],
-        }, ],
-
-        ItemEjector_setSlots: [{
+    [MetaBalancerBuilding.variants.splitter]: entity => {
+        {
+            entity.components.ItemAcceptor.setSlots([{
                 pos: new Vector(0, 0),
-                direction: enumDirection.top,
-            },
-            {
-                pos: new Vector(0, 0),
-                direction: enumDirection.right,
-            },
-        ],
+                directions: [enumDirection.bottom],
+            }, ]);
 
-        BeltUnderlays_underlays: [{ pos: new Vector(0, 0), direction: enumDirection.top }],
+            entity.components.ItemEjector.setSlots([{
+                    pos: new Vector(0, 0),
+                    direction: enumDirection.top,
+                },
+                {
+                    pos: new Vector(0, 0),
+                    direction: enumDirection.right,
+                },
+            ]);
+
+            entity.components.BeltUnderlays.underlays = [
+                { pos: new Vector(0, 0), direction: enumDirection.top },
+            ];
+        }
     },
 
-    [MetaBalancerBuilding.variants.splitterInverse]: {
-        ItemAcceptor_setSlots: [{
-            pos: new Vector(0, 0),
-            directions: [enumDirection.bottom],
-        }, ],
-
-        ItemEjector_setSlots: [{
+    [MetaBalancerBuilding.variants.splitterInverse]: entity => {
+        {
+            entity.components.ItemAcceptor.setSlots([{
                 pos: new Vector(0, 0),
-                direction: enumDirection.top,
-            },
-            {
-                pos: new Vector(0, 0),
-                direction: enumDirection.left,
-            },
-        ],
+                directions: [enumDirection.bottom],
+            }, ]);
 
-        BeltUnderlays_underlays: [{ pos: new Vector(0, 0), direction: enumDirection.top }],
+            entity.components.ItemEjector.setSlots([{
+                    pos: new Vector(0, 0),
+                    direction: enumDirection.top,
+                },
+                {
+                    pos: new Vector(0, 0),
+                    direction: enumDirection.left,
+                },
+            ]);
+
+            entity.components.BeltUnderlays.underlays = [
+                { pos: new Vector(0, 0), direction: enumDirection.top },
+            ];
+        }
     },
 };
 

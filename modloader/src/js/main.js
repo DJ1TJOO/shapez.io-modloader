@@ -1,5 +1,6 @@
 import { MetaTrasherBuilding } from "./buildings/trasher";
 import { TrasherComponent } from "./components/trasher";
+import { AboutModloaderState } from "./states/about";
 import { TrasherSystem } from "./systems/trasher";
 
 var modId = "7079f8cb-b943-4b09-b263-a32b9ed63d36";
@@ -14,6 +15,10 @@ window["registerMod"]({
     incompatible: [],
     main: () => {
         console.log("main test 1");
+
+        window["shapezAPI"].injectCss("**{css}**", "AboutModloaderState");
+
+        window["shapezAPI"].states.push(AboutModloaderState);
 
         window["shapezAPI"].registerAtlases(
             "**{atlas_atlas0_hq}**",

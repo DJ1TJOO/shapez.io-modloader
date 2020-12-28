@@ -13,6 +13,7 @@ module.exports = ({
     mainFile = "./src/main.js",
     iconsPath = "./icons",
     atlasPath = "./atlas",
+    css = "",
 }) => {
     var icons = new Map();
     var iconFiles = fs.readdirSync(iconsPath);
@@ -104,6 +105,12 @@ module.exports = ({
                                             atlasData: atlasJsons.get(p1),
                                         };
                                         return "`" + JSON.stringify(atlas) + "`";
+                                    },
+                                },
+                                {
+                                    pattern: /"\*\*\{css\}\*\*"/g,
+                                    replacement: () => {
+                                        return css;
                                     },
                                 },
                             ],

@@ -11,6 +11,7 @@ import {
 import { globalConfig } from "../core/config";
 import { getDeviceDPI, resizeHighDPICanvas } from "../core/dpi_manager";
 import { DrawParameters } from "../core/draw_parameters";
+import { ExplainedResult } from "../core/explained_result";
 import { gMetaBuildingRegistry } from "../core/global_registries";
 import { createLogger } from "../core/logging";
 import { Rectangle } from "../core/rectangle";
@@ -188,14 +189,14 @@ export class GameCore {
             const status = serializer.deserialize(this.root.savegame.getCurrentDump(), this.root);
             if (!status.isGood()) {
                 logger.error("savegame-deserialize-failed:" + status.reason);
-                return false;
+                return ExplainedResult.bad(status.reason);
             }
         } catch (ex) {
             logger.error("Exception during deserialization:", ex);
-            return false;
+            return ExplainedResult.bad("Exception during deserialization:", ex);
         }
         this.root.gameIsFresh = false;
-        return true;
+        return ExplainedResult.good();
     }
 
     /**

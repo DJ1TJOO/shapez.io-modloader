@@ -28,22 +28,17 @@ export class MetaCutterBuilding extends MetaBuilding {
      * @returns {Array<[string, string]>}
      */
     getAdditionalStatistics(root, variant) {
-        const speed = root.hubGoals.getProcessorBaseSpeed(
-            variant === MetaCutterBuilding.variants.quad ?
-            enumItemProcessorTypes.cutterQuad :
-            enumItemProcessorTypes.cutter
-        );
+        let speed = 0;
+        if (typeof MetaCutterBuilding.additionalStatistics[variant] === "function") {
+            // @ts-ignore
+            speed = MetaCutterBuilding.additionalStatistics[variant](root);
+        } else {
+            // @ts-ignore
+            speed = MetaCutterBuilding.additionalStatistics[variant];
+        }
         return [
             [T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(speed)]
         ];
-
-        /*const speedMultiplier = MetaCutterBuilding.additionalStatistics[variant];
-
-        const speed =
-            (root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.balancer) / 2) * speedMultiplier;
-        return [
-            [T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(speed)]
-        ];*/ // BRB in 30 min
     }
 
     /**
@@ -93,31 +88,7 @@ export class MetaCutterBuilding extends MetaBuilding {
      * @param {string} variant
      */
     updateVariants(entity, rotationVariant, variant) {
-        switch (variant) {
-            case defaultBuildingVariant:
-                {
-                    entity.components.ItemEjector.setSlots([
-                        { pos: new Vector(0, 0), direction: enumDirection.top },
-                        { pos: new Vector(1, 0), direction: enumDirection.top },
-                    ]);
-                    entity.components.ItemProcessor.type = enumItemProcessorTypes.cutter;
-                    break;
-                }
-            case MetaCutterBuilding.variants.quad:
-                {
-                    entity.components.ItemEjector.setSlots([
-                        { pos: new Vector(0, 0), direction: enumDirection.top },
-                        { pos: new Vector(1, 0), direction: enumDirection.top },
-                        { pos: new Vector(2, 0), direction: enumDirection.top },
-                        { pos: new Vector(3, 0), direction: enumDirection.top },
-                    ]);
-                    entity.components.ItemProcessor.type = enumItemProcessorTypes.cutterQuad;
-                    break;
-                }
-
-            default:
-                assertAlways(false, "Unknown painter variant: " + variant);
-        }
+        MetaCutterBuilding.componentVariations[variant](entity);
     }
 }
 MetaCutterBuilding.variants = {
@@ -129,12 +100,32 @@ MetaCutterBuilding.dimensions = {
     [MetaCutterBuilding.variants.quad]: new Vector(4, 1),
 };
 
-MetaBalancerBuilding.additionalStatistics = {
-    [defaultBuildingVariant]: 2,
-    [MetaBalancerBuilding.variants.merger]: 1,
-    [MetaBalancerBuilding.variants.mergerInverse]: 1,
-    [MetaBalancerBuilding.variants.splitter]: 1,
-    [MetaBalancerBuilding.variants.splitterInverse]: 1,
+MetaCutterBuilding.additionalStatistics = {
+    [defaultBuildingVariant]: root =>
+        (root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.cutter) / 2) * 1,
+    [MetaCutterBuilding.variants.quad]: root =>
+        (root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.cutterQuad) / 2) * 1,
+};
+
+MetaCutterBuilding.componentVariations = {
+    [defaultBuildingVariant]: entity => {
+        entity.components.ItemEjector.setSlots([
+            { pos: new Vector(0, 0), direction: enumDirection.top },
+            { pos: new Vector(1, 0), direction: enumDirection.top },
+        ]);
+
+        entity.components.ItemProcessor.type = enumItemProcessorTypes.cutter;
+    },
+
+    [MetaCutterBuilding.variants.quad]: entity => {
+        entity.components.ItemEjector.setSlots([
+            { pos: new Vector(0, 0), direction: enumDirection.top },
+            { pos: new Vector(1, 0), direction: enumDirection.top },
+            { pos: new Vector(2, 0), direction: enumDirection.top },
+            { pos: new Vector(3, 0), direction: enumDirection.top },
+        ]);
+        entity.components.ItemProcessor.type = enumItemProcessorTypes.cutterQuad;
+    },
 };
 
 MetaCutterBuilding.silhouetteColor = "#7dcda2";

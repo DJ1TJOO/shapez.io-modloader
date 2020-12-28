@@ -13,7 +13,7 @@ export class SettingsState extends TextualGameState {
     }
 
     getMainContentHTML() {
-        return `
+            return `
 
         <div class="sidebar">
             ${this.getCategoryButtonsHtml()}
@@ -34,6 +34,7 @@ export class SettingsState extends TextualGameState {
                     <div class="buildVersion">${T.global.loading} ...</div>
                 </div>
             </div>
+            <button class="styledButton aboutModloader">About modloader</button>
         </div>
 
         <div class="categoryContainer">
@@ -97,6 +98,9 @@ export class SettingsState extends TextualGameState {
         this.trackClicks(this.htmlElement.querySelector(".about"), this.onAboutClicked, {
             preventDefault: false,
         });
+        this.trackClicks(this.htmlElement.querySelector(".aboutModloader"), this.onaboutModloaderClicked, {
+            preventDefault: false,
+        });
 
         const keybindingsButton = this.htmlElement.querySelector(".editKeybindings");
 
@@ -157,6 +161,10 @@ export class SettingsState extends TextualGameState {
                 { preventDefault: false }
             );
         });
+    }
+
+    onaboutModloaderClicked() {
+        this.moveToStateAddGoBack("AboutModloaderState");
     }
 
     onAboutClicked() {

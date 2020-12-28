@@ -2,7 +2,7 @@ import { gMetaBuildingRegistry } from "../../core/global_registries.js";
 import { createLogger } from "../../core/logging.js";
 import { MetaBalancerBuilding } from "../../game/buildings/balancer.js";
 import { MetaBeltBuilding } from "../../game/buildings/belt.js";
-import { enumCutterVariants, MetaCutterBuilding } from "../../game/buildings/cutter.js";
+import { MetaCutterBuilding } from "../../game/buildings/cutter.js";
 import { MetaHubBuilding } from "../../game/buildings/hub.js";
 import { MetaMinerBuilding } from "../../game/buildings/miner.js";
 import { MetaMixerBuilding } from "../../game/buildings/mixer.js";
@@ -103,7 +103,10 @@ export class SavegameInterface_V1006 extends SavegameInterface_V1005 {
 
             // Cutter
             "sprites/blueprints/cutter.png": findCode(MetaCutterBuilding),
-            "sprites/blueprints/cutter-quad.png": findCode(MetaCutterBuilding, enumCutterVariants.quad),
+            "sprites/blueprints/cutter-quad.png": findCode(
+                MetaCutterBuilding,
+                MetaCutterBuilding.variants.quad
+            ),
 
             // Rotater
             "sprites/blueprints/rotater.png": findCode(MetaRotaterBuilding),

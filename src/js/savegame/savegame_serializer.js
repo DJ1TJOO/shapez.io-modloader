@@ -87,11 +87,18 @@ export class SavegameSerializer {
 
             const components = entity.components;
             for (const componentId in components) {
-                const componentClass = gComponentRegistry.findById(componentId);
-
+                var componentClass;
                 // Check component id is known
-                if (!componentClass) {
-                    return ExplainedResult.bad("Unknown component id: " + componentId);
+                try {
+                    componentClass = gComponentRegistry.findById(componentId);
+                } catch (error) {
+                    return ExplainedResult.bad(
+                        JSON.stringify({
+                            type: "component",
+                            status: "missing",
+                            id: componentId,
+                        })
+                    );
                 }
 
                 // Verify component data

@@ -1,10 +1,12 @@
 const webpackConfig = require("./webpack.config");
-const path = require("path");
 const atlasLoader = require("./atlas");
+const sass = require("node-sass");
 const webpack = require("webpack");
 
-const srcDir = "./src";
-const mainFile = "./src/main.js";
+const jsDir = "./src/js";
+const mainJsFile = "./src/js/main.js";
+const mainCssFile = "./src/css/main.scss";
+
 const bundle = "bundle.js";
 const bundlePath = "./build/";
 const atlasConfig = "./atlas.json";
@@ -13,15 +15,21 @@ const atlas = "./atlas";
 const icons = "./icons";
 
 atlasLoader.create(atlasConfig, atlasRaw, atlas);
+
+var restult = sass.renderSync({
+    file: mainCssFile,
+});
+
 webpack(
     webpackConfig({
         es6: false,
         bundlePath: bundlePath,
         bundle: bundle,
-        dir: srcDir,
-        mainFile: mainFile,
+        dir: jsDir,
+        mainFile: mainJsFile,
         iconsPath: icons,
         atlasPath: atlas,
+        css: restult.css,
     }),
     () => {}
 );
