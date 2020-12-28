@@ -1,5 +1,6 @@
 import { SingletonFactory } from "./singleton_factory";
 import { Factory } from "./factory";
+import { GameMode } from "../game/game_mode";
 
 /**
  * @typedef {import("../game/time/base_game_speed").BaseGameSpeed} BaseGameSpeed
@@ -18,6 +19,9 @@ export let gBuildingsByCategory = null;
 
 /** @type {FactoryTemplate<Component>} */
 export let gComponentRegistry = new Factory("component");
+
+/** @type {FactoryTemplate<GameMode>} */
+export let gGameModeRegistry = new Factory("gamemode");
 
 /** @type {FactoryTemplate<BaseGameSpeed>} */
 export let gGameSpeedRegistry = new Factory("gamespeed");

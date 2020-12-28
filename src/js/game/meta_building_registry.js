@@ -43,13 +43,13 @@ export function addVanillaBuildingsToAPI() {
         MetaRotaterBuilding,
     ];
     for (let i = 0; i < vanillaBuildings.length; i++) {
-        window["shapezAPI"].ingame.buildings[new vanillaBuildings[i]().getId()] = vanillaBuildings[i];
+        shapezAPI.ingame.buildings[new vanillaBuildings[i]().getId()] = vanillaBuildings[i];
     }
 }
 
 export function initMetaBuildingRegistry() {
-    for (const buildingClassKey in window["shapezAPI"].ingame.buildings) {
-        const buildingClass = window["shapezAPI"].ingame.buildings[buildingClassKey];
+    for (const buildingClassKey in shapezAPI.ingame.buildings) {
+        const buildingClass = shapezAPI.ingame.buildings[buildingClassKey];
         gMetaBuildingRegistry.register(buildingClass);
 
         if (buildingClass.rotationVariants) {

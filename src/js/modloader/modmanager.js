@@ -25,7 +25,7 @@ export class ModManager {
          * Registers a mod
          * @param {import("./mod").ModInfo} mod
          */
-        window.registerMod = mod => {
+        window["registerMod"] = mod => {
             this.registerMod(mod);
         };
     }

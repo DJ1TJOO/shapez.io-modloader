@@ -22,6 +22,7 @@ registerMod({
 
         shapezAPI.states["AboutModloaderState"] = AboutModloaderState;
         shapezAPI.themes["blue"] = "**{theme_blue}**";
+        shapezAPI.translations.settings.labels.theme.themes["blue"] = "Blue";
 
         shapezAPI.registerAtlases("**{atlas_atlas0_hq}**", "**{atlas_atlas0_mq}**", "**{atlas_atlas0_lq}**");
 

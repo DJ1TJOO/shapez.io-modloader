@@ -61,6 +61,7 @@ import { UndergroundBeltComponent } from "../game/components/underground_belt";
 import { WireComponent } from "../game/components/wire";
 import { WiredPinsComponent } from "../game/components/wired_pins";
 import { WireTunnelComponent } from "../game/components/wire_tunnel";
+import { GameMode } from "../game/game_mode";
 import { GameSystem } from "../game/game_system";
 import { GameSystemWithFilter } from "../game/game_system_with_filter";
 import { HubGoals } from "../game/hub_goals";
@@ -74,6 +75,7 @@ import { ShapeItem } from "../game/items/shape_item";
 import { KEYMAPPINGS } from "../game/key_action_mapper";
 import { MapChunk } from "../game/map_chunk";
 import { defaultBuildingVariant, MetaBuilding } from "../game/meta_building";
+import { RegularGameMode } from "../game/modes/regular";
 import { enumAnalyticsDataSource } from "../game/production_analytics";
 import { BeltSystem } from "../game/systems/belt";
 import { BeltReaderSystem } from "../game/systems/belt_reader";
@@ -96,7 +98,10 @@ import { StorageSystem } from "../game/systems/storage";
 import { UndergroundBeltSystem } from "../game/systems/underground_belt";
 import { WireSystem } from "../game/systems/wire";
 import { WiredPinsSystem } from "../game/systems/wired_pins";
-import { THEMES } from "../game/theme";
+import { VANILLA_THEMES } from "../game/theme";
+import { FastForwardGameSpeed } from "../game/time/fast_forward_game_speed";
+import { PausedGameSpeed } from "../game/time/paused_game_speed";
+import { RegularGameSpeed } from "../game/time/regular_game_speed";
 import { enumHubGoalRewards } from "../game/tutorial_goals";
 import { enumHubGoalRewardsToContentUnlocked } from "../game/tutorial_goals_mappings";
 import { enumCategories } from "../profile/application_settings";
@@ -122,6 +127,7 @@ export class ShapezAPI {
             GameSystemWithFilter,
             GameSystem,
             GameState,
+            GameMode,
             TextualGameState,
             MapChunk,
 
@@ -132,6 +138,14 @@ export class ShapezAPI {
             //Variables
             defaultBuildingVariant,
             types,
+
+            //Gamemodes
+            RegularGameMode,
+
+            //Gamespeed
+            PausedGameSpeed,
+            FastForwardGameSpeed,
+            RegularGameSpeed,
 
             //Items
             ShapeItem,
@@ -231,8 +245,8 @@ export class ShapezAPI {
             //Must be array because of update order
             systems: [],
             items: {},
-            levels: {},
-            themes: {},
+            gamemodes: {},
+            gamespeed: {},
             hub_goals: HubGoals,
         };
 
@@ -241,7 +255,7 @@ export class ShapezAPI {
             wires: HUDWiresToolbar.bar,
         };
 
-        this.themes = THEMES;
+        this.themes = VANILLA_THEMES;
 
         this.states = Application.states;
 

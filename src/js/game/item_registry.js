@@ -4,15 +4,15 @@ import { ColorItem } from "./items/color_item";
 import { BooleanItem } from "./items/boolean_item";
 
 export function addVanillaItemsToAPI() {
-    window["shapezAPI"].ingame.items[ShapeItem.getId()] = ShapeItem;
-    window["shapezAPI"].ingame.items[ColorItem.getId()] = ColorItem;
-    window["shapezAPI"].ingame.items[BooleanItem.getId()] = BooleanItem;
+    shapezAPI.ingame.items[ShapeItem.getId()] = ShapeItem;
+    shapezAPI.ingame.items[ColorItem.getId()] = ColorItem;
+    shapezAPI.ingame.items[BooleanItem.getId()] = BooleanItem;
 }
 
 export function initItemRegistry() {
-    for (const itemId in window["shapezAPI"].ingame.items) {
-        if (!window["shapezAPI"].ingame.items.hasOwnProperty(itemId)) continue;
-        const itemClass = window["shapezAPI"].ingame.items[itemId];
+    for (const itemId in shapezAPI.ingame.items) {
+        if (!shapezAPI.ingame.items.hasOwnProperty(itemId)) continue;
+        const itemClass = shapezAPI.ingame.items[itemId];
         gItemRegistry.register(itemClass);
     }
 }

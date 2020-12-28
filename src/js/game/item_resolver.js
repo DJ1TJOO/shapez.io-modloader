@@ -10,9 +10,9 @@ export function itemResolverSingleton(root, data) {
     const itemType = data.$;
     const itemData = data.data;
 
-    for (const itemId in window["shapezAPI"].ingame.items) {
-        if (!window["shapezAPI"].ingame.items.hasOwnProperty(itemId)) continue;
-        const itemClass = window["shapezAPI"].ingame.items[itemId];
+    for (const itemId in shapezAPI.ingame.items) {
+        if (!shapezAPI.ingame.items.hasOwnProperty(itemId)) continue;
+        const itemClass = shapezAPI.ingame.items[itemId];
         if (itemType !== itemClass.getId()) continue;
 
         return itemClass.resolveSingleton(root, itemData);

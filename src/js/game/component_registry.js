@@ -22,7 +22,7 @@ import { ItemProducerComponent } from "./components/item_producer";
 import { Component } from "./component";
 
 export function addVanillaComponentsToAPI() {
-    const components = window["shapezAPI"].ingame["components"];
+    const components = shapezAPI.ingame["components"];
 
     /** @typedef {typeof Component[]}*/
     const vanillaComponents = [
@@ -55,7 +55,7 @@ export function addVanillaComponentsToAPI() {
 }
 
 export function initComponentRegistry() {
-    const components = window["shapezAPI"].ingame["components"];
+    const components = shapezAPI.ingame["components"];
     for (const componentId in components) {
         if (!components.hasOwnProperty(componentId)) continue;
         const component = components[componentId];

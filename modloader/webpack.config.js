@@ -121,7 +121,7 @@ module.exports = ({
                                 {
                                     pattern: /"\*\*\{theme_([A-Za-z0-9_]{0,})\}\*\*"/g,
                                     replacement: (match, p1) => {
-                                        return "`" + themes.get(p1) + "`";
+                                        return themes.get(p1);
                                     },
                                 },
                                 {

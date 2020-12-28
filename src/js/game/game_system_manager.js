@@ -30,7 +30,7 @@ import { GameSystem } from "./game_system";
 const logger = createLogger("game_system_manager");
 
 export function addVanillaSystemsToAPI() {
-    window["shapezAPI"].ingame["systems"] = [
+    shapezAPI.ingame["systems"] = [
         // Order is important!
 
         // IMPORTANT: Item acceptor must be before the belt, because it may not tick after the belt
@@ -101,7 +101,7 @@ export class GameSystemManager {
      * Initializes all systems
      */
     internalInitSystems() {
-        const systems = window["shapezAPI"].ingame["systems"];
+        const systems = shapezAPI.ingame["systems"];
         for (let i = 0; i < systems.length; i++) {
             const system = systems[i];
             this.systems[system.getId()] = new system(this.root);

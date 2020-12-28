@@ -60,8 +60,8 @@ export class SettingsState extends TextualGameState {
             categoriesHTML[catName] = `<div class="category" data-category="${catName}">`;
         });
 
-        for (let i = 0; i < allApplicationSettings.length; ++i) {
-            const setting = allApplicationSettings[i];
+        for (let i = 0; i < allApplicationSettings().length; ++i) {
+            const setting = allApplicationSettings()[i];
 
             categoriesHTML[setting.categoryId] += setting.getHtml(this.app);
         }
@@ -131,7 +131,7 @@ export class SettingsState extends TextualGameState {
     }
 
     initSettings() {
-        allApplicationSettings.forEach(setting => {
+        allApplicationSettings().forEach(setting => {
             /** @type {HTMLElement} */
             const element = this.htmlElement.querySelector("[data-setting='" + setting.id + "']");
             setting.bind(this.app, element, this.dialogs);

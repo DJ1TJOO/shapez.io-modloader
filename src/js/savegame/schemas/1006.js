@@ -7,7 +7,7 @@ import { MetaHubBuilding } from "../../game/buildings/hub.js";
 import { MetaMinerBuilding } from "../../game/buildings/miner.js";
 import { MetaMixerBuilding } from "../../game/buildings/mixer.js";
 import { enumPainterVariants, MetaPainterBuilding } from "../../game/buildings/painter.js";
-import { enumRotaterVariants, MetaRotaterBuilding } from "../../game/buildings/rotater.js";
+import { MetaRotaterBuilding } from "../../game/buildings/rotater.js";
 import { MetaStackerBuilding } from "../../game/buildings/stacker.js";
 import { MetaStorageBuilding } from "../../game/buildings/storage.js";
 import { MetaTrashBuilding } from "../../game/buildings/trash.js";
@@ -110,7 +110,10 @@ export class SavegameInterface_V1006 extends SavegameInterface_V1005 {
 
             // Rotater
             "sprites/blueprints/rotater.png": findCode(MetaRotaterBuilding),
-            "sprites/blueprints/rotater-ccw.png": findCode(MetaRotaterBuilding, enumRotaterVariants.ccw),
+            "sprites/blueprints/rotater-ccw.png": findCode(
+                MetaRotaterBuilding,
+                MetaRotaterBuilding.variants.ccw
+            ),
 
             // Stacker
             "sprites/blueprints/stacker.png": findCode(MetaStackerBuilding),
