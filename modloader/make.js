@@ -3,6 +3,7 @@ const atlasLoader = require("./atlas");
 const sass = require("node-sass");
 const webpack = require("webpack");
 
+const dir = "./src";
 const jsDir = "./src/js";
 const mainJsFile = "./src/js/main.js";
 
@@ -16,28 +17,32 @@ const icons = "./icons";
 const bundle = "bundle.js";
 const bundlePath = "./build/";
 
-atlasLoader.create(atlasConfig, atlasRaw, atlas);
+var make = () => {
+    atlasLoader.create(atlasConfig, atlasRaw, atlas);
 
-var restult = sass.renderSync({
-    file: mainCssFile,
-});
+    var restult = sass.renderSync({
+        file: mainCssFile,
+    });
 
-webpack(
-    webpackConfig({
-        es6: false,
-        bundlePath: bundlePath,
-        bundle: bundle,
-        dir: jsDir,
-        mainFile: mainJsFile,
-        iconsPath: icons,
-        atlasPath: atlas,
-        css: restult.css,
-    }),
-    () => {}
-);
+    webpack(
+        webpackConfig({
+            es6: false,
+            bundlePath: bundlePath,
+            bundle: bundle,
+            dir: jsDir,
+            mainFile: mainJsFile,
+            iconsPath: icons,
+            atlasPath: atlas,
+            css: restult.css,
+        }),
+        () => {}
+    );
+};
+make();
 
 const cors = require("cors");
 const express = require("express");
+const fs = require("fs");
 
 var server = express();
 server.use(cors());
@@ -45,4 +50,8 @@ server.use("/mod", express.static(__dirname + "/build/bundle.js"));
 
 server.listen(3006, () => {
     console.log("Listening on port 3006");
+});
+
+fs.watch(dir, function(event, filename) {
+    make();
 });
