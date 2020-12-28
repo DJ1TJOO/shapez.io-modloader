@@ -43,6 +43,7 @@ make();
 const cors = require("cors");
 const express = require("express");
 const fs = require("fs");
+const chokidar = require("chokidar");
 
 var server = express();
 server.use(cors());
@@ -52,6 +53,7 @@ server.listen(3006, () => {
     console.log("Listening on port 3006");
 });
 
-fs.watch(dir, function(event, filename) {
+chokidar.watch(dir).on("all", (event, path) => {
     make();
+    console.log("Rebuild");
 });

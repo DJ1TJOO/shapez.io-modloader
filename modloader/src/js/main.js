@@ -11,8 +11,9 @@ window["registerMod"]({
     authors: ["DJ1TJOO", "Shrimp", "SHADOW"],
     version: "1.0.0",
     gameVersion: 1007,
-    dependencies: ["51172f31-98b0-45ae-9896-be697b2429e2"],
+    dependencies: [],
     incompatible: [],
+
     main: () => {
         console.log("main test 1");
 
