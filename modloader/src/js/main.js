@@ -16,9 +16,9 @@ window["registerMod"]({
     main: () => {
         console.log("main test 1");
 
-        window["shapezAPI"].injectCss("**{css}**", "AboutModloaderState");
+        window["shapezAPI"].injectCss("**{css}**", modId);
 
-        window["shapezAPI"].states.push(AboutModloaderState);
+        window["shapezAPI"].states["AboutModloaderState"] = AboutModloaderState;
 
         window["shapezAPI"].registerAtlases(
             "**{atlas_atlas0_hq}**",

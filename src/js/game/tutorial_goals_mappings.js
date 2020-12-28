@@ -9,7 +9,7 @@ import { MetaMinerBuilding } from "./buildings/miner";
 import { MetaMixerBuilding } from "./buildings/mixer";
 import { enumPainterVariants, MetaPainterBuilding } from "./buildings/painter";
 import { MetaReaderBuilding } from "./buildings/reader";
-import { enumRotaterVariants, MetaRotaterBuilding } from "./buildings/rotater";
+import { MetaRotaterBuilding } from "./buildings/rotater";
 import { MetaStackerBuilding } from "./buildings/stacker";
 import { MetaStorageBuilding } from "./buildings/storage";
 import { enumUndergroundBeltVariants, MetaUndergroundBeltBuilding } from "./buildings/underground_belt";
@@ -51,10 +51,10 @@ export const enumHubGoalRewardsToContentUnlocked = {
     ]),
 
     [enumHubGoalRewards.reward_rotater_ccw]: typed([
-        [MetaRotaterBuilding, enumRotaterVariants.ccw]
+        [MetaRotaterBuilding, MetaRotaterBuilding.variants.ccw]
     ]),
     [enumHubGoalRewards.reward_rotater_180]: typed([
-        [MetaRotaterBuilding, enumRotaterVariants.rotate180]
+        [MetaRotaterBuilding, MetaRotaterBuilding.variants.rotate180],
     ]),
     [enumHubGoalRewards.reward_miner_chainable]: typed([
         [MetaMinerBuilding, MetaMinerBuilding.variants.chainable],

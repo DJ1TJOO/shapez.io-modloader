@@ -86,8 +86,12 @@ export class MetaBalancerBuilding extends MetaBuilding {
     /**
      * @param {GameRoot} root
      */
+    // @ts-ignore
     getIsUnlocked(root) {
-        return root.hubGoals.isRewardUnlocked(MetaBalancerBuilding.avaibleVariants[defaultBuildingVariant]);
+        return typeof MetaBalancerBuilding.avaibleVariants[defaultBuildingVariant] === "boolean" ?
+            MetaBalancerBuilding.avaibleVariants[defaultBuildingVariant] // @ts-ignore
+            :
+            root.hubGoals.isRewardUnlocked(MetaBalancerBuilding.avaibleVariants[defaultBuildingVariant]);
     }
 
     /**

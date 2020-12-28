@@ -5,14 +5,16 @@ const webpack = require("webpack");
 
 const jsDir = "./src/js";
 const mainJsFile = "./src/js/main.js";
+
 const mainCssFile = "./src/css/main.scss";
 
-const bundle = "bundle.js";
-const bundlePath = "./build/";
 const atlasConfig = "./atlas.json";
 const atlasRaw = "./atlas_raw";
 const atlas = "./atlas";
 const icons = "./icons";
+
+const bundle = "bundle.js";
+const bundlePath = "./build/";
 
 atlasLoader.create(atlasConfig, atlasRaw, atlas);
 

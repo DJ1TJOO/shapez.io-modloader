@@ -1,8 +1,9 @@
+import { track } from "logrocket";
+import { Application } from "../application";
 import { TextualGameState } from "../core/textual_game_state";
 import { formatSecondsToTimeAgo } from "../core/utils";
 import { allApplicationSettings, enumCategories } from "../profile/application_settings";
 import { T } from "../translations";
-
 export class SettingsState extends TextualGameState {
     constructor() {
         super("SettingsState");
@@ -13,35 +14,7 @@ export class SettingsState extends TextualGameState {
     }
 
     getMainContentHTML() {
-            return `
-
-        <div class="sidebar">
-            ${this.getCategoryButtonsHtml()}
-
-            ${
-                this.app.platformWrapper.getSupportsKeyboard()
-                    ? `
-            <button class="styledButton categoryButton editKeybindings">
-            ${T.keybindings.title}
-            </button>`
-                    : ""
-            }
-
-            <div class="other">
-                <button class="styledButton about">${T.about.title}</button>
-
-                <div class="versionbar">
-                    <div class="buildVersion">${T.global.loading} ...</div>
-                </div>
-            </div>
-            <button class="styledButton aboutModloader">About modloader</button>
-        </div>
-
-        <div class="categoryContainer">
-            ${this.getSettingsHtml()}
-        </div>
-
-        `;
+        return SettingsState.getMainContentHTML(this);
     }
 
     getCategoryButtonsHtml() {
@@ -49,7 +22,7 @@ export class SettingsState extends TextualGameState {
             .map(key => enumCategories[key])
             .map(
                 category =>
-                    `
+                `
                     <button class="styledButton categoryButton" data-category-btn="${category}">
                         ${T.settings.categories[category]}
                     </button>
@@ -95,12 +68,15 @@ export class SettingsState extends TextualGameState {
 
     onEnter(payload) {
         this.renderBuildText();
-        this.trackClicks(this.htmlElement.querySelector(".about"), this.onAboutClicked, {
-            preventDefault: false,
-        });
-        this.trackClicks(this.htmlElement.querySelector(".aboutModloader"), this.onaboutModloaderClicked, {
-            preventDefault: false,
-        });
+
+        for (let i = 0; i < SettingsState.trackClicks.length; i++) {
+            const trackClick = SettingsState.trackClicks[i];
+            this.trackClicks(
+                this.htmlElement.querySelector(trackClick.htmlElement),
+                this.onClickedStateAddGoBack(trackClick.state),
+                trackClick.options
+            );
+        }
 
         const keybindingsButton = this.htmlElement.querySelector(".editKeybindings");
 
@@ -143,8 +119,7 @@ export class SettingsState extends TextualGameState {
                 element,
                 () => {
                     setting.modify();
-                },
-                { preventDefault: false }
+                }, { preventDefault: false }
             );
         });
     }
@@ -157,21 +132,57 @@ export class SettingsState extends TextualGameState {
                 button,
                 () => {
                     this.setActiveCategory(category);
-                },
-                { preventDefault: false }
+                }, { preventDefault: false }
             );
         });
     }
 
-    onaboutModloaderClicked() {
-        this.moveToStateAddGoBack("AboutModloaderState");
-    }
-
-    onAboutClicked() {
-        this.moveToStateAddGoBack("AboutState");
+    onClickedStateAddGoBack(state) {
+        return () => {
+            this.moveToStateAddGoBack(state);
+        };
     }
 
     onKeybindingsClicked() {
         this.moveToStateAddGoBack("KeybindingsState");
     }
 }
+
+SettingsState.getMainContentHTML = self => {
+        return `<div class="sidebar">
+        ${self.getCategoryButtonsHtml()}
+
+        ${
+            self.app.platformWrapper.getSupportsKeyboard()
+                ? `
+        <button class="styledButton categoryButton editKeybindings">
+        ${T.keybindings.title}
+        </button>`
+                : ""
+        }
+
+        <div class="other">
+            <button class="styledButton about">${T.about.title}</button>
+
+            <div class="versionbar">
+                <div class="buildVersion">${T.global.loading} ...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="categoryContainer">
+        ${self.getSettingsHtml()}
+    </div>
+
+    `;
+};
+
+SettingsState.trackClicks = [
+    {
+        htmlElement: ".about",
+        state: "AboutState",
+        options: {
+            preventDefault: false,
+        },
+    },
+];

@@ -17,7 +17,7 @@ import { MetaMinerBuilding } from "./buildings/miner";
 import { MetaMixerBuilding } from "./buildings/mixer";
 import { enumPainterVariants, MetaPainterBuilding } from "./buildings/painter";
 import { MetaReaderBuilding } from "./buildings/reader";
-import { enumRotaterVariants, MetaRotaterBuilding } from "./buildings/rotater";
+import { MetaRotaterBuilding } from "./buildings/rotater";
 import { MetaStackerBuilding } from "./buildings/stacker";
 import { MetaStorageBuilding } from "./buildings/storage";
 import { enumTransistorVariants, MetaTransistorBuilding } from "./buildings/transistor";
@@ -40,6 +40,7 @@ export function addVanillaBuildingsToAPI() {
         MetaBeltBuilding,
         MetaMinerBuilding,
         MetaCutterBuilding,
+        MetaRotaterBuilding,
     ];
     for (let i = 0; i < vanillaBuildings.length; i++) {
         window["shapezAPI"].ingame.buildings[new vanillaBuildings[i]().getId()] = vanillaBuildings[i];
@@ -83,7 +84,6 @@ export function initMetaBuildingRegistry() {
         }
     }
 
-    gMetaBuildingRegistry.register(MetaRotaterBuilding);
     gMetaBuildingRegistry.register(MetaStackerBuilding);
     gMetaBuildingRegistry.register(MetaMixerBuilding);
     gMetaBuildingRegistry.register(MetaPainterBuilding);
@@ -103,11 +103,6 @@ export function initMetaBuildingRegistry() {
     gMetaBuildingRegistry.register(MetaTransistorBuilding);
     gMetaBuildingRegistry.register(MetaComparatorBuilding);
     gMetaBuildingRegistry.register(MetaItemProducerBuilding);
-
-    // Rotater
-    registerBuildingVariant(MetaRotaterBuilding);
-    registerBuildingVariant(MetaRotaterBuilding, enumRotaterVariants.ccw);
-    registerBuildingVariant(MetaRotaterBuilding, enumRotaterVariants.rotate180);
 
     // Stacker
     registerBuildingVariant(MetaStackerBuilding);
@@ -208,8 +203,7 @@ export function initMetaBuildingRegistry() {
     }
 
     // Check for valid keycodes
-    if (false) {
-        //mods can have non registerd buildings
+    if (G_IS_DEV) {
         gMetaBuildingRegistry.entries.forEach(metaBuilding => {
             const id = metaBuilding.getId();
             if (!["hub"].includes(id)) {

@@ -118,6 +118,7 @@ export class Application {
         // Store the mouse position, or null if not available
         /** @type {Vector|null} */
         this.mousePosition = null;
+        this.onAboutClicked = undefined;
     }
 
     /**
@@ -143,8 +144,9 @@ export class Application {
      * Registers all game states
      */
     registerStates() {
-        for (let i = 0; i < Application.states.length; ++i) {
-            this.stateMgr.register(Application.states[i]);
+        for (const stateKey in Application.states) {
+            if (!Object.hasOwnProperty.call(Application.states, stateKey)) continue;
+            this.stateMgr.register(Application.states[stateKey]);
         }
     }
 
@@ -403,8 +405,11 @@ export class Application {
     }
 }
 
-/** @type {Array<typeof GameState>} */
-Application.states = [
+Application.trackClicks = undefined;
+
+Application.getMainContentHTML = undefined;
+
+Application.states = {
     PreloadState,
     MobileWarningState,
     MainMenuState,
@@ -413,4 +418,4 @@ Application.states = [
     KeybindingsState,
     AboutState,
     ChangelogState,
-];
+};

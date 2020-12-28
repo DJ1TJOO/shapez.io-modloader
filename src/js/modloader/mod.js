@@ -109,6 +109,14 @@ import { enumHubGoalRewardsToContentUnlocked } from "../game/tutorial_goals_mapp
 import { enumCategories } from "../profile/application_settings";
 import { enumLocalSavegameStatus } from "../savegame/savegame_manager";
 import { types } from "../savegame/serialization";
+import { AboutState } from "../states/about";
+import { ChangelogState } from "../states/changelog";
+import { InGameState } from "../states/ingame";
+import { KeybindingsState } from "../states/keybindings";
+import { MainMenuState } from "../states/main_menu";
+import { MobileWarningState } from "../states/mobile_warning";
+import { PreloadState } from "../states/preload";
+import { SettingsState } from "../states/settings";
 import { T } from "../translations";
 
 const Toposort = require("toposort-class");
@@ -291,6 +299,16 @@ export class ShapezAPI {
             //Variables
             defaultBuildingVariant,
             types,
+
+            //States
+            InGameState,
+            SettingsState,
+            AboutState,
+            MainMenuState,
+            ChangelogState,
+            KeybindingsState,
+            PreloadState,
+            MobileWarningState,
 
             //Systems
             ItemAcceptorSystem,

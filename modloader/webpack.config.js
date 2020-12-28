@@ -9,8 +9,8 @@ module.exports = ({
     es6 = false,
     bundlePath = "./build",
     bundle = "bundle.js",
-    dir = "./src",
-    mainFile = "./src/main.js",
+    dir = "./src/js",
+    mainFile = "./src/js/main.js",
     iconsPath = "./icons",
     atlasPath = "./atlas",
     css = "",
@@ -110,7 +110,7 @@ module.exports = ({
                                 {
                                     pattern: /"\*\*\{css\}\*\*"/g,
                                     replacement: () => {
-                                        return css;
+                                        return "`" + css.toString("utf8") + "`";
                                     },
                                 },
                             ],
