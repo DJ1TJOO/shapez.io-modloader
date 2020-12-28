@@ -1,18 +1,20 @@
-const webpackConfig = require("./make/webpack.config");
-const atlasLoader = require("./make/atlas");
+const webpackConfig = require("./webpack.config");
+const atlasLoader = require("./atlas");
 const sass = require("node-sass");
+const fs = require("fs");
 const webpack = require("webpack");
 
-const dir = "./src";
 const jsDir = "./src/js";
 const mainJsFile = "./src/js/main.js";
 
 const mainCssFile = "./src/css/main.scss";
 
-const atlasConfig = "./make/atlas.json";
+const atlasConfig = "./atlas.json";
 const atlasRaw = "./atlas_raw";
 const atlas = "./atlas";
 const icons = "./icons";
+
+const themes = "./themes";
 
 const bundle = "bundle.js";
 const bundlePath = "./build/";
@@ -33,16 +35,18 @@ var make = () => {
             mainFile: mainJsFile,
             iconsPath: icons,
             atlasPath: atlas,
+            themesPath: themes,
             css: restult.css,
         }),
-        () => {}
+        () => {
+            console.log("Completed bundle.js");
+        }
     );
 };
 make();
 
 const cors = require("cors");
 const express = require("express");
-const fs = require("fs");
 const chokidar = require("chokidar");
 
 var server = express();
@@ -53,7 +57,7 @@ server.listen(3006, () => {
     console.log("Listening on port 3006");
 });
 
-chokidar.watch(dir).on("all", (event, path) => {
-    make();
-    console.log("Rebuild");
-});
+// chokidar.watch(dir).on("all", (event, path) => {
+//     make();
+//     console.log("Rebuild");
+// });

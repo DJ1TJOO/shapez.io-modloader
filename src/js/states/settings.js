@@ -1,5 +1,3 @@
-import { track } from "logrocket";
-import { Application } from "../application";
 import { TextualGameState } from "../core/textual_game_state";
 import { formatSecondsToTimeAgo } from "../core/utils";
 import { allApplicationSettings, enumCategories } from "../profile/application_settings";
@@ -14,7 +12,30 @@ export class SettingsState extends TextualGameState {
     }
 
     getMainContentHTML() {
-        return SettingsState.getMainContentHTML(this);
+            return `<div class="sidebar">
+                        ${this.getCategoryButtonsHtml()}
+                        ${
+                            this.app.platformWrapper.getSupportsKeyboard()
+                                ? `<button class="styledButton categoryButton editKeybindings">
+                                ${T.keybindings.title}
+                            </button>`
+                                : ""
+                        }${this.getExtraButtonsHtml()}<div class="other">
+                            <button class="styledButton about">${T.about.title}</button>
+
+                            <div class="versionbar">
+                                <div class="buildVersion">${T.global.loading} ...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="categoryContainer">
+                        ${this.getSettingsHtml()}
+                    </div>
+                `;
+    }
+    getExtraButtonsHtml() {
+        return SettingsState.extraSideBarButtons.join("");
     }
 
     getCategoryButtonsHtml() {
@@ -22,7 +43,7 @@ export class SettingsState extends TextualGameState {
             .map(key => enumCategories[key])
             .map(
                 category =>
-                `
+                    `
                     <button class="styledButton categoryButton" data-category-btn="${category}">
                         ${T.settings.categories[category]}
                     </button>
@@ -119,7 +140,8 @@ export class SettingsState extends TextualGameState {
                 element,
                 () => {
                     setting.modify();
-                }, { preventDefault: false }
+                },
+                { preventDefault: false }
             );
         });
     }
@@ -132,7 +154,8 @@ export class SettingsState extends TextualGameState {
                 button,
                 () => {
                     this.setActiveCategory(category);
-                }, { preventDefault: false }
+                },
+                { preventDefault: false }
             );
         });
     }
@@ -148,34 +171,7 @@ export class SettingsState extends TextualGameState {
     }
 }
 
-SettingsState.getMainContentHTML = self => {
-        return `<div class="sidebar">
-        ${self.getCategoryButtonsHtml()}
-
-        ${
-            self.app.platformWrapper.getSupportsKeyboard()
-                ? `
-        <button class="styledButton categoryButton editKeybindings">
-        ${T.keybindings.title}
-        </button>`
-                : ""
-        }
-
-        <div class="other">
-            <button class="styledButton about">${T.about.title}</button>
-
-            <div class="versionbar">
-                <div class="buildVersion">${T.global.loading} ...</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="categoryContainer">
-        ${self.getSettingsHtml()}
-    </div>
-
-    `;
-};
+SettingsState.extraSideBarButtons = [];
 
 SettingsState.trackClicks = [
     {

@@ -36,35 +36,5 @@ shapezAPI.exports.SettingsState.trackClicks.push({
     },
 });
 
-shapezAPI.exports.SettingsState.getMainContentHTML = self => {
-        return `<div class="sidebar">
-        ${self.getCategoryButtonsHtml()}
-
-        ${
-            self.app.platformWrapper.getSupportsKeyboard()
-                ? `
-        <button class="styledButton categoryButton editKeybindings">
-        ${shapezAPI.translations.keybindings.title}
-        </button>`
-                : ""
-        }
-
-        <div class="other">
-            <button class="styledButton aboutModloader">About modloader</button>
-        </div>
-
-        <div class="other">
-            <button class="styledButton about">${shapezAPI.translations.about.title}</button>
-
-            <div class="versionbar">
-                <div class="buildVersion">${shapezAPI.translations.global.loading} ...</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="categoryContainer">
-        ${self.getSettingsHtml()}
-    </div>
-
-    `;
-};
+shapezAPI.exports.SettingsState.extraSideBarButtons.push(`
+    <button class="styledButton aboutModloader">About modloader</button>`);

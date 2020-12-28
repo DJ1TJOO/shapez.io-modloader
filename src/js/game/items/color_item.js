@@ -81,12 +81,16 @@ export class ColorItem extends BaseItem {
     }
 }
 
+ColorItem.resolveSingleton = (root, itemData) => {
+    return ColorItem.ITEM_SINGLETONS[itemData];
+};
+
 /**
  * Singleton instances
  * @type {Object<enumColors, ColorItem>}
  */
-export const COLOR_ITEM_SINGLETONS = {};
+ColorItem.ITEM_SINGLETONS = {};
 
 for (const color in enumColors) {
-    COLOR_ITEM_SINGLETONS[color] = new ColorItem(color);
+    ColorItem.ITEM_SINGLETONS[color] = new ColorItem(color);
 }

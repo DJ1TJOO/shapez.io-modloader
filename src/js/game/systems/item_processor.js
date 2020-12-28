@@ -8,7 +8,7 @@ import {
 import { Entity } from "../entity";
 import { GameSystemWithFilter } from "../game_system_with_filter";
 import { BOOL_TRUE_SINGLETON, isTruthyItem } from "../items/boolean_item";
-import { ColorItem, COLOR_ITEM_SINGLETONS } from "../items/color_item";
+import { ColorItem } from "../items/color_item";
 import { ShapeItem } from "../items/shape_item";
 
 /**
@@ -464,7 +464,7 @@ export class ItemProcessorSystem extends GameSystemWithFilter {
             resultColor = mixedColor;
         }
         payload.outItems.push({
-            item: COLOR_ITEM_SINGLETONS[resultColor],
+            item: ColorItem.ITEM_SINGLETONS[resultColor],
         });
     }
 

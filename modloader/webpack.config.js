@@ -13,6 +13,7 @@ module.exports = ({
     mainFile = "./src/js/main.js",
     iconsPath = "./icons",
     atlasPath = "./atlas",
+    themesPath = "./themes",
     css = "",
 }) => {
     var icons = new Map();
@@ -23,6 +24,16 @@ module.exports = ({
             path.basename(filename, path.extname(filename)),
             "data:image/png;base64," +
             Buffer.from(fs.readFileSync(path.join(iconsPath, filename))).toString("base64")
+        );
+    }
+
+    var themes = new Map();
+    var themeFiles = fs.readdirSync(themesPath);
+    for (let i = 0; i < themeFiles.length; i++) {
+        const filename = themeFiles[i];
+        themes.set(
+            path.basename(filename, path.extname(filename)),
+            fs.readFileSync(path.join(themesPath, filename), "utf8")
         );
     }
 
@@ -92,19 +103,25 @@ module.exports = ({
                         "uglify-template-string-loader", // Finally found this plugin
                         StringReplacePlugin.replace({
                             replacements: [{
-                                    pattern: /"\*\*\{icons_(.{0,})\}\*\*"/g,
+                                    pattern: /"\*\*\{icons_([A-Za-z0-9_]{0,})\}\*\*"/g,
                                     replacement: (match, p1) => {
                                         return "`" + icons.get(p1) + "`";
                                     },
                                 },
                                 {
-                                    pattern: /"\*\*\{atlas_(.{0,})\}\*\*"/g,
+                                    pattern: /"\*\*\{atlas_([A-Za-z0-9_]{0,})\}\*\*"/g,
                                     replacement: (match, p1) => {
                                         const atlas = {
                                             src: atlases.get(p1),
                                             atlasData: atlasJsons.get(p1),
                                         };
                                         return "`" + JSON.stringify(atlas) + "`";
+                                    },
+                                },
+                                {
+                                    pattern: /"\*\*\{theme_([A-Za-z0-9_]{0,})\}\*\*"/g,
+                                    replacement: (match, p1) => {
+                                        return "`" + themes.get(p1) + "`";
                                     },
                                 },
                                 {

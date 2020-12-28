@@ -44,6 +44,7 @@ declare interface ShapezAPI {
     };
     states;
     clickDetectors;
+    themes;
 
     /**
      * Generates rotated variants of the matrix
@@ -66,6 +67,13 @@ declare interface ShapezAPI {
      * @returns {RegularSprite}
      */
     getRegularSprite(id);
+
+    /**
+     * Returns a regular sprite by its id
+     * @param {string} id
+     * @returns {AtlasSprite}
+     */
+    getSprite(id);
 
     /**
      * Registers a new atlas

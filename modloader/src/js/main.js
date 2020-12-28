@@ -1,5 +1,6 @@
 import { MetaTrasherBuilding } from "./buildings/trasher";
 import { TrasherComponent } from "./components/trasher";
+import { FluidItem } from "./items/fluid";
 import { AboutModloaderState } from "./states/about";
 import { TrasherSystem } from "./systems/trasher";
 
@@ -20,8 +21,11 @@ registerMod({
         shapezAPI.injectCss("**{css}**", modId);
 
         shapezAPI.states["AboutModloaderState"] = AboutModloaderState;
+        shapezAPI.themes["blue"] = "**{theme_blue}**";
 
         shapezAPI.registerAtlases("**{atlas_atlas0_hq}**", "**{atlas_atlas0_mq}**", "**{atlas_atlas0_lq}**");
+
+        shapezAPI.ingame.items[FluidItem.getId()] = FluidItem;
 
         shapezAPI.registerBuilding(MetaTrasherBuilding, "**{icons_trasher}**", "K", "Trasher", {
             default: {

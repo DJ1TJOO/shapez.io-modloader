@@ -7,10 +7,10 @@ import { Application } from "./application";
 import { IS_DEBUG } from "./core/config";
 import { addVanillaComponentsToAPI, initComponentRegistry } from "./game/component_registry";
 import { initDrawUtils } from "./core/draw_utils";
-import { initItemRegistry } from "./game/item_registry";
+import { addVanillaItemsToAPI, initItemRegistry } from "./game/item_registry";
 import { addVanillaBuildingsToAPI, initMetaBuildingRegistry } from "./game/meta_building_registry";
 import { initGameSpeedRegistry } from "./game/game_speed_registry";
-import { ModManager } from "./modloader/mod";
+import { ModManager } from "./modloader/modmanager";
 import { addVanillaSystemsToAPI } from "./game/game_system_manager";
 const logger = createLogger("main");
 (async() => {
@@ -82,11 +82,12 @@ const logger = createLogger("main");
     addVanillaBuildingsToAPI();
     addVanillaComponentsToAPI();
     addVanillaSystemsToAPI();
+    addVanillaItemsToAPI();
     await modMgr.addMods([
-        "http://thomasbrants.nl:3000/mods/test_mods/mod1/bundle.js",
-        "http://thomasbrants.nl:3000/mods/test_mods/test_mod2.js",
-        "http://thomasbrants.nl:3000/mods/test_mods/test_mod3.js",
-        //"http://localhost:3006/mod",
+        // "http://thomasbrants.nl:3000/mods/test_mods/mod1/bundle.js",
+        // "http://thomasbrants.nl:3000/mods/test_mods/test_mod2.js",
+        // "http://thomasbrants.nl:3000/mods/test_mods/test_mod3.js",
+        "http://localhost:3006/mod",
     ]);
     modMgr.loadMods();
 

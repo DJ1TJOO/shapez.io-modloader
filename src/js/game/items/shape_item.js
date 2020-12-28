@@ -76,3 +76,7 @@ export class ShapeItem extends BaseItem {
         this.definition.drawCentered(x, y, parameters, diameter);
     }
 }
+
+ShapeItem.resolveSingleton = (root, itemData) => {
+    return root.shapeDefinitionMgr.getShapeItemFromShortKey(itemData);
+};
