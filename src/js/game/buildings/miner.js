@@ -40,7 +40,6 @@ export class MetaMinerBuilding extends MetaBuilding {
         for (const variant in variants) {
             const reward = variants[variant];
             if (typeof reward === "function") {
-                console.log(reward);
                 // @ts-ignore
                 if (!reward(root)) continue;
                 available.push(variant);

@@ -80,7 +80,7 @@ export class BooleanItem extends BaseItem {
     }
 }
 
-BooleanItem.resolveSingelton = (root, itemData) => {
+BooleanItem.resolveSingleton = (root, itemData) => {
     return itemData ? BOOL_TRUE_SINGLETON : BOOL_FALSE_SINGLETON;
 };
 

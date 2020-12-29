@@ -6,6 +6,9 @@ export class MetaTrasherBuilding extends shapezAPI.exports.MetaBuilding {
     constructor() {
         super("trasher");
     }
+    getLayer() {
+        return "test";
+    }
 
     getIsRotateable() {
         return false;

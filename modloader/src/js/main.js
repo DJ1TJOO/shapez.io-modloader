@@ -5,6 +5,7 @@ import { FastestForwardGameSpeed } from "./gamespeed/fastest_forward_game_speed"
 import { FluidItem } from "./items/fluid";
 import { AboutModloaderState } from "./states/about";
 import { TrasherSystem } from "./systems/trasher";
+import { HUDTestToolbar } from "./toolbars/test_toolbar";
 
 const modId = "7079f8cb-b943-4b09-b263-a32b9ed63d36";
 registerMod({
@@ -27,7 +28,8 @@ registerMod({
         console.log("main test 1");
 
         shapezAPI.injectCss("**{css}**", modId);
-
+        shapezAPI.toolbars["test"] = HUDTestToolbar;
+        shapezAPI.ingame.layers.push("test");
         shapezAPI.ingame.gamespeed[FastestForwardGameSpeed.getId()] = FastestForwardGameSpeed;
         shapezAPI.ingame.gamemodes[WeirdStartGameMode.getId()] = WeirdStartGameMode;
         shapezAPI.states["AboutModloaderState"] = AboutModloaderState;

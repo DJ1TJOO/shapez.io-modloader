@@ -14,7 +14,6 @@ export function itemResolverSingleton(root, data) {
         if (!shapezAPI.ingame.items.hasOwnProperty(itemId)) continue;
         const itemClass = shapezAPI.ingame.items[itemId];
         if (itemType !== itemClass.getId()) continue;
-
         return itemClass.resolveSingleton(root, itemData);
     }
     assertAlways(false, "Unknown item type: " + itemType);

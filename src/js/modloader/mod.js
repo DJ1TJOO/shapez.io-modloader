@@ -68,6 +68,7 @@ import { GameMode } from "../game/game_mode";
 import { GameSystem } from "../game/game_system";
 import { GameSystemWithFilter } from "../game/game_system_with_filter";
 import { HubGoals } from "../game/hub_goals";
+import { HUDBaseToolbar } from "../game/hud/parts/base_toolbar";
 import { HUDBuildingsToolbar } from "../game/hud/parts/buildings_toolbar";
 import { enumNotificationType } from "../game/hud/parts/notifications";
 import { enumDisplayMode } from "../game/hud/parts/statistics_handle";
@@ -135,6 +136,7 @@ export class ShapezAPI {
             GameMode,
             TextualGameState,
             MapChunk,
+            HUDBaseToolbar,
 
             //Functions,
             cachebust,

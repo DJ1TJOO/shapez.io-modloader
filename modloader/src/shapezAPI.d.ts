@@ -30,6 +30,8 @@ declare interface ShapezAPI {
         items;
         levels;
         themes;
+        //List of layer names
+        layers;
         hub_goals;
         gamespeed;
         gamemodes;

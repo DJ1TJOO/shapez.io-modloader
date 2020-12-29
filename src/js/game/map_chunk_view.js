@@ -339,7 +339,7 @@ export class MapChunkView extends MapChunk {
         const systems = this.root.systemMgr.systems;
         for (let i = 0; i < systemUpdateOrder.length; i++) {
             const system = systems[systemUpdateOrder[i]];
-            if (typeof system.drawChunk_WiresForegroundLayer !== "function") continue;
+            if (typeof system.drawChunk_ForegroundLayer !== "function") continue;
             system.drawChunk_ForegroundLayer(parameters, this, layer);
         }
     }
