@@ -33,8 +33,8 @@ export class MetaReaderBuilding extends MetaBuilding {
         return new Vector(1, 1);
     }
 
-    getShowWiresLayerPreview() {
-        return true;
+    getShowLayerPreview() {
+        return ["wires"];
     }
 
     /**
@@ -55,8 +55,7 @@ export class MetaReaderBuilding extends MetaBuilding {
     setupEntityComponents(entity) {
         entity.addComponent(
             new WiredPinsComponent({
-                slots: [
-                    {
+                slots: [{
                         pos: new Vector(0, 0),
                         direction: enumDirection.right,
                         type: enumPinSlotType.logicalEjector,
@@ -72,23 +71,19 @@ export class MetaReaderBuilding extends MetaBuilding {
 
         entity.addComponent(
             new ItemAcceptorComponent({
-                slots: [
-                    {
-                        pos: new Vector(0, 0),
-                        directions: [enumDirection.bottom],
-                    },
-                ],
+                slots: [{
+                    pos: new Vector(0, 0),
+                    directions: [enumDirection.bottom],
+                }, ],
             })
         );
 
         entity.addComponent(
             new ItemEjectorComponent({
-                slots: [
-                    {
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.top,
-                    },
-                ],
+                slots: [{
+                    pos: new Vector(0, 0),
+                    direction: enumDirection.top,
+                }, ],
             })
         );
 
@@ -101,12 +96,10 @@ export class MetaReaderBuilding extends MetaBuilding {
 
         entity.addComponent(
             new BeltUnderlaysComponent({
-                underlays: [
-                    {
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.top,
-                    },
-                ],
+                underlays: [{
+                    pos: new Vector(0, 0),
+                    direction: enumDirection.top,
+                }, ],
             })
         );
 

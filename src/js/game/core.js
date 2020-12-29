@@ -456,6 +456,8 @@ export class GameCore {
             if (this.root.currentLayer === "wires") {
                 // Static map entities
                 root.map.drawWiresForegroundLayer(params);
+            } else if (this.root.currentLayer !== "regular") {
+                root.map.drawForegroundLayer(params, this.root.currentLayer);
             }
         }
 

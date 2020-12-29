@@ -228,8 +228,8 @@ export class MapChunkView extends MapChunk {
             }
         }
 
-        if (this.root.currentLayer === "wires") {
-            // Draw wires overlay
+        if (this.root.currentLayer === "regular") {
+            // Draw layers overlay
 
             context.fillStyle = THEME.map.wires.overlayColor;
             context.fillRect(0, 0, w, h);
@@ -241,7 +241,7 @@ export class MapChunkView extends MapChunk {
                     if (!content) {
                         continue;
                     }
-                    MapChunkView.drawSingleWiresOverviewTile({
+                    MapChunkView.drawSingleOverviewTile({
                         context,
                         x: x * CHUNK_OVERLAY_RES,
                         y: y * CHUNK_OVERLAY_RES,
@@ -250,6 +250,26 @@ export class MapChunkView extends MapChunk {
                     });
                 }
             }
+
+            //For later
+            // for (const [layer, array2D] of this.layersContents) {
+            //     for (let x = 0; x < globalConfig.mapChunkSize; ++x) {
+            //         const array = array2D[x];
+            //         for (let y = 0; y < globalConfig.mapChunkSize; ++y) {
+            //             const content = array[y];
+            //             if (!content) {
+            //                 continue;
+            //             }
+            //             MapChunkView.drawSingleOverviewTile({
+            //                 context,
+            //                 x: x * CHUNK_OVERLAY_RES,
+            //                 y: y * CHUNK_OVERLAY_RES,
+            //                 entity: content,
+            //                 tileSizePixels: CHUNK_OVERLAY_RES,
+            //             });
+            //         }
+            //     }
+            // }
         }
     }
 
@@ -262,7 +282,7 @@ export class MapChunkView extends MapChunk {
      * @param {number} param0.tileSizePixels
      * @param {string=} param0.overrideColor Optionally override the color to be rendered
      */
-    static drawSingleWiresOverviewTile({ context, x, y, entity, tileSizePixels, overrideColor = null }) {
+    static drawSingleOverviewTile({ context, x, y, entity, tileSizePixels, overrideColor = null }) {
         const staticComp = entity.components.StaticMapEntity;
         const data = getBuildingDataFromCode(staticComp.code);
         const metaBuilding = data.metaInstance;
@@ -305,6 +325,22 @@ export class MapChunkView extends MapChunk {
             const system = systems[systemUpdateOrder[i]];
             if (typeof system.drawChunk_WiresForegroundLayer !== "function") continue;
             system.drawChunk_WiresForegroundLayer(parameters, this);
+        }
+    }
+
+    /**
+     * Draws the layer
+     * @param {DrawParameters} parameters
+     * @param {Layer} layer
+     */
+    drawForegroundLayer(parameters, layer) {
+        const systemUpdateOrder = JSON.parse(JSON.stringify(this.root.systemMgr.systemUpdateOrder));
+        systemUpdateOrder.reverse();
+        const systems = this.root.systemMgr.systems;
+        for (let i = 0; i < systemUpdateOrder.length; i++) {
+            const system = systems[systemUpdateOrder[i]];
+            if (typeof system.drawChunk_WiresForegroundLayer !== "function") continue;
+            system.drawChunk_ForegroundLayer(parameters, this, layer);
         }
     }
 }

@@ -45,6 +45,12 @@ export class MapChunk {
          */
         this.wireContents = make2DUndefinedArray(globalConfig.mapChunkSize, globalConfig.mapChunkSize);
 
+        /**
+         * Stores the contents of the layers
+         *  @type {Map<string, Array<Array<?Entity>>>}
+         */
+        this.layersContents = new Map();
+
         /** @type {Array<Entity>} */
         this.containedEntities = [];
 
@@ -76,6 +82,15 @@ export class MapChunk {
             regular: [],
             wires: [],
         };
+
+        for (let i = 0; i < shapezAPI.ingame.layers.length; i++) {
+            const layer = shapezAPI.ingame.layers[i];
+            this.containedEntitiesByLayer[layer] = [];
+            this.layersContents.set(
+                layer,
+                make2DUndefinedArray(globalConfig.mapChunkSize, globalConfig.mapChunkSize)
+            );
+        }
 
         /**
          * Store which patches we have so we can render them in the overview
@@ -238,8 +253,10 @@ export class MapChunk {
             assert(localY < globalConfig.mapChunkSize, "Local Y is >= chunk size");
             if (layer === "regular") {
                 return this.contents[localX][localY] || null;
-            } else {
+            } else if (layer === "wires") {
                 return this.wireContents[localX][localY] || null;
+            } else if (this.layersContents.has(layer)) {
+                return this.layersContents.get(layer)[localX][localY] || null;
             }
         }
         /**
@@ -266,6 +283,13 @@ export class MapChunk {
         if (wireContent) {
             result.push(wireContent);
         }
+
+        for (const [layer, array] of this.layersContents) {
+            if (array[localX][localY]) {
+                result.push(array[localX][localY]);
+            }
+        }
+
         return result;
     }
 
@@ -288,7 +312,7 @@ export class MapChunk {
      * Sets the chunks contents
      * @param {number} tileX
      * @param {number} tileY
-     * @param {Entity=} contents
+     * @param {Entity} contents
      * @param {Layer} layer
      */
     setLayerContentFromWorldCords(tileX, tileY, contents, layer) {
@@ -302,8 +326,10 @@ export class MapChunk {
         let oldContents;
         if (layer === "regular") {
             oldContents = this.contents[localX][localY];
-        } else {
+        } else if (layer === "wires") {
             oldContents = this.wireContents[localX][localY];
+        } else if (this.layersContents.has(layer)) {
+            oldContents = this.layersContents.get(layer)[localX][localY];
         }
 
         assert(contents === null || !oldContents, "Tile already used: " + tileX + " / " + tileY);
@@ -316,8 +342,10 @@ export class MapChunk {
 
         if (layer === "regular") {
             this.contents[localX][localY] = contents;
-        } else {
+        } else if (layer === "wires") {
             this.wireContents[localX][localY] = contents;
+        } else if (this.layersContents.has(layer)) {
+            this.layersContents.get(layer)[localX][localY] = contents;
         }
 
         if (contents) {

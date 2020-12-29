@@ -254,6 +254,8 @@ export class ShapezAPI {
             items: {},
             gamemodes: {},
             gamespeed: {},
+            //List of layer names
+            layers: [],
             hub_goals: HubGoals,
         };
 

@@ -26,8 +26,8 @@ export class MetaDisplayBuilding extends MetaBuilding {
         return new Vector(1, 1);
     }
 
-    getShowWiresLayerPreview() {
-        return true;
+    getShowLayerPreview() {
+        return ["wires"];
     }
 
     /**
@@ -37,13 +37,11 @@ export class MetaDisplayBuilding extends MetaBuilding {
     setupEntityComponents(entity) {
         entity.addComponent(
             new WiredPinsComponent({
-                slots: [
-                    {
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.bottom,
-                        type: enumPinSlotType.logicalAcceptor,
-                    },
-                ],
+                slots: [{
+                    pos: new Vector(0, 0),
+                    direction: enumDirection.bottom,
+                    type: enumPinSlotType.logicalAcceptor,
+                }, ],
             })
         );
         entity.addComponent(new DisplayComponent());

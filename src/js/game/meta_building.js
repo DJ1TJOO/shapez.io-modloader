@@ -92,10 +92,10 @@ export class MetaBuilding {
     }
 
     /**
-     * Whether to show a preview of the wires layer when placing the building
+     * Whether to show a preview of the layer when placing the building
      */
-    getShowWiresLayerPreview() {
-        return false;
+    getShowLayerPreview() {
+        return [];
     }
 
     /**

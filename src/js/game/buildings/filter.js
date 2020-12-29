@@ -30,8 +30,8 @@ export class MetaFilterBuilding extends MetaBuilding {
         return new Vector(2, 1);
     }
 
-    getShowWiresLayerPreview() {
-        return true;
+    getShowLayerPreview() {
+        return ["wires"];
     }
 
     /**
@@ -41,7 +41,9 @@ export class MetaFilterBuilding extends MetaBuilding {
      */
     getAdditionalStatistics(root, variant) {
         const beltSpeed = root.hubGoals.getBeltBaseSpeed();
-        return [[T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(beltSpeed)]];
+        return [
+            [T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(beltSpeed)]
+        ];
     }
 
     /**
@@ -51,31 +53,26 @@ export class MetaFilterBuilding extends MetaBuilding {
     setupEntityComponents(entity) {
         entity.addComponent(
             new WiredPinsComponent({
-                slots: [
-                    {
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.left,
-                        type: enumPinSlotType.logicalAcceptor,
-                    },
-                ],
+                slots: [{
+                    pos: new Vector(0, 0),
+                    direction: enumDirection.left,
+                    type: enumPinSlotType.logicalAcceptor,
+                }, ],
             })
         );
 
         entity.addComponent(
             new ItemAcceptorComponent({
-                slots: [
-                    {
-                        pos: new Vector(0, 0),
-                        directions: [enumDirection.bottom],
-                    },
-                ],
+                slots: [{
+                    pos: new Vector(0, 0),
+                    directions: [enumDirection.bottom],
+                }, ],
             })
         );
 
         entity.addComponent(
             new ItemEjectorComponent({
-                slots: [
-                    {
+                slots: [{
                         pos: new Vector(0, 0),
                         direction: enumDirection.top,
                     },

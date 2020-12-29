@@ -14,8 +14,8 @@ export class MetaItemProducerBuilding extends MetaBuilding {
         return "#b37dcd";
     }
 
-    getShowWiresLayerPreview() {
-        return true;
+    getShowLayerPreview() {
+        return ["wires"];
     }
 
     /**
@@ -30,13 +30,11 @@ export class MetaItemProducerBuilding extends MetaBuilding {
         );
         entity.addComponent(
             new WiredPinsComponent({
-                slots: [
-                    {
-                        pos: new Vector(0, 0),
-                        type: enumPinSlotType.logicalAcceptor,
-                        direction: enumDirection.bottom,
-                    },
-                ],
+                slots: [{
+                    pos: new Vector(0, 0),
+                    type: enumPinSlotType.logicalAcceptor,
+                    direction: enumDirection.bottom,
+                }, ],
             })
         );
         entity.addComponent(new ItemProducerComponent());

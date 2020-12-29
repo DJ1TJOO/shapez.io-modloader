@@ -75,9 +75,9 @@ export class HUDLayerPreview extends BaseHUDPart {
                 const tileX = dx + startTileX;
                 const tileY = dy + startTileY;
 
-                const content = this.root.map.getLayerContentXY(tileX, tileY, "wires");
+                const content = this.root.map.getLayerContentXY(tileX, tileY, this.root.currentLayer);
                 if (content) {
-                    MapChunkView.drawSingleWiresOverviewTile({
+                    MapChunkView.drawSingleOverviewTile({
                         context: this.context,
                         x: dx * globalConfig.tileSize,
                         y: dy * globalConfig.tileSize,
