@@ -272,6 +272,11 @@ export class InGameState extends GameState {
      */
     stage5FirstUpdate() {
         if (this.switchStage(stages.s5_firstUpdate)) {
+            //Call mod for gameload
+            for (let i = 0; i < shapezAPI.modOrder.length; i++) {
+                const modId = shapezAPI.modOrder[i];
+                shapezAPI.mods.get(modId).gameBeforeFirstUpdate(this.core.root);
+            }
             this.core.root.logicInitialized = true;
             this.core.updateLogic();
             this.stage6PostLoadHook();

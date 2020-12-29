@@ -13,8 +13,8 @@ export class MetaMinerBuilding extends MetaBuilding {
         super("miner");
     }
 
-    getSilhouetteColor() {
-        return MetaMinerBuilding.silhouetteColor;
+    getSilhouetteColor(variant) {
+        return MetaMinerBuilding.silhouetteColor[variant];
     }
 
     /**
@@ -88,7 +88,9 @@ export class MetaMinerBuilding extends MetaBuilding {
     }
 }
 
-MetaMinerBuilding.silhouetteColor = "#b37dcd";
+MetaMinerBuilding.silhouetteColor = {
+    [defaultBuildingVariant]: "#b37dcd",
+};
 
 MetaMinerBuilding.variants = {
     chainable: "chainable",

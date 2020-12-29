@@ -12,8 +12,8 @@ export class MetaAnalyzerBuilding extends MetaBuilding {
         super("analyzer");
     }
 
-    getSilhouetteColor() {
-        return MetaAnalyzerBuilding.silhouetteColor;
+    getSilhouetteColor(variant) {
+        return MetaAnalyzerBuilding.silhouetteColor[variant];
     }
 
     /**
@@ -24,15 +24,13 @@ export class MetaAnalyzerBuilding extends MetaBuilding {
 
         if (typeof reward === "function") {
             // @ts-ignore
-            if (reward() !== true && !root.hubGoals.isRewardUnlocked(reward())) return false;
+            if (!root.hubGoals.isRewardUnlocked(reward())) return false;
             // @ts-ignore
             return root.hubGoals.isRewardUnlocked(reward());
         } else if (typeof reward === "boolean") {
             // @ts-ignore
             return reward;
         } else if (root.hubGoals.isRewardUnlocked(reward) != undefined) {
-            // @ts-ignore
-            if (reward !== true && !root.hubGoals.isRewardUnlocked(reward)) return false;
             // @ts-ignore
             return root.hubGoals.isRewardUnlocked(reward);
         } else {
@@ -45,8 +43,8 @@ export class MetaAnalyzerBuilding extends MetaBuilding {
         return "wires";
     }
 
-    getDimensions() {
-        return MetaAnalyzerBuilding.dimensions;
+    getDimensions(variant) {
+        return MetaAnalyzerBuilding.dimensions[variant];
     }
 
     getRenderPins() {
@@ -55,7 +53,8 @@ export class MetaAnalyzerBuilding extends MetaBuilding {
     }
 
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant) {
-        return MetaAnalyzerBuilding.overlayMatrices[rotation];
+        return MetaAnalyzerBuilding.overlayMatrices[variant][rotation];
+        // Mod 2 or 3 have removed them they don't do anything
     }
 
     /**
@@ -92,12 +91,18 @@ export class MetaAnalyzerBuilding extends MetaBuilding {
     }
 }
 
-MetaAnalyzerBuilding.overlayMatrices = generateMatrixRotations([1, 1, 0, 1, 1, 1, 0, 1, 0]);
+MetaAnalyzerBuilding.overlayMatrices = {
+    [defaultBuildingVariant]: generateMatrixRotations([1, 1, 0, 1, 1, 1, 0, 1, 0]),
+};
 
 MetaAnalyzerBuilding.avaibleVariants = {
     [defaultBuildingVariant]: enumHubGoalRewards.reward_virtual_processing,
 };
 
-MetaAnalyzerBuilding.dimensions = new Vector(1, 1);
+MetaAnalyzerBuilding.dimensions = {
+    [defaultBuildingVariant]: new Vector(1, 1),
+};
 
-MetaAnalyzerBuilding.silhouetteColor = "#555759";
+MetaAnalyzerBuilding.silhouetteColor = {
+    [defaultBuildingVariant]: "#555759",
+};

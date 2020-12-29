@@ -7,6 +7,9 @@ declare function registerMod(info: {
     gameVersion: number;
     dependencies: string[];
     incompatible: string[];
+    gameInitializedRootClasses: Function;
+    gameInitializedRootManagers: Function;
+    gameBeforeFirstUpdate: Function;
     main: Function;
 });
 
@@ -28,6 +31,8 @@ declare interface ShapezAPI {
         levels;
         themes;
         hub_goals;
+        gamespeed;
+        gamemodes;
     };
 
     toolbars: {
@@ -45,6 +50,8 @@ declare interface ShapezAPI {
     states;
     clickDetectors;
     themes;
+    mods;
+    modOrder;
 
     /**
      * Generates rotated variants of the matrix

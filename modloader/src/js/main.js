@@ -1,5 +1,7 @@
 import { MetaTrasherBuilding } from "./buildings/trasher";
 import { TrasherComponent } from "./components/trasher";
+import { WeirdStartGameMode } from "./gamemodes/weirdstart";
+import { FastestForwardGameSpeed } from "./gamespeed/fastest_forward_game_speed";
 import { FluidItem } from "./items/fluid";
 import { AboutModloaderState } from "./states/about";
 import { TrasherSystem } from "./systems/trasher";
@@ -14,12 +16,20 @@ registerMod({
     gameVersion: 1007,
     dependencies: [],
     incompatible: [],
-
+    gameInitializedRootClasses: root => {
+        root.gameMode = new WeirdStartGameMode(root);
+    },
+    gameInitializedRootManagers: root => {},
+    gameBeforeFirstUpdate: root => {
+        root.time.setSpeed(new FastestForwardGameSpeed(root));
+    },
     main: () => {
         console.log("main test 1");
 
         shapezAPI.injectCss("**{css}**", modId);
 
+        shapezAPI.ingame.gamespeed[FastestForwardGameSpeed.getId()] = FastestForwardGameSpeed;
+        shapezAPI.ingame.gamemodes[WeirdStartGameMode.getId()] = WeirdStartGameMode;
         shapezAPI.states["AboutModloaderState"] = AboutModloaderState;
         shapezAPI.themes["blue"] = "**{theme_blue}**";
         shapezAPI.translations.settings.labels.theme.themes["blue"] = "Blue";

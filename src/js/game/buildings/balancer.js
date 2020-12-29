@@ -56,8 +56,8 @@ export class MetaBalancerBuilding extends MetaBuilding {
         ];
     }
 
-    getSilhouetteColor() {
-        return MetaBalancerBuilding.silhouetteColor;
+    getSilhouetteColor(variant) {
+        return MetaBalancerBuilding.silhouetteColor[variant];
     }
 
     /**
@@ -88,10 +88,22 @@ export class MetaBalancerBuilding extends MetaBuilding {
      */
     // @ts-ignore
     getIsUnlocked(root) {
-        return typeof MetaBalancerBuilding.avaibleVariants[defaultBuildingVariant] === "boolean" ?
-            MetaBalancerBuilding.avaibleVariants[defaultBuildingVariant] // @ts-ignore
-            :
-            root.hubGoals.isRewardUnlocked(MetaBalancerBuilding.avaibleVariants[defaultBuildingVariant]);
+        const reward = MetaBalancerBuilding.avaibleVariants[defaultBuildingVariant];
+
+        if (typeof reward === "function") {
+            // @ts-ignore
+            if (!root.hubGoals.isRewardUnlocked(reward())) return false;
+            // @ts-ignore
+            return root.hubGoals.isRewardUnlocked(reward());
+        } else if (typeof reward === "boolean") {
+            // @ts-ignore
+            return reward;
+        } else if (root.hubGoals.isRewardUnlocked(reward) != undefined) {
+            // @ts-ignore
+            return root.hubGoals.isRewardUnlocked(reward);
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -175,6 +187,14 @@ MetaBalancerBuilding.additionalStatistics = {
         (root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.balancer) / 2) * 1,
     [MetaBalancerBuilding.variants.splitterInverse]: root =>
         (root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.balancer) / 2) * 1,
+};
+
+MetaBalancerBuilding.silhouetteColor = {
+    [defaultBuildingVariant]: "#555759",
+    [MetaBalancerBuilding.variants.merger]: "#555759",
+    [MetaBalancerBuilding.variants.mergerInverse]: "#555759",
+    [MetaBalancerBuilding.variants.splitter]: "#555759",
+    [MetaBalancerBuilding.variants.splitterInverse]: "#555759",
 };
 
 MetaBalancerBuilding.componentVariations = {
@@ -278,5 +298,3 @@ MetaBalancerBuilding.componentVariations = {
         }
     },
 };
-
-MetaBalancerBuilding.silhouetteColor = "#555759";

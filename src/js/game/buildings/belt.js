@@ -14,8 +14,8 @@ export class MetaBeltBuilding extends MetaBuilding {
         super("belt");
     }
 
-    getSilhouetteColor() {
-        return MetaBeltBuilding.silhouetteColor;
+    getSilhouetteColor(variant) {
+        return MetaBeltBuilding.silhouetteColor[variant];
     }
 
     getPlacementSound() {

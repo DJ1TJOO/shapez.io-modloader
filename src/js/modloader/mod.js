@@ -8,6 +8,9 @@
  * gameVersion: number,
  * dependencies: Array<String>,
  * incompatible: Array<String>,
+ * gameInitializedRootClasses: Function,
+ * gameInitializedRootManagers: Function,
+ * gameBeforeFirstUpdate: Function,
  * main: Function,
  * }} ModInfo
  */
@@ -18,7 +21,7 @@ import { GameState } from "../core/game_state";
 import { Loader } from "../core/loader";
 import { AtlasSprite, RegularSprite } from "../core/sprites";
 import { TextualGameState } from "../core/textual_game_state";
-import { clamp, generateMatrixRotations } from "../core/utils";
+import { clamp, findNiceIntegerValue, generateMatrixRotations } from "../core/utils";
 import {
     enumAngleToDirection,
     enumDirection,
@@ -99,6 +102,7 @@ import { UndergroundBeltSystem } from "../game/systems/underground_belt";
 import { WireSystem } from "../game/systems/wire";
 import { WiredPinsSystem } from "../game/systems/wired_pins";
 import { VANILLA_THEMES } from "../game/theme";
+import { BaseGameSpeed } from "../game/time/base_game_speed";
 import { FastForwardGameSpeed } from "../game/time/fast_forward_game_speed";
 import { PausedGameSpeed } from "../game/time/paused_game_speed";
 import { RegularGameSpeed } from "../game/time/regular_game_speed";
@@ -124,6 +128,7 @@ export class ShapezAPI {
             Vector,
             Component,
             BaseItem,
+            BaseGameSpeed,
             GameSystemWithFilter,
             GameSystem,
             GameState,
@@ -134,6 +139,7 @@ export class ShapezAPI {
             //Functions,
             cachebust,
             clamp,
+            findNiceIntegerValue,
 
             //Variables
             defaultBuildingVariant,
@@ -238,6 +244,7 @@ export class ShapezAPI {
         this.translations = T;
 
         this.mods = new Map();
+        this.modOrder = [];
 
         this.ingame = {
             buildings: {},

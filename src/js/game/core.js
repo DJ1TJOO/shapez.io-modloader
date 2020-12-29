@@ -115,6 +115,12 @@ export class GameCore {
         root.automaticSave = new AutomaticSave(root);
         root.soundProxy = new SoundProxy(root);
 
+        //Call mod for root classes
+        for (let i = 0; i < shapezAPI.modOrder.length; i++) {
+            const modId = shapezAPI.modOrder[i];
+            shapezAPI.mods.get(modId).gameInitializedRootClasses(this.root);
+        }
+
         // Init managers
         root.entityMgr = new EntityManager(root);
         root.systemMgr = new GameSystemManager(root);
@@ -125,6 +131,12 @@ export class GameCore {
 
         // Initialize the hud once everything is loaded
         this.root.hud.initialize();
+
+        //Call mod for root managers
+        for (let i = 0; i < shapezAPI.modOrder.length; i++) {
+            const modId = shapezAPI.modOrder[i];
+            shapezAPI.mods.get(modId).gameInitializedRootManagers(this.root);
+        }
 
         // Initial resize event, it might be possible that the screen
         // resized later during init tho, which is why will emit it later
@@ -196,6 +208,7 @@ export class GameCore {
             return ExplainedResult.bad("Exception during deserialization:", ex);
         }
         this.root.gameIsFresh = false;
+
         return ExplainedResult.good();
     }
 

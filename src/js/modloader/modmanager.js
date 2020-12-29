@@ -11,6 +11,9 @@ const INFOType = {
     gameVersion: 0,
     dependencies: [],
     incompatible: [],
+    gameInitializedRootClasses: root => {},
+    gameInitializedRootManagers: root => {},
+    gameBeforeFirstUpdate: root => {},
     main: () => {},
 };
 
@@ -126,7 +129,7 @@ export class ModManager {
      * Loads all mods in the mods list
      */
     loadMods() {
-        window["shapezAPI"].mods = this.mods;
+        shapezAPI.mods = this.mods;
 
         var sorter = new Toposort();
         for (const [id, mod] of this.mods.entries()) {
@@ -150,9 +153,9 @@ export class ModManager {
             } else sorter.add(id, mod.dependencies);
         }
 
-        var sortedKeys = sorter.sort().reverse();
-        for (let i = 0; i < sortedKeys.length; i++) {
-            this.loadMod(sortedKeys[i]);
+        shapezAPI.modOrder = sorter.sort().reverse();
+        for (let i = 0; i < shapezAPI.modOrder.length; i++) {
+            this.loadMod(shapezAPI.modOrder[i]);
         }
     }
 
