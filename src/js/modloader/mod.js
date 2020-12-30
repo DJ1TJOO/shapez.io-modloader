@@ -8,6 +8,8 @@
  * gameVersion: number,
  * dependencies: Array<String>,
  * incompatible: Array<String>,
+ * translations: {},
+ * updateStaticTranslations: Function,
  * gameInitializedRootClasses: Function,
  * gameInitializedRootManagers: Function,
  * gameBeforeFirstUpdate: Function,
@@ -21,7 +23,7 @@ import { GameState } from "../core/game_state";
 import { Loader } from "../core/loader";
 import { AtlasSprite, RegularSprite } from "../core/sprites";
 import { TextualGameState } from "../core/textual_game_state";
-import { clamp, findNiceIntegerValue, generateMatrixRotations } from "../core/utils";
+import { clamp, findNiceIntegerValue, generateFileDownload, generateMatrixRotations } from "../core/utils";
 import {
     enumAngleToDirection,
     enumDirection,
@@ -142,6 +144,7 @@ export class ShapezAPI {
             cachebust,
             clamp,
             findNiceIntegerValue,
+            generateFileDownload,
 
             //Variables
             defaultBuildingVariant,
@@ -242,11 +245,10 @@ export class ShapezAPI {
         this.KEYMAPPINGS = KEYMAPPINGS;
         this.KEYMAPPINGS.key = str => str.toUpperCase().charCodeAt(0);
 
-        //TODO: mutliple languages
-        this.translations = T;
-
         this.mods = new Map();
         this.modOrder = [];
+
+        this.translations = T;
 
         this.ingame = {
             buildings: {},
@@ -359,10 +361,10 @@ export class ShapezAPI {
 
     /**
      * Registers a new icon
-     * @param {string} buildingId
+     * @param {string} id
      * @param {string} iconDataURL
      */
-    registerBuildingIcon(buildingId, iconDataURL) {
+    registerIcon(id, iconDataURL) {
         var css = ``;
         var style = undefined;
         if (!(style = document.getElementById("mod-loader-icons"))) {
@@ -373,21 +375,19 @@ export class ShapezAPI {
             head.appendChild(style);
         }
         css = `
-            [data-icon="building_icons/${buildingId}.png"] {
+            [data-icon="${id}.png"] {
                 background-image: url(${iconDataURL}) !important;
             }
         `;
         style.appendChild(document.createTextNode(css));
     }
 
-    registerBuilding(buildingClass, iconDataURL, key, keyBindingName, buildingInfoText) {
+    registerBuilding(buildingClass, iconDataURL, key) {
+        //TODO: update test mod
         var id = new buildingClass().getId();
         this.ingame.buildings[id] = buildingClass;
-        this.registerBuildingIcon(id, iconDataURL);
+        this.registerIcon("building_icon/" + id, iconDataURL);
         this.KEYMAPPINGS.buildings[id] = { keyCode: this.KEYMAPPINGS.key(key), id: id };
-        //TODO: multiple translations
-        this.translations.keybindings.mappings[id] = keyBindingName;
-        this.translations.buildings[id] = buildingInfoText;
     }
 
     /**

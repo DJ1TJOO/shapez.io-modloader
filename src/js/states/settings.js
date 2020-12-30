@@ -94,7 +94,7 @@ export class SettingsState extends TextualGameState {
             const trackClick = SettingsState.trackClicks[i];
             this.trackClicks(
                 this.htmlElement.querySelector(trackClick.htmlElement),
-                this.onClickedStateAddGoBack(trackClick.state),
+                trackClick.action(this),
                 trackClick.options
             );
         }
@@ -161,9 +161,7 @@ export class SettingsState extends TextualGameState {
     }
 
     onClickedStateAddGoBack(state) {
-        return () => {
-            this.moveToStateAddGoBack(state);
-        };
+        this.moveToStateAddGoBack(state);
     }
 
     onKeybindingsClicked() {
@@ -176,7 +174,9 @@ SettingsState.extraSideBarButtons = [];
 SettingsState.trackClicks = [
     {
         htmlElement: ".about",
-        state: "AboutState",
+        action: settingsState => () => {
+            settingsState.onClickedStateAddGoBack("AboutState");
+        },
         options: {
             preventDefault: false,
         },

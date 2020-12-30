@@ -1,3 +1,4 @@
+import { matchOverwriteRecursive } from "../translations";
 import { ShapezAPI } from "./mod";
 
 const Toposort = require("toposort-class");
@@ -11,6 +12,8 @@ const INFOType = {
     gameVersion: 0,
     dependencies: [],
     incompatible: [],
+    translations: {},
+    updateStaticTranslations: id => {},
     gameInitializedRootClasses: root => {},
     gameInitializedRootManagers: root => {},
     gameBeforeFirstUpdate: root => {},
@@ -172,6 +175,10 @@ export class ModManager {
                 );
                 return;
             }
+        }
+        const language = mod.translations["en"];
+        if (language) {
+            matchOverwriteRecursive(shapezAPI.translations, language);
         }
         mod.main();
     }

@@ -45,6 +45,7 @@ export class MainMenuState extends GameState {
             <div class="topButtons">
                 <button class="languageChoose" data-languageicon="${this.app.settings.getLanguage()}"></button>
                 <button class="settingsButton"></button>
+                ${this.getExtraTopButtons()}
             ${
                 G_IS_STANDALONE || G_IS_DEV
                     ? `
@@ -103,6 +104,15 @@ export class MainMenuState extends GameState {
                 )}</div>
             </div>
         `;
+    }
+
+    getExtraTopButtons() {
+        let html = "";
+        for (let i = 0; i < MainMenuState.extraTopButtons.length; i++) {
+            const extraButton = MainMenuState.extraTopButtons[i];
+            html += `<button class="${extraButton.htmlClass}" ${extraButton.htmlData}></button>`;
+        }
+        return html;
     }
 
     /**
@@ -208,6 +218,14 @@ export class MainMenuState extends GameState {
             }
         });
 
+        for (let i = 0; i < MainMenuState.extraTrackClicks.length; i++) {
+            const trackClick = MainMenuState.extraTrackClicks[i];
+            this.trackClicks(
+                this.htmlElement.querySelector(trackClick.htmlElement),
+                trackClick.action(this),
+                trackClick.options
+            );
+        }
         this.trackClicks(qs(".settingsButton"), this.onSettingsButtonClicked);
         this.trackClicks(qs(".changelog"), this.onChangelogClicked);
         this.trackClicks(qs(".redditLink"), this.onRedditClicked);
@@ -276,12 +294,16 @@ export class MainMenuState extends GameState {
                 T.mainMenu.newGame
             );
             this.trackClicks(newGameButton, this.onPlayButtonClicked);
-            const CreateModButton = makeButton(
-                this.htmlElement.querySelector(".mainContainer .outer"),
-                ["CreateModButton", "styledButton"],
-                T.mainMenu.createmods
-            );
-            this.trackClicks(CreateModButton, this.onCreateButtonClicked);
+
+            for (let i = 0; i < MainMenuState.extraSmallButtons.length; i++) {
+                const extraButton = MainMenuState.extraSmallButtons[i];
+                const button = makeButton(
+                    this.htmlElement.querySelector(".mainContainer .outer"),
+                    [extraButton.htmlClass, "styledButton"],
+                    extraButton.text
+                );
+                this.trackClicks(button, extraButton.action(this));
+            }
         } else {
             // New game
             const playBtn = makeButton(buttonContainer, ["playButton", "styledButton"], T.mainMenu.play);
@@ -559,13 +581,6 @@ export class MainMenuState extends GameState {
         });
     }
 
-    onCreateButtonClicked() {
-        this.app.analytics.trackUiClick("create_mod");
-        const data = "http://thomasbrants.nl:3000/mods/"; //change to pull current basic mods file and download
-        const filename = "Basic_mod_layout.js";
-        generateFileDownload(filename, data);
-    }
-
     onContinueButtonClicked() {
         let latestLastUpdate = 0;
         let latestInternalId;
@@ -588,3 +603,8 @@ export class MainMenuState extends GameState {
         this.dialogs.cleanup();
     }
 }
+
+MainMenuState.extraTopButtons = [];
+MainMenuState.extraSmallButtons = [];
+
+MainMenuState.extraTrackClicks = [];

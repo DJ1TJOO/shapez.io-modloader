@@ -1,0 +1,48 @@
+#state_AboutModsState {
+    >.container .content {
+        @include S(max-width, 600px);
+        @include PlainText;
+        padding: 0;
+        background: transparent;
+    }
+    .head {
+        @include S(padding, 20px);
+    }
+    .text {
+        @include S(margin, 10px);
+    }
+    a {
+        @include S(margin, 0, 3px);
+    }
+    .logo {
+        display: flex;
+        flex-grow: 1;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        padding-top: calc(20px * var(--ui-scale));
+        position: relative;
+        img {
+            width: calc(350px * var(--ui-scale));
+        }
+        .updateLabel {
+            position: absolute;
+            transform: translateX(50%) rotate(-5deg);
+            color: #e74e3a;
+            font-size: calc(19px * var(--ui-scale));
+            line-height: calc(21px * var(--ui-scale));
+            font-weight: 400;
+            font-family: "GameFont", sans-serif;
+            letter-spacing: 0.04em;
+            font-weight: bold;
+            right: calc(40px * var(--ui-scale));
+            bottom: calc(20px * var(--ui-scale));
+            animation: modsStateUpdateLabel 1.3s ease-in-out infinite !important;
+        }
+    }
+    @keyframes modsStateUpdateLabel {
+        50% {
+            transform: translateX(50%) rotate(-7deg) scale(1.1);
+        }
+    }
+}

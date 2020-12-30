@@ -7,6 +7,8 @@ declare function registerMod(info: {
     gameVersion: number;
     dependencies: string[];
     incompatible: string[];
+    translations: {};
+    updateStaticTranslations: Function;
     gameInitializedRootClasses: Function;
     gameInitializedRootManagers: Function;
     gameBeforeFirstUpdate: Function;
