@@ -38,7 +38,7 @@ declare interface ShapezAPI {
         gamespeed;
         gamemodes;
     };
-
+    firstState;
     toolbars: {
         buildings: {
             primaryBuildings;

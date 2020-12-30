@@ -242,6 +242,7 @@ export class ShapezAPI {
             enumSavePriority,
         };
 
+        this.firstState = "MainMenuState";
         this.KEYMAPPINGS = KEYMAPPINGS;
         this.KEYMAPPINGS.key = str => str.toUpperCase().charCodeAt(0);
 
