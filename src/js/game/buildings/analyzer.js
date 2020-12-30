@@ -47,9 +47,16 @@ export class MetaAnalyzerBuilding extends MetaBuilding {
         return MetaAnalyzerBuilding.dimensions[variant];
     }
 
-    getRenderPins() {
-        // We already have it included
-        return false;
+    getRenderPins(variant) {
+        const condition = MetaAnalyzerBuilding.renderPins[variant];
+
+        if (typeof condition === "function") {
+            return condition(variant);
+        } else if (typeof condition === "boolean") {
+            return condition;
+        } else {
+            return false;
+        }
     }
 
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant) {
@@ -105,4 +112,8 @@ MetaAnalyzerBuilding.dimensions = {
 
 MetaAnalyzerBuilding.silhouetteColor = {
     [defaultBuildingVariant]: "#555759",
+};
+
+MetaAnalyzerBuilding.renderPins = {
+    [defaultBuildingVariant]: false,
 };

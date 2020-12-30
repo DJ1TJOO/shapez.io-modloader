@@ -1,6 +1,19 @@
 import { matchOverwriteRecursive } from "../translations";
 import { ShapezAPI } from "./mod";
 
+/**
+ * @typedef {{
+ *  mods: [
+ *      {
+ *          url: string,
+ *          id: string,
+ *          config: {},
+ *      },
+ *  ],
+ *  modOrder?: [],
+ * }} ModPack
+ */
+
 const Toposort = require("toposort-class");
 
 const INFOType = {
@@ -21,9 +34,15 @@ const INFOType = {
 };
 
 export class ModManager {
-    constructor() {
+    /**
+     *
+     * @param {ModPack} modPack
+     */
+    constructor(modPack = undefined) {
         /** @type {Map<String, import("./mod").ModInfo>} */
         this.mods = new Map();
+
+        this.modPack = modPack;
 
         window["shapezAPI"] = new ShapezAPI();
 
@@ -66,6 +85,7 @@ export class ModManager {
      * @returns {Promise}
      */
     addMod(url) {
+        //TODO: check if is mods website
         return Promise.race([
                 new Promise((resolve, reject) => {
                     setTimeout(reject, 60 * 1000);
@@ -110,6 +130,20 @@ export class ModManager {
             });
     }
 
+    addModPackMods() {
+        if (this.modPack && this.modPack.mods) {
+            let promise = Promise.resolve(null);
+
+            for (let i = 0; i < this.modPack.mods.length; i++) {
+                promise = promise.then(() => {
+                    return this.addMod(this.modPack.mods[i].url);
+                });
+            }
+            return promise;
+        }
+        return Promise.reject();
+    }
+
     /**
      * Adds a mod to the page
      * @param {Array<String>} urls
@@ -134,29 +168,33 @@ export class ModManager {
     loadMods() {
         shapezAPI.mods = this.mods;
 
-        var sorter = new Toposort();
-        for (const [id, mod] of this.mods.entries()) {
-            let isMissingDependecie = false;
-            let missingDependecie = "";
-            for (let i = 0; i < mod.dependencies.length; i++) {
-                const dependencie = mod.dependencies[i];
-                if (this.mods.has(dependencie)) continue;
-                isMissingDependecie = true;
-                missingDependecie = dependencie;
-            }
+        if (!this.modPack || !this.modPack.modOrder) {
+            var sorter = new Toposort();
+            for (const [id, mod] of this.mods.entries()) {
+                let isMissingDependecie = false;
+                let missingDependecie = "";
+                for (let i = 0; i < mod.dependencies.length; i++) {
+                    const dependencie = mod.dependencies[i];
+                    if (this.mods.has(dependencie)) continue;
+                    isMissingDependecie = true;
+                    missingDependecie = dependencie;
+                }
 
-            if (isMissingDependecie) {
-                console.warn(
-                    "Mod with mod id: " +
-                    mod.id +
-                    " is disabled because it's missings the dependecie " +
-                    missingDependecie
-                );
-                continue;
-            } else sorter.add(id, mod.dependencies);
+                if (isMissingDependecie) {
+                    console.warn(
+                        "Mod with mod id: " +
+                        mod.id +
+                        " is disabled because it's missings the dependecie " +
+                        missingDependecie
+                    );
+                    continue;
+                } else sorter.add(id, mod.dependencies);
+            }
+            shapezAPI.modOrder = sorter.sort().reverse();
+        } else {
+            shapezAPI.modOrder = this.modPack.modOrder;
         }
 
-        shapezAPI.modOrder = sorter.sort().reverse();
         for (let i = 0; i < shapezAPI.modOrder.length; i++) {
             this.loadMod(shapezAPI.modOrder[i]);
         }
@@ -180,6 +218,7 @@ export class ModManager {
         if (language) {
             matchOverwriteRecursive(shapezAPI.translations, language);
         }
-        mod.main();
+        if (this.modPack && this.modPack.mods) mod.main(this.modPack.mods.find(mod => mod.id === id).config);
+        else mod.main();
     }
 }

@@ -54,7 +54,7 @@ registerMod({
     gameInitializedRootClasses: root => {},
     gameInitializedRootManagers: root => {},
     gameBeforeFirstUpdate: root => {},
-    main: () => {
+    main: config => {
         shapezAPI.registerIcon("main_menu/mods", "**{icons_mods}**");
         shapezAPI.injectCss("**{css}**", modId);
         shapezAPI.states["ModsState"] = ModsState;

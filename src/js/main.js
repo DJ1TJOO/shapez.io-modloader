@@ -79,19 +79,29 @@ const logger = createLogger("main");
 
     logSection("Boot Process", "#f9a825");
 
-    var modMgr = new ModManager();
+    var modpack = {
+        mods: [{
+            url: "http://localhost:3006/mod",
+            id: "a18121cf-fc7c-4f23-906d-b7ab0512bbc8",
+            config: {},
+        }, ],
+    };
+
+    // @ts-ignore
+    var modMgr = new ModManager(modpack);
     addVanillaBuildingsToAPI();
     addVanillaComponentsToAPI();
     addVanillaSystemsToAPI();
     addVanillaItemsToAPI();
     addVanillaGameModesToAPI();
     addVanillaGameSpeedToAPI();
-    await modMgr.addMods([
-        // "http://thomasbrants.nl:3000/mods/test_mods/mod1/bundle.js",
-        // "http://thomasbrants.nl:3000/mods/test_mods/test_mod2.js",
-        // "http://thomasbrants.nl:3000/mods/test_mods/test_mod3.js",
-        "http://localhost:3006/mod",
-    ]);
+    // await modMgr.addMods([
+    //     // "http://thomasbrants.nl:3000/mods/test_mods/mod1/bundle.js",
+    //     // "http://thomasbrants.nl:3000/mods/test_mods/test_mod2.js",
+    //     // "http://thomasbrants.nl:3000/mods/test_mods/test_mod3.js",
+    //     "http://localhost:3006/mod",
+    // ]);
+    await modMgr.addModPackMods();
     modMgr.loadMods();
 
     initDrawUtils();

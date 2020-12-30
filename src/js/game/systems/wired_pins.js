@@ -8,6 +8,7 @@ import { enumPinSlotType, WiredPinsComponent } from "../components/wired_pins";
 import { Entity } from "../entity";
 import { GameSystemWithFilter } from "../game_system_with_filter";
 import { MapChunkView } from "../map_chunk_view";
+import { getBuildingDataFromCode } from "../building_codes";
 
 /** @type {Object<ItemType, number>} */
 const enumTypeToSize = {
@@ -169,6 +170,7 @@ export class WiredPinsSystem extends GameSystemWithFilter {
             }
 
             const staticComp = entity.components.StaticMapEntity;
+            const data = getBuildingDataFromCode(staticComp.code);
             const slots = pinsComp.slots;
 
             for (let j = 0; j < slots.length; ++j) {
@@ -190,7 +192,7 @@ export class WiredPinsSystem extends GameSystemWithFilter {
                     staticComp.rotation + enumDirectionToAngle[slot.direction]
                 );
 
-                if (staticComp.getMetaBuilding().getRenderPins()) {
+                if (staticComp.getMetaBuilding().getRenderPins(data.variant)) {
                     drawRotatedSprite({
                         parameters,
                         sprite: this.pinSprites[slot.type],

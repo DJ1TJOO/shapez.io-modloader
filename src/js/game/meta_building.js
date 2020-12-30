@@ -108,18 +108,20 @@ export class MetaBuilding {
 
     /**
      * Returns whether this building is removable
+     * @param {string} variant
      * @returns {boolean}
      */
-    getIsRemovable() {
-        return true;
+    getIsRemovable(variant) {
+        return true; // TODO: test variant too !!!!
     }
 
     /**
      * Returns the placement sound
+     * @param {string} variant
      * @returns {string}
      */
-    getPlacementSound() {
-        return SOUNDS.placeBuilding;
+    getPlacementSound(variant) {
+        return SOUNDS.placeBuilding; // TODO: test variant too !!!!
     }
 
     /**
@@ -183,9 +185,10 @@ export class MetaBuilding {
 
     /**
      * Should return false if the pins are already included in the sprite of the building
+     * @param {string} variant
      * @returns {boolean}
      */
-    getRenderPins() {
+    getRenderPins(variant) {
         return true;
     }
 
