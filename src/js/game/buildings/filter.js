@@ -51,6 +51,36 @@ export class MetaFilterBuilding extends MetaBuilding {
     }
 
     /**
+     * @param {string} variant
+     */
+    getIsRemovable(variant) {
+        let condition = MetaFilterBuilding.isRemovable[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "boolean" ? condition : true;
+    }
+
+    /**
+     * @param {string} variant
+     */
+    getIsRotateable(variant) {
+        let condition = MetaFilterBuilding.isRotateable[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "boolean" ? condition : true;
+    }
+
+    /**
      * @param {GameRoot} root
      */
     getAvailableVariants(root) {
@@ -74,6 +104,24 @@ export class MetaFilterBuilding extends MetaBuilding {
         }
 
         return available;
+    }
+
+    /**
+     * Returns the edit layer of the building
+     * @param {GameRoot} root
+     * @param {string} variant
+     * @returns {Layer}
+     */
+    getLayer(root, variant) {
+        let reward = MetaFilterBuilding.layerByVariant[defaultBuildingVariant];
+
+        if (typeof reward === "function") {
+            // @ts-ignore
+            reward = reward();
+        }
+
+        // @ts-ignore
+        return typeof reward === "string" ? reward : "regular";
     }
 
     /**
@@ -135,6 +183,19 @@ export class MetaFilterBuilding extends MetaBuilding {
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
         let condition = MetaFilterBuilding.overlayMatrices[variant][rotation];
         return condition ? condition : null;
+    }
+
+    /**
+     * @param {string} variant
+     */
+    getRenderPins(variant) {
+        let condition = MetaFilterBuilding.renderPins[variant];
+
+        if (typeof condition === "function") {
+            condition = condition();
+        }
+
+        return typeof condition === "boolean" ? condition : true;
     }
 
     /**
@@ -200,6 +261,14 @@ MetaFilterBuilding.silhouetteColors = {
     [defaultBuildingVariant]: "#c45c2e",
 };
 
+MetaFilterBuilding.isRemovable = {
+    [defaultBuildingVariant]: true,
+};
+
+MetaFilterBuilding.isRotateable = {
+    [defaultBuildingVariant]: true,
+};
+
 MetaFilterBuilding.avaibleVariants = {
     [defaultBuildingVariant]: enumHubGoalRewards.reward_display,
 };
@@ -214,6 +283,10 @@ MetaFilterBuilding.layerPreview = {
 
 MetaFilterBuilding.additionalStatistics = {
     [defaultBuildingVariant]: root => root.hubGoals.getBeltBaseSpeed(),
+};
+
+MetaFilterBuilding.renderPins = {
+    [defaultBuildingVariant]: true,
 };
 
 MetaFilterBuilding.componentVariations = {

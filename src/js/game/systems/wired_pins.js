@@ -192,7 +192,7 @@ export class WiredPinsSystem extends GameSystemWithFilter {
                     staticComp.rotation + enumDirectionToAngle[slot.direction]
                 );
 
-                if (staticComp.getMetaBuilding().getRenderPins(this.root, data.variant)) {
+                if (staticComp.getMetaBuilding().getRenderPins(data.variant)) {
                     drawRotatedSprite({
                         parameters,
                         sprite: this.pinSprites[slot.type],

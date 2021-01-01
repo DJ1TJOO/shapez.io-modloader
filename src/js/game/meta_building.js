@@ -189,11 +189,10 @@ export class MetaBuilding {
 
     /**
      * Should return false if the pins are already included in the sprite of the building
-     * @param {GameRoot} root
      * @param {string} variant
      * @returns {boolean}
      */
-    getRenderPins(root, variant = defaultBuildingVariant) {
+    getRenderPins(variant = defaultBuildingVariant) {
         return true;
     }
 

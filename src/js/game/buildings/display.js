@@ -75,6 +75,36 @@ export class MetaDisplayBuilding extends MetaBuilding {
     /**
      * @param {string} variant
      */
+    getIsRemovable(variant) {
+        let condition = MetaDisplayBuilding.isRemovable[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "boolean" ? condition : true;
+    }
+
+    /**
+     * @param {string} variant
+     */
+    getIsRotateable(variant) {
+        let condition = MetaDisplayBuilding.isRotateable[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "boolean" ? condition : true;
+    }
+
+    /**
+     * @param {string} variant
+     */
     getDimensions(variant) {
         let condition = MetaDisplayBuilding.dimensions[variant];
 
@@ -121,6 +151,19 @@ export class MetaDisplayBuilding extends MetaBuilding {
     }
 
     /**
+     * @param {string} variant
+     */
+    getRenderPins(variant) {
+        let condition = MetaDisplayBuilding.renderPins[variant];
+
+        if (typeof condition === "function") {
+            condition = condition();
+        }
+
+        return typeof condition === "boolean" ? condition : true;
+    }
+
+    /**
      * Creates the entity at the given location
      * @param {Entity} entity
      */
@@ -159,6 +202,14 @@ MetaDisplayBuilding.silhouetteColors = {
     [defaultBuildingVariant]: "#aaaaaa",
 };
 
+MetaDisplayBuilding.isRemovable = {
+    [defaultBuildingVariant]: true,
+};
+
+MetaDisplayBuilding.isRotateable = {
+    [defaultBuildingVariant]: true,
+};
+
 MetaDisplayBuilding.avaibleVariants = {
     [defaultBuildingVariant]: enumHubGoalRewards.reward_display,
 };
@@ -169,6 +220,10 @@ MetaDisplayBuilding.layerByVariant = {
 
 MetaDisplayBuilding.layerPreview = {
     [defaultBuildingVariant]: "wires",
+};
+
+MetaDisplayBuilding.renderPins = {
+    [defaultBuildingVariant]: true,
 };
 
 MetaDisplayBuilding.componentVariations = {

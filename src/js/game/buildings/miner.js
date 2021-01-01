@@ -13,8 +13,129 @@ export class MetaMinerBuilding extends MetaBuilding {
         super("miner");
     }
 
+    /**
+     * @param {string} variant
+     */
     getSilhouetteColor(variant) {
-        return MetaMinerBuilding.silhouetteColors[variant];
+        let condition = MetaMinerBuilding.silhouetteColors[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "string" ? condition : "#ffffff";
+    }
+
+    /**
+     * @param {GameRoot} root
+     */
+    getIsUnlocked(root) {
+        let reward = MetaMinerBuilding.avaibleVariants[defaultBuildingVariant];
+
+        if (typeof reward === "function") {
+            // @ts-ignore
+            reward = reward(root);
+        }
+
+        if (typeof reward === "boolean") {
+            // @ts-ignore
+            return reward;
+        }
+
+        // @ts-ignore
+        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
+    }
+
+    /**
+     * @param {string} variant
+     */
+    getIsRemovable(variant) {
+        let condition = MetaMinerBuilding.isRemovable[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "boolean" ? condition : true;
+    }
+
+    /**
+     * @param {string} variant
+     */
+    getIsRotateable(variant) {
+        let condition = MetaMinerBuilding.isRotateable[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "boolean" ? condition : true;
+    }
+
+    /**
+     * @param {GameRoot} root
+     */
+    getAvailableVariants(root) {
+        const variants = MetaMinerBuilding.avaibleVariants;
+
+        let available = [];
+        for (const variant in variants) {
+            let reward = variants[variant];
+            if (typeof reward === "function") {
+                // @ts-ignore
+                reward = reward(root);
+            }
+
+            if (typeof reward === "boolean") {
+                available.push(variant);
+                continue;
+            }
+
+            // @ts-ignore
+            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
+            available.push(variant);
+        }
+
+        return available;
+    }
+
+    /**
+     * Returns the edit layer of the building
+     * @param {GameRoot} root
+     * @param {string} variant
+     * @returns {Layer}
+     */
+    getLayer(root, variant) {
+        let reward = MetaMinerBuilding.layerByVariant[defaultBuildingVariant];
+
+        if (typeof reward === "function") {
+            // @ts-ignore
+            reward = reward();
+        }
+
+        // @ts-ignore
+        return typeof reward === "string" ? reward : "regular";
+    }
+
+    /**
+     * @param {string} variant
+     */
+    getDimensions(variant) {
+        let condition = MetaMinerBuilding.dimensions[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "object" ? condition : new Vector(1, 1);
     }
 
     /**
@@ -23,34 +144,17 @@ export class MetaMinerBuilding extends MetaBuilding {
      * @returns {Array<[string, string]>}
      */
     getAdditionalStatistics(root, variant) {
-        const speed = root.hubGoals.getMinerBaseSpeed();
+        let speed = 0;
+        if (typeof MetaMinerBuilding.additionalStatistics[variant] === "function") {
+            // @ts-ignore
+            speed = MetaMinerBuilding.additionalStatistics[variant](root);
+        } else {
+            // @ts-ignore
+            speed = MetaMinerBuilding.additionalStatistics[variant];
+        }
         return [
             [T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(speed)]
         ];
-    }
-
-    /**
-     *
-     * @param {GameRoot} root
-     */
-    getAvailableVariants(root) {
-        const variants = MetaMinerBuilding.avaibleVariants;
-
-        let available = [];
-        for (const variant in variants) {
-            const reward = variants[variant];
-            if (typeof reward === "function") {
-                // @ts-ignore
-                if (!reward(root)) continue;
-                available.push(variant);
-            } else {
-                // @ts-ignore
-                if (reward !== true && !root.hubGoals.isRewardUnlocked(reward)) continue;
-                available.push(variant);
-            }
-        }
-
-        return available;
     }
 
     /**
@@ -58,9 +162,11 @@ export class MetaMinerBuilding extends MetaBuilding {
      * @param {number} rotationVariant
      * @param {string} variant
      * @param {Entity} entity
+     * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        return MetaMinerBuilding.overlayMatrix[variant][rotation];
+        let condition = MetaMinerBuilding.overlayMatrices[variant][rotation];
+        return condition ? condition : null;
     }
 
     /**
@@ -77,25 +183,45 @@ export class MetaMinerBuilding extends MetaBuilding {
     }
 
     /**
-     *
      * @param {Entity} entity
      * @param {number} rotationVariant
      * @param {string} variant
      */
     updateVariants(entity, rotationVariant, variant) {
-        entity.components.Miner.chainable = variant === MetaMinerBuilding.variants.chainable;
+        MetaMinerBuilding.componentVariations[variant](entity, rotationVariant);
     }
 }
-
-MetaMinerBuilding.silhouetteColors = {
-    [defaultBuildingVariant]: "#b37dcd",
-};
 
 MetaMinerBuilding.variants = {
     chainable: "chainable",
 };
 
-MetaMinerBuilding.overlayMatrix = {
+MetaMinerBuilding.silhouetteColors = {
+    [defaultBuildingVariant]: "#b37dcd",
+    [MetaMinerBuilding.variants.chainable]: "#b37dcd",
+};
+
+MetaMinerBuilding.dimensions = {
+    [defaultBuildingVariant]: new Vector(1, 1),
+    [MetaMinerBuilding.variants.chainable]: new Vector(1, 1),
+};
+
+MetaMinerBuilding.isRemovable = {
+    [defaultBuildingVariant]: true,
+    [MetaMinerBuilding.variants.chainable]: true,
+};
+
+MetaMinerBuilding.isRotateable = {
+    [defaultBuildingVariant]: true,
+    [MetaMinerBuilding.variants.chainable]: true,
+};
+
+MetaMinerBuilding.layerByVariant = {
+    [defaultBuildingVariant]: "regular",
+    [MetaMinerBuilding.variants.chainable]: "regular",
+};
+
+MetaMinerBuilding.overlayMatrices = {
     [defaultBuildingVariant]: generateMatrixRotations([1, 1, 1, 1, 0, 1, 1, 1, 1]),
     [MetaMinerBuilding.variants.chainable]: generateMatrixRotations([0, 1, 0, 1, 1, 1, 1, 1, 1]),
 };
@@ -104,4 +230,19 @@ MetaMinerBuilding.avaibleVariants = {
     [defaultBuildingVariant]: root =>
         !root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_miner_chainable),
     [MetaMinerBuilding.variants.chainable]: enumHubGoalRewards.reward_miner_chainable,
+};
+
+MetaMinerBuilding.additionalStatistics = {
+    [defaultBuildingVariant]: root => root.hubGoals.getMinerBaseSpeed(),
+    [MetaMinerBuilding.variants.chainable]: root => root.hubGoals.getMinerBaseSpeed(),
+};
+
+MetaMinerBuilding.componentVariations = {
+    [defaultBuildingVariant]: (entity, rotationVariant) => {
+        entity.components.Miner.chainable = false;
+    },
+
+    [MetaMinerBuilding.variants.chainable]: (entity, rotationVariant) => {
+        entity.components.Miner.chainable = true;
+    },
 };
