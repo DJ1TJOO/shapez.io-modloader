@@ -139,7 +139,7 @@ export class HUDBuildingPlacerLogic extends BaseHUDPart {
     onEditModeChanged(layer) {
         const metaBuilding = this.currentMetaBuilding.get();
         if (metaBuilding) {
-            if (metaBuilding.getLayer() !== layer) {
+            if (metaBuilding.getLayer(this.root, this.currentVariant.get()) !== layer) {
                 // This layer doesn't fit the edit mode anymore
                 this.currentMetaBuilding.set(null);
             }
@@ -413,7 +413,7 @@ export class HUDBuildingPlacerLogic extends BaseHUDPart {
             tile,
             rotation: this.currentBaseRotation,
             variant: this.currentVariant.get(),
-            layer: metaBuilding.getLayer(),
+            layer: metaBuilding.getLayer(this.root, this.currentVariant.get()),
         });
 
         const entity = this.root.logic.tryPlaceBuilding({
@@ -518,7 +518,7 @@ export class HUDBuildingPlacerLogic extends BaseHUDPart {
         });
 
         if (anythingPlaced) {
-            this.root.soundProxy.playUi(metaBuilding.getPlacementSound());
+            this.root.soundProxy.playUi(metaBuilding.getPlacementSound(this.currentVariant.get()));
         }
     }
 
@@ -660,7 +660,7 @@ export class HUDBuildingPlacerLogic extends BaseHUDPart {
             // Place initial building, but only if direction lock is not active
             if (!this.isDirectionLockActive) {
                 if (this.tryPlaceCurrentBuildingAt(this.lastDragTile)) {
-                    this.root.soundProxy.playUi(metaBuilding.getPlacementSound());
+                    this.root.soundProxy.playUi(metaBuilding.getPlacementSound(this.currentVariant.get()));
                 }
             }
             return STOP_PROPAGATION;
@@ -774,7 +774,7 @@ export class HUDBuildingPlacerLogic extends BaseHUDPart {
                 }
 
                 if (anythingPlaced) {
-                    this.root.soundProxy.playUi(metaBuilding.getPlacementSound());
+                    this.root.soundProxy.playUi(metaBuilding.getPlacementSound(this.currentVariant.get()));
                 }
                 if (anythingDeleted) {
                     this.root.soundProxy.playUi(SOUNDS.destroyBuilding);

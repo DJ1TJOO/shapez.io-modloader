@@ -16,10 +16,18 @@ export class MetaBalancerBuilding extends MetaBuilding {
     }
 
     /**
-     * @param {String} variant
+     * @param {string} variant
      */
     getDimensions(variant) {
-        return MetaBalancerBuilding.dimensions[variant];
+        let condition = MetaBalancerBuilding.dimensions[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "object" ? condition : new Vector(1, 1);
     }
 
     /**
@@ -30,11 +38,8 @@ export class MetaBalancerBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        const matrix = MetaBalancerBuilding.overlayMatrices[variant];
-        if (matrix) {
-            return matrix[rotation];
-        }
-        return null;
+        let condition = MetaBalancerBuilding.overlayMatrices[variant][rotation];
+        return condition ? condition : null;
     }
 
     /**
@@ -56,8 +61,19 @@ export class MetaBalancerBuilding extends MetaBuilding {
         ];
     }
 
+    /**
+     * @param {string} variant
+     */
     getSilhouetteColor(variant) {
-        return MetaBalancerBuilding.silhouetteColor[variant];
+        let condition = MetaBalancerBuilding.silhouetteColors[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "string" ? condition : "#ffffff";
     }
 
     /**
@@ -68,16 +84,19 @@ export class MetaBalancerBuilding extends MetaBuilding {
 
         let available = [];
         for (const variant in variants) {
-            const reward = variants[variant];
+            let reward = variants[variant];
             if (typeof reward === "function") {
                 // @ts-ignore
-                if (reward() !== true && !root.hubGoals.isRewardUnlocked(reward())) continue;
-                available.push(variant);
-            } else {
-                // @ts-ignore
-                if (reward !== true && !root.hubGoals.isRewardUnlocked(reward)) continue;
-                available.push(variant);
+                reward = reward(root);
             }
+
+            if (typeof reward === "boolean") {
+                available.push(variant);
+                continue;
+            }
+
+            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
+            available.push(variant);
         }
 
         return available;
@@ -88,22 +107,20 @@ export class MetaBalancerBuilding extends MetaBuilding {
      */
     // @ts-ignore
     getIsUnlocked(root) {
-        const reward = MetaBalancerBuilding.avaibleVariants[defaultBuildingVariant];
+        let reward = MetaBalancerBuilding.avaibleVariants[defaultBuildingVariant];
 
         if (typeof reward === "function") {
             // @ts-ignore
-            if (!root.hubGoals.isRewardUnlocked(reward())) return false;
-            // @ts-ignore
-            return root.hubGoals.isRewardUnlocked(reward());
-        } else if (typeof reward === "boolean") {
+            reward = reward(root);
+        }
+
+        if (typeof reward === "boolean") {
             // @ts-ignore
             return reward;
-        } else if (root.hubGoals.isRewardUnlocked(reward) != undefined) {
-            // @ts-ignore
-            return root.hubGoals.isRewardUnlocked(reward);
-        } else {
-            return false;
         }
+
+        // @ts-ignore
+        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
     }
 
     /**
@@ -135,13 +152,12 @@ export class MetaBalancerBuilding extends MetaBuilding {
     }
 
     /**
-     *
      * @param {Entity} entity
      * @param {number} rotationVariant
      * @param {string} variant
      */
     updateVariants(entity, rotationVariant, variant) {
-        MetaBalancerBuilding.componentVariations[variant](entity);
+        MetaBalancerBuilding.componentVariations[variant](entity, rotationVariant);
     }
 }
 
@@ -189,7 +205,7 @@ MetaBalancerBuilding.additionalStatistics = {
         (root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.balancer) / 2) * 1,
 };
 
-MetaBalancerBuilding.silhouetteColor = {
+MetaBalancerBuilding.silhouetteColors = {
     [defaultBuildingVariant]: "#555759",
     [MetaBalancerBuilding.variants.merger]: "#555759",
     [MetaBalancerBuilding.variants.mergerInverse]: "#555759",
@@ -198,7 +214,7 @@ MetaBalancerBuilding.silhouetteColor = {
 };
 
 MetaBalancerBuilding.componentVariations = {
-    [defaultBuildingVariant]: entity => {
+    [defaultBuildingVariant]: (entity, rotationVariant) => {
         entity.components.ItemAcceptor.setSlots([{
                 pos: new Vector(0, 0),
                 directions: [enumDirection.bottom],
@@ -220,7 +236,7 @@ MetaBalancerBuilding.componentVariations = {
         ];
     },
 
-    [MetaBalancerBuilding.variants.merger]: entity => {
+    [MetaBalancerBuilding.variants.merger]: (entity, rotationVariant) => {
         entity.components.ItemAcceptor.setSlots([{
                 pos: new Vector(0, 0),
                 directions: [enumDirection.bottom],
@@ -236,7 +252,7 @@ MetaBalancerBuilding.componentVariations = {
         entity.components.BeltUnderlays.underlays = [{ pos: new Vector(0, 0), direction: enumDirection.top }];
     },
 
-    [MetaBalancerBuilding.variants.mergerInverse]: entity => {
+    [MetaBalancerBuilding.variants.mergerInverse]: (entity, rotationVariant) => {
         entity.components.ItemAcceptor.setSlots([{
                 pos: new Vector(0, 0),
                 directions: [enumDirection.bottom],
@@ -252,7 +268,7 @@ MetaBalancerBuilding.componentVariations = {
         entity.components.BeltUnderlays.underlays = [{ pos: new Vector(0, 0), direction: enumDirection.top }];
     },
 
-    [MetaBalancerBuilding.variants.splitter]: entity => {
+    [MetaBalancerBuilding.variants.splitter]: (entity, rotationVariant) => {
         {
             entity.components.ItemAcceptor.setSlots([{
                 pos: new Vector(0, 0),
@@ -275,7 +291,7 @@ MetaBalancerBuilding.componentVariations = {
         }
     },
 
-    [MetaBalancerBuilding.variants.splitterInverse]: entity => {
+    [MetaBalancerBuilding.variants.splitterInverse]: (entity, rotationVariant) => {
         {
             entity.components.ItemAcceptor.setSlots([{
                 pos: new Vector(0, 0),

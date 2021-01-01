@@ -28,7 +28,7 @@ export const enumVariantToGate = {
 };
 
 const colors = {
-    [defaultBuildingVariant]: new MetaCutterBuilding().getSilhouetteColor(),
+    [defaultBuildingVariant]: new MetaCutterBuilding().getSilhouetteColor(defaultBuildingVariant),
     [enumVirtualProcessorVariants.rotater]: new MetaRotaterBuilding().getSilhouetteColor(),
     [enumVirtualProcessorVariants.unstacker]: new MetaStackerBuilding().getSilhouetteColor(),
     [enumVirtualProcessorVariants.stacker]: new MetaStackerBuilding().getSilhouetteColor(),
@@ -51,13 +51,18 @@ export class MetaVirtualProcessorBuilding extends MetaBuilding {
         return root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_virtual_processing);
     }
 
-    /** @returns {"wires"} **/
-    getLayer() {
-        return "wires";
+    /**
+     * Returns the edit layer of the building
+     * @param {GameRoot} root
+     * @param {string} variant
+     * @returns {Layer}
+     */
+    getLayer(root, variant) {
+        return MetaVirtualProcessorBuilding.getLayer[variant];
     }
 
-    getDimensions() {
-        return new Vector(1, 1);
+    getDimensions(root, variant) {
+        return MetaVirtualProcessorBuilding.dimensions[variant];
     }
 
     getAvailableVariants() {
@@ -70,9 +75,20 @@ export class MetaVirtualProcessorBuilding extends MetaBuilding {
         ];
     }
 
-    getRenderPins() {
-        // We already have it included
-        return false;
+    /**
+     * @param {GameRoot} root
+     * @param {string} variant
+     */
+    getRenderPins(root, variant) {
+        const condition = MetaVirtualProcessorBuilding.renderPins[variant];
+
+        if (typeof condition === "function") {
+            return condition(root);
+        } else if (typeof condition === "boolean") {
+            return condition;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -86,62 +102,62 @@ export class MetaVirtualProcessorBuilding extends MetaBuilding {
         const pinComp = entity.components.WiredPins;
         switch (gateType) {
             case enumLogicGateType.cutter:
-            case enumLogicGateType.unstacker: {
-                pinComp.setSlots([
-                    {
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.left,
-                        type: enumPinSlotType.logicalEjector,
-                    },
-                    {
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.right,
-                        type: enumPinSlotType.logicalEjector,
-                    },
-                    {
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.bottom,
-                        type: enumPinSlotType.logicalAcceptor,
-                    },
-                ]);
-                break;
-            }
-            case enumLogicGateType.rotater: {
-                pinComp.setSlots([
-                    {
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.top,
-                        type: enumPinSlotType.logicalEjector,
-                    },
-                    {
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.bottom,
-                        type: enumPinSlotType.logicalAcceptor,
-                    },
-                ]);
-                break;
-            }
+            case enumLogicGateType.unstacker:
+                {
+                    pinComp.setSlots([{
+                            pos: new Vector(0, 0),
+                            direction: enumDirection.left,
+                            type: enumPinSlotType.logicalEjector,
+                        },
+                        {
+                            pos: new Vector(0, 0),
+                            direction: enumDirection.right,
+                            type: enumPinSlotType.logicalEjector,
+                        },
+                        {
+                            pos: new Vector(0, 0),
+                            direction: enumDirection.bottom,
+                            type: enumPinSlotType.logicalAcceptor,
+                        },
+                    ]);
+                    break;
+                }
+            case enumLogicGateType.rotater:
+                {
+                    pinComp.setSlots([{
+                            pos: new Vector(0, 0),
+                            direction: enumDirection.top,
+                            type: enumPinSlotType.logicalEjector,
+                        },
+                        {
+                            pos: new Vector(0, 0),
+                            direction: enumDirection.bottom,
+                            type: enumPinSlotType.logicalAcceptor,
+                        },
+                    ]);
+                    break;
+                }
             case enumLogicGateType.stacker:
-            case enumLogicGateType.painter: {
-                pinComp.setSlots([
-                    {
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.top,
-                        type: enumPinSlotType.logicalEjector,
-                    },
-                    {
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.bottom,
-                        type: enumPinSlotType.logicalAcceptor,
-                    },
-                    {
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.right,
-                        type: enumPinSlotType.logicalAcceptor,
-                    },
-                ]);
-                break;
-            }
+            case enumLogicGateType.painter:
+                {
+                    pinComp.setSlots([{
+                            pos: new Vector(0, 0),
+                            direction: enumDirection.top,
+                            type: enumPinSlotType.logicalEjector,
+                        },
+                        {
+                            pos: new Vector(0, 0),
+                            direction: enumDirection.bottom,
+                            type: enumPinSlotType.logicalAcceptor,
+                        },
+                        {
+                            pos: new Vector(0, 0),
+                            direction: enumDirection.right,
+                            type: enumPinSlotType.logicalAcceptor,
+                        },
+                    ]);
+                    break;
+                }
             default:
                 assertAlways("unknown logic gate type: " + gateType);
         }
@@ -161,3 +177,15 @@ export class MetaVirtualProcessorBuilding extends MetaBuilding {
         entity.addComponent(new LogicGateComponent({}));
     }
 }
+
+MetaVirtualProcessorBuilding.getLayer = {
+    [defaultBuildingVariant]: "wires",
+};
+
+MetaVirtualProcessorBuilding.dimensions = {
+    [defaultBuildingVariant]: new Vector(1, 1),
+};
+
+MetaVirtualProcessorBuilding.renderPins = {
+    [defaultBuildingVariant]: false,
+};

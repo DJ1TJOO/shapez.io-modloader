@@ -32,7 +32,7 @@ export class MetaLeverBuilding extends MetaBuilding {
     }
 
     getShowLayerPreview() {
-        return ["wires"];
+        return "wires";
     }
 
     /**

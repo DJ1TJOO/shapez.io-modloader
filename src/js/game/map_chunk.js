@@ -245,26 +245,27 @@ export class MapChunk {
      * @returns {Entity=}
      */
     getLayerContentFromWorldCoords(worldX, worldY, layer) {
-            const localX = worldX - this.tileX;
-            const localY = worldY - this.tileY;
-            assert(localX >= 0, "Local X is < 0");
-            assert(localY >= 0, "Local Y is < 0");
-            assert(localX < globalConfig.mapChunkSize, "Local X is >= chunk size");
-            assert(localY < globalConfig.mapChunkSize, "Local Y is >= chunk size");
-            if (layer === "regular") {
-                return this.contents[localX][localY] || null;
-            } else if (layer === "wires") {
-                return this.wireContents[localX][localY] || null;
-            } else if (this.layersContents.has(layer)) {
-                return this.layersContents.get(layer)[localX][localY] || null;
-            }
+        const localX = worldX - this.tileX;
+        const localY = worldY - this.tileY;
+        assert(localX >= 0, "Local X is < 0");
+        assert(localY >= 0, "Local Y is < 0");
+        assert(localX < globalConfig.mapChunkSize, "Local X is >= chunk size");
+        assert(localY < globalConfig.mapChunkSize, "Local Y is >= chunk size");
+        if (layer === "regular") {
+            return this.contents[localX][localY] || null;
+        } else if (layer === "wires") {
+            return this.wireContents[localX][localY] || null;
+        } else if (this.layersContents.has(layer)) {
+            return this.layersContents.get(layer)[localX][localY] || null;
         }
-        /**
-         * Returns the contents of this chunk from the given world space coordinates
-         * @param {number} worldX
-         * @param {number} worldY
-         * @returns {Array<Entity>}
-         */
+    }
+
+    /**
+     * Returns the contents of this chunk from the given world space coordinates
+     * @param {number} worldX
+     * @param {number} worldY
+     * @returns {Array<Entity>}
+     */
     getLayersContentsMultipleFromWorldCoords(worldX, worldY) {
         const localX = worldX - this.tileX;
         const localY = worldY - this.tileY;

@@ -3,7 +3,7 @@ import { HubComponent } from "../components/hub";
 import { ItemAcceptorComponent } from "../components/item_acceptor";
 import { enumItemProcessorTypes, ItemProcessorComponent } from "../components/item_processor";
 import { Entity } from "../entity";
-import { MetaBuilding } from "../meta_building";
+import { defaultBuildingVariant, MetaBuilding } from "../meta_building";
 import { WiredPinsComponent, enumPinSlotType } from "../components/wired_pins";
 
 export class MetaHubBuilding extends MetaBuilding {
@@ -11,29 +11,51 @@ export class MetaHubBuilding extends MetaBuilding {
         super("hub");
     }
 
-    getDimensions() {
+    getDimensions(variant) {
         return new Vector(4, 4);
     }
 
-    getSilhouetteColor() {
-        return "#eb5555";
+    /**
+     * @param {string} variant
+     */
+    getSilhouetteColor(variant) {
+        const condition = MetaHubBuilding.silhouetteColors[variant];
+
+        if (typeof condition === "function") {
+            return condition(variant);
+        } else if (typeof condition === "string") {
+            return condition;
+        } else {
+            return "#ffffff";
+        }
     }
 
-    getIsRotateable() {
+    getIsRotateable(variant) {
+        // TODO: add variant check
         return false;
     }
 
-    getBlueprintSprite() {
+    getBlueprintSprite(variant) {
+        // TODO: add variant check
         return null;
     }
 
-    getSprite() {
+    getSprite(variant) {
+        // TODO: add variant check
         // We render it ourself
         return null;
     }
 
-    getIsRemovable() {
-        return false;
+    getIsRemovable(variant) {
+        const condition = MetaHubBuilding.isRemovable[variant];
+
+        if (typeof condition === "function") {
+            return condition(variant);
+        } else if (typeof condition === "boolean") {
+            return condition;
+        } else {
+            return true;
+        }
     }
 
     /**
@@ -51,20 +73,17 @@ export class MetaHubBuilding extends MetaBuilding {
 
         entity.addComponent(
             new WiredPinsComponent({
-                slots: [
-                    {
-                        pos: new Vector(0, 2),
-                        type: enumPinSlotType.logicalEjector,
-                        direction: enumDirection.left,
-                    },
-                ],
+                slots: [{
+                    pos: new Vector(0, 2),
+                    type: enumPinSlotType.logicalEjector,
+                    direction: enumDirection.left,
+                }, ],
             })
         );
 
         entity.addComponent(
             new ItemAcceptorComponent({
-                slots: [
-                    {
+                slots: [{
                         pos: new Vector(0, 0),
                         directions: [enumDirection.top, enumDirection.left],
                         filter: "shape",
@@ -139,3 +158,15 @@ export class MetaHubBuilding extends MetaBuilding {
         );
     }
 }
+
+MetaHubBuilding.silhouetteColors = {
+    [defaultBuildingVariant]: "#eb5555",
+};
+
+MetaHubBuilding.dimensions = {
+    [defaultBuildingVariant]: new Vector(4, 4),
+};
+
+MetaHubBuilding.isRemovable = {
+    [defaultBuildingVariant]: false,
+};

@@ -12,56 +12,118 @@ export class MetaAnalyzerBuilding extends MetaBuilding {
         super("analyzer");
     }
 
+    /**
+     * @param {string} variant
+     */
     getSilhouetteColor(variant) {
-        return MetaAnalyzerBuilding.silhouetteColor[variant];
+        let condition = MetaAnalyzerBuilding.silhouetteColors[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "string" ? condition : "#ffffff";
     }
 
     /**
      * @param {GameRoot} root
      */
     getIsUnlocked(root) {
-        const reward = MetaAnalyzerBuilding.avaibleVariants[defaultBuildingVariant];
+        let reward = MetaAnalyzerBuilding.avaibleVariants[defaultBuildingVariant];
 
         if (typeof reward === "function") {
             // @ts-ignore
-            if (!root.hubGoals.isRewardUnlocked(reward())) return false;
-            // @ts-ignore
-            return root.hubGoals.isRewardUnlocked(reward());
-        } else if (typeof reward === "boolean") {
+            reward = reward(root);
+        }
+
+        if (typeof reward === "boolean") {
             // @ts-ignore
             return reward;
-        } else if (root.hubGoals.isRewardUnlocked(reward) != undefined) {
-            // @ts-ignore
-            return root.hubGoals.isRewardUnlocked(reward);
-        } else {
-            return false;
         }
+
+        // @ts-ignore
+        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
     }
 
-    /** @returns {"wires"} **/
-    getLayer() {
-        return "wires";
+    /**
+     * Returns the edit layer of the building
+     * @param {GameRoot} root
+     * @param {string} variant
+     * @returns {Layer}
+     */
+    getLayer(root, variant) {
+        let reward = MetaAnalyzerBuilding.layerByVariant[defaultBuildingVariant];
+
+        if (typeof reward === "function") {
+            // @ts-ignore
+            reward = reward();
+        }
+
+        // @ts-ignore
+        return typeof reward === "string" ? reward : "regular";
     }
 
+    /**
+     * @param {string} variant
+     */
     getDimensions(variant) {
-        return MetaAnalyzerBuilding.dimensions[variant];
-    }
-
-    getRenderPins(variant) {
-        const condition = MetaAnalyzerBuilding.renderPins[variant];
+        let condition = MetaAnalyzerBuilding.dimensions[variant];
 
         if (typeof condition === "function") {
-            return condition(variant);
-        } else if (typeof condition === "boolean") {
-            return condition;
-        } else {
-            return false;
+            // @ts-ignore
+            condition = condition();
         }
+
+        // @ts-ignore
+        return typeof condition === "object" ? condition : new Vector(1, 1);
+    }
+
+    /**
+     * @param {GameRoot} root
+     * @param {string} variant
+     */
+    getRenderPins(root, variant) {
+        let condition = MetaAnalyzerBuilding.renderPins[variant];
+
+        if (typeof condition === "function") {
+            condition = condition(root);
+        }
+
+        // @ts-ignore
+        return typeof condition === "boolean" ? condition : false;
     }
 
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant) {
-        return MetaAnalyzerBuilding.overlayMatrices[variant][rotation];
-        // Mod 2 or 3 have removed them they don't do anything
+        let condition = MetaAnalyzerBuilding.overlayMatrices[variant][rotation];
+        return condition ? condition : null;
+    }
+
+    /**
+     * @param {GameRoot} root
+     */
+    getAvailableVariants(root) {
+        const variants = MetaAnalyzerBuilding.avaibleVariants;
+
+        let available = [];
+        for (const variant in variants) {
+            let reward = variants[variant];
+            if (typeof reward === "function") {
+                // @ts-ignore
+                reward = reward(root);
+            }
+
+            if (typeof reward === "boolean") {
+                available.push(variant);
+                continue;
+            }
+
+            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
+            available.push(variant);
+        }
+
+        return available;
     }
 
     /**
@@ -96,24 +158,60 @@ export class MetaAnalyzerBuilding extends MetaBuilding {
             })
         );
     }
-}
 
-MetaAnalyzerBuilding.overlayMatrices = {
-    [defaultBuildingVariant]: generateMatrixRotations([1, 1, 0, 1, 1, 1, 0, 1, 0]),
-};
+    /**
+     * @param {Entity} entity
+     * @param {number} rotationVariant
+     * @param {string} variant
+     */
+    updateVariants(entity, rotationVariant, variant) {
+        MetaAnalyzerBuilding.componentVariations[variant](entity, rotationVariant);
+    }
+}
 
 MetaAnalyzerBuilding.avaibleVariants = {
     [defaultBuildingVariant]: enumHubGoalRewards.reward_virtual_processing,
+};
+
+MetaAnalyzerBuilding.overlayMatrices = {
+    [defaultBuildingVariant]: generateMatrixRotations([1, 1, 0, 1, 1, 1, 0, 1, 0]),
 };
 
 MetaAnalyzerBuilding.dimensions = {
     [defaultBuildingVariant]: new Vector(1, 1),
 };
 
-MetaAnalyzerBuilding.silhouetteColor = {
-    [defaultBuildingVariant]: "#555759",
-};
-
 MetaAnalyzerBuilding.renderPins = {
     [defaultBuildingVariant]: false,
+};
+
+MetaAnalyzerBuilding.layerByVariant = {
+    [defaultBuildingVariant]: "wires",
+};
+
+MetaAnalyzerBuilding.componentVariations = {
+    [defaultBuildingVariant]: (entity, rotationVariant) => {
+        entity.components.WiredPins.setSlots([{
+                pos: new Vector(0, 0),
+                direction: enumDirection.left,
+                type: enumPinSlotType.logicalEjector,
+            },
+            {
+                pos: new Vector(0, 0),
+                direction: enumDirection.right,
+                type: enumPinSlotType.logicalEjector,
+            },
+            {
+                pos: new Vector(0, 0),
+                direction: enumDirection.bottom,
+                type: enumPinSlotType.logicalAcceptor,
+            },
+        ]);
+
+        entity.components.LogicGate.type = enumLogicGateType.analyzer;
+    },
+};
+
+MetaAnalyzerBuilding.silhouetteColors = {
+    [defaultBuildingVariant]: "#555759",
 };

@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const CircularDependencyPlugin = require("circular-dependency-plugin");
 const StringReplacePlugin = require("string-replace-webpack-plugin");
+const FriendlyErrorsWebpackPlugin = require("friendly-errors-webpack-plugin");
 
 module.exports = ({
     es6 = false,
@@ -55,11 +56,13 @@ module.exports = ({
             atlasJsons.set(name, JSON.parse(fs.readFileSync(readPath, "utf8")));
         }
     }
-
+    css = css.toString("utf8");
     return {
         entry: path.resolve(__dirname, mainFile),
         context: path.resolve(__dirname, dir),
         plugins: [
+            new FriendlyErrorsWebpackPlugin(),
+            new StringReplacePlugin(),
             new CircularDependencyPlugin({
                 // exclude detection of files based on a RegExp
                 exclude: /node_modules/,
@@ -103,9 +106,15 @@ module.exports = ({
                         "uglify-template-string-loader", // Finally found this plugin
                         StringReplacePlugin.replace({
                             replacements: [{
-                                    pattern: /"\*\*\{icons_([A-Za-z0-9_]{0,})\}\*\*"/g,
+                                    pattern: /"\*\*\{css\}\*\*"/g,
                                     replacement: (match, p1) => {
-                                        return "`" + icons.get(p1) + "`";
+                                        return "`" + css + "`";
+                                    },
+                                },
+                                {
+                                    pattern: /\*\*\{icons_([A-Za-z0-9_]{0,})\}\*\*/g,
+                                    replacement: (match, p1) => {
+                                        return icons.get(p1);
                                     },
                                 },
                                 {
@@ -122,12 +131,6 @@ module.exports = ({
                                     pattern: /"\*\*\{theme_([A-Za-z0-9_]{0,})\}\*\*"/g,
                                     replacement: (match, p1) => {
                                         return themes.get(p1);
-                                    },
-                                },
-                                {
-                                    pattern: /"\*\*\{css\}\*\*"/g,
-                                    replacement: () => {
-                                        return "`" + css.toString("utf8") + "`";
                                     },
                                 },
                             ],

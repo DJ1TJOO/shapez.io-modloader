@@ -84,6 +84,17 @@ const logger = createLogger("main");
             url: "http://localhost:3006/mod",
             id: "a18121cf-fc7c-4f23-906d-b7ab0512bbc8",
             config: {},
+            settings: {
+                hasMakeModButton: {
+                    value: false,
+                },
+                enum: {
+                    value: "new test",
+                },
+                range: {
+                    value: 10,
+                },
+            },
         }, ],
     };
 

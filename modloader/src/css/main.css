@@ -1,0 +1,38 @@
+#state_SettingsState .container .content .sidebar button.aboutModloader {
+  background-color: #eeeff5;
+  color: #777a7f;
+}
+
+#state_AboutModloaderState > .container .content {
+  max-width: calc(600px * var(--ui-scale))    ;
+  font-size: calc(13px * var(--ui-scale));
+  line-height: calc(17px * var(--ui-scale));
+  font-weight: 400;
+  font-family: "GameFont", sans-serif;
+  letter-spacing: 0.04em;
+  padding: 0;
+  background: transparent;
+}
+
+#state_AboutModloaderState .head {
+  padding: calc(20px * var(--ui-scale))    ;
+}
+
+#state_AboutModloaderState .head img {
+  display: block;
+  margin: 0 auto;
+  max-width: calc(200px * var(--ui-scale))    ;
+}
+
+#state_AboutModloaderState .text {
+  margin: calc(10px * var(--ui-scale))    ;
+}
+
+#state_AboutModloaderState a {
+  margin: calc(0px * var(--ui-scale)) calc(3px * var(--ui-scale))   ;
+}
+
+#ingame_HUD_test_toolbar {
+  z-index: 230;
+}
+/*# sourceMappingURL=main.css.map */

@@ -14,7 +14,7 @@ export class MetaMinerBuilding extends MetaBuilding {
     }
 
     getSilhouetteColor(variant) {
-        return MetaMinerBuilding.silhouetteColor[variant];
+        return MetaMinerBuilding.silhouetteColors[variant];
     }
 
     /**
@@ -87,7 +87,7 @@ export class MetaMinerBuilding extends MetaBuilding {
     }
 }
 
-MetaMinerBuilding.silhouetteColor = {
+MetaMinerBuilding.silhouetteColors = {
     [defaultBuildingVariant]: "#b37dcd",
 };
 

@@ -2,7 +2,7 @@ import { generateMatrixRotations } from "../../core/utils";
 import { Vector } from "../../core/vector";
 import { WireTunnelComponent } from "../components/wire_tunnel";
 import { Entity } from "../entity";
-import { MetaBuilding } from "../meta_building";
+import { defaultBuildingVariant, MetaBuilding } from "../meta_building";
 import { GameRoot } from "../root";
 import { enumHubGoalRewards } from "../tutorial_goals";
 
@@ -43,9 +43,14 @@ export class MetaWireTunnelBuilding extends MetaBuilding {
         return new Vector(1, 1);
     }
 
-    /** @returns {"wires"} **/
-    getLayer() {
-        return "wires";
+    /**
+     * Returns the edit layer of the building
+     * @param {GameRoot} root
+     * @param {string} variant
+     * @returns {Layer}
+     */
+    getLayer(root, variant) {
+        return MetaWireTunnelBuilding.getLayer[variant];
     }
 
     /**
@@ -56,3 +61,7 @@ export class MetaWireTunnelBuilding extends MetaBuilding {
         entity.addComponent(new WireTunnelComponent());
     }
 }
+
+MetaWireTunnelBuilding.getLayer = {
+    [defaultBuildingVariant]: "wires",
+};

@@ -27,14 +27,17 @@ export class MetaBuilding {
 
     /**
      * Returns the edit layer of the building
+     * @param {GameRoot} root
+     * @param {string} variant
      * @returns {Layer}
      */
-    getLayer() {
+    getLayer(root, variant = defaultBuildingVariant) {
         return "regular";
     }
 
     /**
      * Should return the dimensions of the building
+     * @param {string} variant
      */
     getDimensions(variant = defaultBuildingVariant) {
         return new Vector(1, 1);
@@ -79,8 +82,8 @@ export class MetaBuilding {
     /**
      * Returns whether this building can get replaced
      */
-    getIsReplaceable() {
-        return false;
+    getIsReplaceable(variant = defaultBuildingVariant) {
+        return false; // TODO: Test this!!!
     }
 
     /**
@@ -93,16 +96,17 @@ export class MetaBuilding {
 
     /**
      * Whether to show a preview of the layer when placing the building
+     * @param {string} variant
      */
-    getShowLayerPreview() {
-        return [];
+    getShowLayerPreview(variant) {
+        return null;
     }
 
     /**
      * Whether to rotate automatically in the dragging direction while placing
      * @param {string} variant
      */
-    getRotateAutomaticallyWhilePlacing(variant) {
+    getRotateAutomaticallyWhilePlacing(variant = defaultBuildingVariant) {
         return false;
     }
 
@@ -111,8 +115,8 @@ export class MetaBuilding {
      * @param {string} variant
      * @returns {boolean}
      */
-    getIsRemovable(variant) {
-        return true; // TODO: test variant too !!!!
+    getIsRemovable(variant = defaultBuildingVariant) {
+        return true;
     }
 
     /**
@@ -120,8 +124,8 @@ export class MetaBuilding {
      * @param {string} variant
      * @returns {string}
      */
-    getPlacementSound(variant) {
-        return SOUNDS.placeBuilding; // TODO: test variant too !!!!
+    getPlacementSound(variant = defaultBuildingVariant) {
+        return SOUNDS.placeBuilding;
     }
 
     /**
@@ -185,10 +189,11 @@ export class MetaBuilding {
 
     /**
      * Should return false if the pins are already included in the sprite of the building
+     * @param {GameRoot} root
      * @param {string} variant
      * @returns {boolean}
      */
-    getRenderPins(variant) {
+    getRenderPins(root, variant = defaultBuildingVariant) {
         return true;
     }
 
@@ -204,7 +209,7 @@ export class MetaBuilding {
      */
     createEntity({ root, origin, rotation, originalRotation, rotationVariant, variant }) {
         const entity = new Entity(root);
-        entity.layer = this.getLayer();
+        entity.layer = this.getLayer(root, variant);
         entity.addComponent(
             new StaticMapEntityComponent({
                 origin: new Vector(origin.x, origin.y),

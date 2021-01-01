@@ -15,7 +15,7 @@ export class MetaItemProducerBuilding extends MetaBuilding {
     }
 
     getShowLayerPreview() {
-        return ["wires"];
+        return "wires";
     }
 
     /**

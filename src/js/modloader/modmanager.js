@@ -8,11 +8,32 @@ import { ShapezAPI } from "./mod";
  *          url: string,
  *          id: string,
  *          config: {},
+ *          settings: {},
  *      },
  *  ],
  *  modOrder?: [],
  * }} ModPack
  */
+
+export function matchOverwriteRecursiveSettings(dest, src) {
+    if (typeof dest !== "object" || typeof src !== "object") {
+        return;
+    }
+
+    for (const key in src) {
+        //console.log("copy", key);
+        const data = src[key];
+        if (typeof data === "object") {
+            if (!dest[key]) dest[key] = {};
+            matchOverwriteRecursive(dest[key], src[key]);
+        } else if (typeof data === "string" || typeof data === "number" || typeof data === "boolean") {
+            // console.log("match string", key);
+            dest[key] = src[key];
+        } else {
+            console.log("Unknown type:", typeof data, "in key", key);
+        }
+    }
+}
 
 const Toposort = require("toposort-class");
 
@@ -26,6 +47,8 @@ const INFOType = {
     dependencies: [],
     incompatible: [],
     translations: {},
+    settings: {},
+    updateStaticSettings: () => {},
     updateStaticTranslations: id => {},
     gameInitializedRootClasses: root => {},
     gameInitializedRootManagers: root => {},
@@ -217,6 +240,11 @@ export class ModManager {
         const language = mod.translations["en"];
         if (language) {
             matchOverwriteRecursive(shapezAPI.translations, language);
+        }
+
+        const settings = this.modPack.mods.find(mod => mod.id === id).settings;
+        if (settings) {
+            matchOverwriteRecursiveSettings(mod.settings, settings);
         }
         if (this.modPack && this.modPack.mods) mod.main(this.modPack.mods.find(mod => mod.id === id).config);
         else mod.main();

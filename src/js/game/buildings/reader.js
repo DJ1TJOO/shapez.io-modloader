@@ -34,7 +34,7 @@ export class MetaReaderBuilding extends MetaBuilding {
     }
 
     getShowLayerPreview() {
-        return ["wires"];
+        return "wires";
     }
 
     /**

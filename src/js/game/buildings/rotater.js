@@ -21,8 +21,8 @@ export class MetaRotaterBuilding extends MetaBuilding {
         return MetaRotaterBuilding.dimensions[variant];
     }
 
-    getSilhouetteColor() {
-        return MetaRotaterBuilding.silhouetteColor;
+    getSilhouetteColor(variant) {
+        return MetaRotaterBuilding.silhouetteColors[variant];
     }
 
     /**
@@ -169,6 +169,18 @@ MetaRotaterBuilding.variants = {
     rotate180: "rotate180",
 };
 
+MetaRotaterBuilding.componentVariations = {
+    [defaultBuildingVariant]: (entity, rotationVariant) => {
+        entity.components.ItemProcessor.type = enumItemProcessorTypes.rotater;
+    },
+    [MetaRotaterBuilding.variants.ccw]: (entity, rotationVariant) => {
+        entity.components.ItemProcessor.type = enumItemProcessorTypes.rotaterCCW;
+    },
+    [MetaRotaterBuilding.variants.rotate180]: (entity, rotationVariant) => {
+        entity.components.ItemProcessor.type = enumItemProcessorTypes.rotater180;
+    },
+};
+
 MetaRotaterBuilding.dimensions = {
     [defaultBuildingVariant]: new Vector(1, 1),
     [MetaRotaterBuilding.variants.ccw]: new Vector(1, 1),
@@ -200,4 +212,6 @@ MetaRotaterBuilding.additionalStatistics = {
         return root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.rotater180);
     },
 };
-MetaRotaterBuilding.silhouetteColor = "#7dc6cd";
+MetaRotaterBuilding.silhouetteColors = {
+    [defaultBuildingVariant]: "#7dc6cd",
+};

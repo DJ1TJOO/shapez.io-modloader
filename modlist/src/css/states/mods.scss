@@ -79,13 +79,15 @@
                     display: block;
                 }
                 .setting {
+                    display: block;
+                    color: #777a7f;
                     @include S(padding, 10px);
                     background: #eeeff5;
                     @include S(border-radius, $globalBorderRadius);
                     @include S(margin-bottom, 5px);
                     .desc {
                         @include S(margin-top, 5px);
-                        @include SuperSmallText;
+                        @include PlainText;
                         color: #aaadb2;
                     }
                     >.row {
@@ -135,7 +137,7 @@
                         @include S(padding-right, 15px);
                         & {
                             /* @load-async */
-                            background: #fff uiResource("icons/enum_selector.png") calc(100% - #{D(5px)}) calc(50% + #{D(1px)}) / #{D(15px)} no-repeat;
+                            background: #fff url(**{icons_enum_selector}**) calc(100% - #{D(5px)}) calc(50% + #{D(1px)}) / #{D(15px)} no-repeat;
                         }
                         transition: background-color 0.12s ease-in-out;
                         &:hover {
@@ -169,7 +171,7 @@
                             background-color: $darkModeControlsBackground;
                             & {
                                 /* @load-async */
-                                background-image: uiResource("icons/enum_selector_white.png");
+                                background-image: url(**{icons_enum_selector_white}**);
                             }
                             color: #ddd;
                             &:hover {

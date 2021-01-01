@@ -41,7 +41,7 @@ export class MetaWireBuilding extends MetaBuilding {
         return true;
     }
 
-    getSilhouetteColor() {
+    getSilhouetteColor(variant) {
         return "#61ef6f";
     }
 
@@ -53,28 +53,37 @@ export class MetaWireBuilding extends MetaBuilding {
         return new Vector(1, 1);
     }
 
-    getStayInPlacementMode() {
+    getStayInPlacementMode(variant) {
+        // TODO: add variant check
         return true;
     }
 
-    getPlacementSound() {
-        return SOUNDS.placeBelt;
+    getPlacementSound(variant) {
+        return MetaWireBuilding.placementSounds[variant];
     }
 
-    getRotateAutomaticallyWhilePlacing() {
+    getRotateAutomaticallyWhilePlacing(variant) {
+        // TODO: add variant check
         return true;
     }
 
-    /** @returns {"wires"} **/
-    getLayer() {
+    /**
+     * Returns the edit layer of the building
+     * @param {GameRoot} root
+     * @param {string} variant
+     * @returns {Layer}
+     */
+    getLayer(root, variant) {
         return "wires";
     }
 
-    getSprite() {
+    getSprite(variamt) {
+        // TODO: add variant check
         return null;
     }
 
-    getIsReplaceable() {
+    getIsReplaceable(variant) {
+        // TODO: add variant check
         return true;
     }
 
@@ -124,21 +133,26 @@ export class MetaWireBuilding extends MetaBuilding {
     getPreviewSprite(rotationVariant, variant) {
         const wireVariant = enumWireVariantToVariant[variant];
         switch (arrayWireRotationVariantToType[rotationVariant]) {
-            case enumWireType.forward: {
-                return Loader.getSprite("sprites/wires/sets/" + wireVariant + "_forward.png");
-            }
-            case enumWireType.turn: {
-                return Loader.getSprite("sprites/wires/sets/" + wireVariant + "_turn.png");
-            }
-            case enumWireType.split: {
-                return Loader.getSprite("sprites/wires/sets/" + wireVariant + "_split.png");
-            }
-            case enumWireType.cross: {
-                return Loader.getSprite("sprites/wires/sets/" + wireVariant + "_cross.png");
-            }
-            default: {
-                assertAlways(false, "Invalid wire rotation variant");
-            }
+            case enumWireType.forward:
+                {
+                    return Loader.getSprite("sprites/wires/sets/" + wireVariant + "_forward.png");
+                }
+            case enumWireType.turn:
+                {
+                    return Loader.getSprite("sprites/wires/sets/" + wireVariant + "_turn.png");
+                }
+            case enumWireType.split:
+                {
+                    return Loader.getSprite("sprites/wires/sets/" + wireVariant + "_split.png");
+                }
+            case enumWireType.cross:
+                {
+                    return Loader.getSprite("sprites/wires/sets/" + wireVariant + "_cross.png");
+                }
+            default:
+                {
+                    assertAlways(false, "Invalid wire rotation variant");
+                }
         }
     }
 
@@ -268,3 +282,7 @@ export class MetaWireBuilding extends MetaBuilding {
         };
     }
 }
+
+MetaWireBuilding.placementSounds = {
+    [defaultBuildingVariant]: SOUNDS.placeBelt,
+};

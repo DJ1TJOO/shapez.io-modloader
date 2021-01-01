@@ -5,7 +5,7 @@ import { SOUNDS } from "../../platform/sound";
 import { T } from "../../translations";
 import { BeltComponent } from "../components/belt";
 import { Entity } from "../entity";
-import { MetaBuilding } from "../meta_building";
+import { defaultBuildingVariant, MetaBuilding } from "../meta_building";
 import { GameRoot } from "../root";
 import { THEME } from "../theme";
 
@@ -15,11 +15,11 @@ export class MetaBeltBuilding extends MetaBuilding {
     }
 
     getSilhouetteColor(variant) {
-        return MetaBeltBuilding.silhouetteColor[variant];
+        return MetaBeltBuilding.silhouetteColors[variant];
     }
 
-    getPlacementSound() {
-        return SOUNDS.placeBelt;
+    getPlacementSound(variant) {
+        return MetaBeltBuilding.placementSounds[variant];
     }
 
     getHasDirectionLockAvailable() {
@@ -229,7 +229,9 @@ export class MetaBeltBuilding extends MetaBuilding {
         };
     }
 }
-MetaBeltBuilding.silhouetteColor = THEME.map.chunkOverview.beltColor;
+MetaBeltBuilding.silhouetteColors = {
+    [defaultBuildingVariant]: THEME.map.chunkOverview.beltColor,
+};
 
 MetaBeltBuilding.arrayBeltVariantToRotation = [enumDirection.top, enumDirection.left, enumDirection.right];
 
@@ -237,6 +239,10 @@ MetaBeltBuilding.beltOverlayMatrices = {
     [enumDirection.top]: generateMatrixRotations([0, 1, 0, 0, 1, 0, 0, 1, 0]),
     [enumDirection.left]: generateMatrixRotations([0, 0, 0, 1, 1, 0, 0, 1, 0]),
     [enumDirection.right]: generateMatrixRotations([0, 0, 0, 0, 1, 1, 0, 1, 0]),
+};
+
+MetaBeltBuilding.placementSounds = {
+    [defaultBuildingVariant]: SOUNDS.placeBelt,
 };
 
 MetaBeltBuilding.rotationVariants = [0, 1, 2];

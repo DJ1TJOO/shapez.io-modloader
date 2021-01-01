@@ -33,9 +33,14 @@ export class MetaTransistorBuilding extends MetaBuilding {
         return root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_logic_gates);
     }
 
-    /** @returns {"wires"} **/
-    getLayer() {
-        return "wires";
+    /**
+     * Returns the edit layer of the building
+     * @param {GameRoot} root
+     * @param {string} variant
+     * @returns {Layer}
+     */
+    getLayer(root, variant) {
+        return MetaTransistorBuilding.getLayer[variant];
     }
 
     getDimensions() {
@@ -50,9 +55,20 @@ export class MetaTransistorBuilding extends MetaBuilding {
         return overlayMatrices[variant][rotation];
     }
 
-    getRenderPins() {
-        // We already have it included
-        return false;
+    /**
+     * @param {GameRoot} root
+     * @param {string} variant
+     */
+    getRenderPins(root, variant) {
+        const condition = MetaTransistorBuilding.renderPins[variant];
+
+        if (typeof condition === "function") {
+            return condition(root);
+        } else if (typeof condition === "boolean") {
+            return condition;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -72,8 +88,7 @@ export class MetaTransistorBuilding extends MetaBuilding {
     setupEntityComponents(entity) {
         entity.addComponent(
             new WiredPinsComponent({
-                slots: [
-                    {
+                slots: [{
                         pos: new Vector(0, 0),
                         direction: enumDirection.top,
                         type: enumPinSlotType.logicalEjector,
@@ -99,3 +114,11 @@ export class MetaTransistorBuilding extends MetaBuilding {
         );
     }
 }
+
+MetaTransistorBuilding.getLayer = {
+    [defaultBuildingVariant]: "wires",
+};
+
+MetaTransistorBuilding.renderPins = {
+    [defaultBuildingVariant]: false,
+};

@@ -256,7 +256,9 @@ export class HUDBuildingPlacer extends HUDBuildingPlacerLogic {
             this.drawRegularPlacement(parameters);
         }
 
-        if (metaBuilding.getShowLayerPreview().indexOf("wires") > -1) {
+        const layer = metaBuilding.getShowLayerPreview(this.currentVariant.get());
+
+        if (layer && layer != this.root.currentLayer) {
             this.drawLayerPeek(parameters);
         }
     }
@@ -307,7 +309,7 @@ export class HUDBuildingPlacer extends HUDBuildingPlacerLogic {
             tile: mouseTile,
             rotation: this.currentBaseRotation,
             variant: this.currentVariant.get(),
-            layer: metaBuilding.getLayer(),
+            layer: metaBuilding.getLayer(this.root, this.currentVariant.get()),
         });
 
         // Check if there are connected entities
@@ -342,7 +344,7 @@ export class HUDBuildingPlacer extends HUDBuildingPlacerLogic {
         }
 
         // Synchronize rotation and origin
-        this.fakeEntity.layer = metaBuilding.getLayer();
+        this.fakeEntity.layer = metaBuilding.getLayer(this.root, this.currentVariant.get());
         const staticComp = this.fakeEntity.components.StaticMapEntity;
         staticComp.origin = mouseTile;
         staticComp.rotation = rotation;

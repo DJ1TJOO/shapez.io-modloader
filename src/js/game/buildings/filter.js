@@ -6,7 +6,7 @@ import { ItemAcceptorComponent } from "../components/item_acceptor";
 import { ItemEjectorComponent } from "../components/item_ejector";
 import { enumPinSlotType, WiredPinsComponent } from "../components/wired_pins";
 import { Entity } from "../entity";
-import { MetaBuilding } from "../meta_building";
+import { defaultBuildingVariant, MetaBuilding } from "../meta_building";
 import { GameRoot } from "../root";
 import { enumHubGoalRewards } from "../tutorial_goals";
 
@@ -15,23 +15,95 @@ export class MetaFilterBuilding extends MetaBuilding {
         super("filter");
     }
 
-    getSilhouetteColor() {
-        return "#c45c2e";
+    /**
+     * @param {string} variant
+     */
+    getSilhouetteColor(variant) {
+        let condition = MetaFilterBuilding.silhouetteColors[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "string" ? condition : "#ffffff";
     }
 
     /**
      * @param {GameRoot} root
      */
     getIsUnlocked(root) {
-        return root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_filter);
+        let reward = MetaFilterBuilding.avaibleVariants[defaultBuildingVariant];
+
+        if (typeof reward === "function") {
+            // @ts-ignore
+            reward = reward(root);
+        }
+
+        if (typeof reward === "boolean") {
+            // @ts-ignore
+            return reward;
+        }
+
+        // @ts-ignore
+        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
     }
 
-    getDimensions() {
-        return new Vector(2, 1);
+    /**
+     * @param {GameRoot} root
+     */
+    getAvailableVariants(root) {
+        const variants = MetaFilterBuilding.avaibleVariants;
+
+        let available = [];
+        for (const variant in variants) {
+            let reward = variants[variant];
+            if (typeof reward === "function") {
+                // @ts-ignore
+                reward = reward(root);
+            }
+
+            if (typeof reward === "boolean") {
+                available.push(variant);
+                continue;
+            }
+
+            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
+            available.push(variant);
+        }
+
+        return available;
     }
 
-    getShowLayerPreview() {
-        return ["wires"];
+    /**
+     * @param {string} variant
+     */
+    getDimensions(variant) {
+        let condition = MetaFilterBuilding.dimensions[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "object" ? condition : new Vector(1, 1);
+    }
+
+    /**
+     * @param {string} variant
+     */
+    getShowLayerPreview(variant) {
+        let condition = MetaFilterBuilding.layerPreview[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "string" ? condition : null;
     }
 
     /**
@@ -40,10 +112,29 @@ export class MetaFilterBuilding extends MetaBuilding {
      * @returns {Array<[string, string]>}
      */
     getAdditionalStatistics(root, variant) {
-        const beltSpeed = root.hubGoals.getBeltBaseSpeed();
+        let speed = 0;
+        if (typeof MetaFilterBuilding.additionalStatistics[variant] === "function") {
+            // @ts-ignore
+            speed = MetaFilterBuilding.additionalStatistics[variant](root);
+        } else {
+            // @ts-ignore
+            speed = MetaFilterBuilding.additionalStatistics[variant];
+        }
         return [
-            [T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(beltSpeed)]
+            [T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(speed)]
         ];
+    }
+
+    /**
+     * @param {number} rotation
+     * @param {number} rotationVariant
+     * @param {string} variant
+     * @param {Entity} entity
+     * @returns {Array<number>|null}
+     */
+    getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
+        let condition = MetaFilterBuilding.overlayMatrices[variant][rotation];
+        return condition ? condition : null;
     }
 
     /**
@@ -86,4 +177,66 @@ export class MetaFilterBuilding extends MetaBuilding {
 
         entity.addComponent(new FilterComponent());
     }
+
+    /**
+     * @param {Entity} entity
+     * @param {number} rotationVariant
+     * @param {string} variant
+     */
+    updateVariants(entity, rotationVariant, variant) {
+        MetaFilterBuilding.componentVariations[variant](entity, rotationVariant);
+    }
 }
+
+MetaFilterBuilding.overlayMatrices = {
+    [defaultBuildingVariant]: null,
+};
+
+MetaFilterBuilding.dimensions = {
+    [defaultBuildingVariant]: new Vector(2, 1),
+};
+
+MetaFilterBuilding.silhouetteColors = {
+    [defaultBuildingVariant]: "#c45c2e",
+};
+
+MetaFilterBuilding.avaibleVariants = {
+    [defaultBuildingVariant]: enumHubGoalRewards.reward_display,
+};
+
+MetaFilterBuilding.layerByVariant = {
+    [defaultBuildingVariant]: "regular",
+};
+
+MetaFilterBuilding.layerPreview = {
+    [defaultBuildingVariant]: "wires",
+};
+
+MetaFilterBuilding.additionalStatistics = {
+    [defaultBuildingVariant]: root => root.hubGoals.getBeltBaseSpeed(),
+};
+
+MetaFilterBuilding.componentVariations = {
+    [defaultBuildingVariant]: (entity, rotationVariant) => {
+        entity.components.WiredPins.setSlots([{
+            pos: new Vector(0, 0),
+            direction: enumDirection.bottom,
+            type: enumPinSlotType.logicalAcceptor,
+        }, ]);
+
+        entity.components.ItemAcceptor.setSlots([{
+            pos: new Vector(0, 0),
+            directions: [enumDirection.bottom],
+        }, ]);
+
+        entity.components.ItemEjector.setSlots([{
+                pos: new Vector(0, 0),
+                direction: enumDirection.top,
+            },
+            {
+                pos: new Vector(1, 0),
+                direction: enumDirection.right,
+            },
+        ]);
+    },
+};

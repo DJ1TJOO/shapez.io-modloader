@@ -9,6 +9,8 @@
  * dependencies: Array<String>,
  * incompatible: Array<String>,
  * translations: {},
+ * settings: {},
+ * updateStaticSettings: Function,
  * updateStaticTranslations: Function,
  * gameInitializedRootClasses: Function,
  * gameInitializedRootManagers: Function,
@@ -112,6 +114,7 @@ import { RegularGameSpeed } from "../game/time/regular_game_speed";
 import { enumHubGoalRewards } from "../game/tutorial_goals";
 import { enumHubGoalRewardsToContentUnlocked } from "../game/tutorial_goals_mappings";
 import { enumCategories } from "../profile/application_settings";
+import { EnumSetting, BoolSetting, RangeSetting, BaseSetting } from "../profile/setting_types";
 import { enumLocalSavegameStatus } from "../savegame/savegame_manager";
 import { types } from "../savegame/serialization";
 import { AboutState } from "../states/about";
@@ -139,6 +142,12 @@ export class ShapezAPI {
             TextualGameState,
             MapChunk,
             HUDBaseToolbar,
+
+            //Settings
+            EnumSetting,
+            BoolSetting,
+            RangeSetting,
+            BaseSetting,
 
             //Functions,
             cachebust,

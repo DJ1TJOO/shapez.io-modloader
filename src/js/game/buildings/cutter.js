@@ -14,12 +14,52 @@ export class MetaCutterBuilding extends MetaBuilding {
         super("cutter");
     }
 
-    getSilhouetteColor() {
-        return MetaCutterBuilding.silhouetteColor;
+    /**
+     * @param {string} variant
+     */
+    getSilhouetteColor(variant) {
+        let condition = MetaCutterBuilding.silhouetteColors[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "string" ? condition : "#ffffff";
     }
 
+    /**
+     * Returns the edit layer of the building
+     * @param {GameRoot} root
+     * @param {string} variant
+     * @returns {Layer}
+     */
+    getLayer(root, variant) {
+        let reward = MetaCutterBuilding.layerByVariant[defaultBuildingVariant];
+
+        if (typeof reward === "function") {
+            // @ts-ignore
+            reward = reward();
+        }
+
+        // @ts-ignore
+        return typeof reward === "string" ? reward : "regular";
+    }
+
+    /**
+     * @param {string} variant
+     */
     getDimensions(variant) {
-        return MetaCutterBuilding.dimensions[variant];
+        let condition = MetaCutterBuilding.dimensions[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "object" ? condition : new Vector(1, 1);
     }
 
     /**
@@ -45,17 +85,46 @@ export class MetaCutterBuilding extends MetaBuilding {
      * @param {GameRoot} root
      */
     getAvailableVariants(root) {
-        if (root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_cutter_quad)) {
-            return [defaultBuildingVariant, MetaCutterBuilding.variants.quad];
+        const variants = MetaCutterBuilding.avaibleVariants;
+
+        let available = [];
+        for (const variant in variants) {
+            let reward = variants[variant];
+            if (typeof reward === "function") {
+                // @ts-ignore
+                reward = reward(root);
+            }
+
+            if (typeof reward === "boolean") {
+                available.push(variant);
+                continue;
+            }
+
+            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
+            available.push(variant);
         }
-        return super.getAvailableVariants(root);
+
+        return available;
     }
 
     /**
      * @param {GameRoot} root
      */
     getIsUnlocked(root) {
-        return root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_cutter_and_trash);
+        let reward = MetaCutterBuilding.avaibleVariants[defaultBuildingVariant];
+
+        if (typeof reward === "function") {
+            // @ts-ignore
+            reward = reward(root);
+        }
+
+        if (typeof reward === "boolean") {
+            // @ts-ignore
+            return reward;
+        }
+
+        // @ts-ignore
+        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
     }
 
     /**
@@ -82,22 +151,38 @@ export class MetaCutterBuilding extends MetaBuilding {
     }
 
     /**
-     *
      * @param {Entity} entity
      * @param {number} rotationVariant
      * @param {string} variant
      */
     updateVariants(entity, rotationVariant, variant) {
-        MetaCutterBuilding.componentVariations[variant](entity);
+        MetaCutterBuilding.componentVariations[variant](entity, rotationVariant);
     }
 }
+
 MetaCutterBuilding.variants = {
     quad: "quad",
 };
 
+MetaCutterBuilding.overlayMatrices = {
+    [defaultBuildingVariant]: null,
+};
+
 MetaCutterBuilding.dimensions = {
-    defaultBuildingVariant: new Vector(2, 1),
+    [defaultBuildingVariant]: new Vector(2, 1),
     [MetaCutterBuilding.variants.quad]: new Vector(4, 1),
+};
+
+MetaCutterBuilding.silhouetteColors = {
+    [defaultBuildingVariant]: "#7dcda2",
+};
+
+MetaCutterBuilding.avaibleVariants = {
+    [defaultBuildingVariant]: enumHubGoalRewards.reward_cutter_and_trash,
+};
+
+MetaCutterBuilding.layerByVariant = {
+    [defaultBuildingVariant]: "regular",
 };
 
 MetaCutterBuilding.additionalStatistics = {
@@ -108,7 +193,7 @@ MetaCutterBuilding.additionalStatistics = {
 };
 
 MetaCutterBuilding.componentVariations = {
-    [defaultBuildingVariant]: entity => {
+    [defaultBuildingVariant]: (entity, rotationVariant) => {
         entity.components.ItemEjector.setSlots([
             { pos: new Vector(0, 0), direction: enumDirection.top },
             { pos: new Vector(1, 0), direction: enumDirection.top },
@@ -117,7 +202,7 @@ MetaCutterBuilding.componentVariations = {
         entity.components.ItemProcessor.type = enumItemProcessorTypes.cutter;
     },
 
-    [MetaCutterBuilding.variants.quad]: entity => {
+    [MetaCutterBuilding.variants.quad]: (entity, rotationVariant) => {
         entity.components.ItemEjector.setSlots([
             { pos: new Vector(0, 0), direction: enumDirection.top },
             { pos: new Vector(1, 0), direction: enumDirection.top },
@@ -127,5 +212,3 @@ MetaCutterBuilding.componentVariations = {
         entity.components.ItemProcessor.type = enumItemProcessorTypes.cutterQuad;
     },
 };
-
-MetaCutterBuilding.silhouetteColor = "#7dcda2";

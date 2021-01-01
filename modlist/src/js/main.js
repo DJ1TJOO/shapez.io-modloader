@@ -1,18 +1,55 @@
 const { AboutModsState } = require("./states/aboutmods");
 const { ModsState } = require("./states/mods");
+const { ModSettingsState } = require("./states/modsettings");
 
 const modId = "a18121cf-fc7c-4f23-906d-b7ab0512bbc8";
 registerMod({
     title: "Modlist",
     id: modId,
-    description: "Modlist",
+    description: "The mod that adds the mods list",
     authors: ["DJ1TJOO"],
     version: "1.0.0",
     gameVersion: 1007,
     dependencies: [],
     incompatible: [],
+    settings: {
+        hasMakeModButton: {
+            type: "bool",
+            value: false,
+            title: "Make mod button",
+            description: "Enable/Disable the make mod button",
+            enabled: () => true,
+        },
+        // enum: {
+        //     type: "enum",
+        //     options: ["test", "new test"],
+        //     value: "new test",
+        //     title: "Enum test",
+        //     description: "Choose a test value",
+        //     textGetter: option => {
+        //         return option;
+        //     },
+        //     enabled: () => true,
+        // },
+        // range: {
+        //     type: "range",
+        //     min: 0,
+        //     max: 200,
+        //     stepSize: 0.001,
+        //     value: 10,
+        //     title: "Range test",
+        //     description: "Choose a test value",
+        //     enabled: () => true,
+        // },
+    },
     translations: {
         en: {
+            [modId]: {
+                description: "The mod that adds the mods list",
+            },
+            modSettings: {
+                title: "Mod settings",
+            },
             aboutMods: {
                 title: "About mods",
                 text: "This is a page about mods",
@@ -30,6 +67,12 @@ registerMod({
             },
         },
         nl: {
+            [modId]: {
+                description: "De mod die de mod lijst toevoegd",
+            },
+            modSettings: {
+                title: "Mod instellingen",
+            },
             aboutMods: {
                 title: "Over mods",
                 text: "Dit is een pagina mods",
@@ -47,18 +90,21 @@ registerMod({
             },
         },
     },
+    updateStaticSettings: () => {
+        ModsState.updateStaticSettings(modId);
+    },
     updateStaticTranslations: id => {
-        shapezAPI.exports.MainMenuState.extraSmallButtons.find(o => o.htmlClass === "CreateModButton").text =
-            shapezAPI.translations.mainMenu.createMod;
+        shapezAPI.mods.get(modId).description = shapezAPI.translations[modId].description;
+        ModsState.updateStaticTranslations(modId, id);
     },
     gameInitializedRootClasses: root => {},
     gameInitializedRootManagers: root => {},
     gameBeforeFirstUpdate: root => {},
     main: config => {
-        shapezAPI.registerIcon("main_menu/mods", "**{icons_mods}**");
         shapezAPI.injectCss("**{css}**", modId);
         shapezAPI.states["ModsState"] = ModsState;
+        shapezAPI.states["ModSettingsState"] = ModSettingsState;
         shapezAPI.states["AboutModsState"] = AboutModsState;
-        ModsState.setAPI();
+        ModsState.setAPI(modId);
     },
 });

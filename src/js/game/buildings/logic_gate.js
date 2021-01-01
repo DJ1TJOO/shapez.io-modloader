@@ -52,9 +52,14 @@ export class MetaLogicGateBuilding extends MetaBuilding {
         return root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_logic_gates);
     }
 
-    /** @returns {"wires"} **/
-    getLayer() {
-        return "wires";
+    /**
+     * Returns the edit layer of the building
+     * @param {GameRoot} root
+     * @param {string} variant
+     * @returns {Layer}
+     */
+    getLayer(root, variant) {
+        return MetaLogicGateBuilding.getLayer[variant];
     }
 
     getDimensions() {
@@ -93,42 +98,42 @@ export class MetaLogicGateBuilding extends MetaBuilding {
         switch (gateType) {
             case enumLogicGateType.and:
             case enumLogicGateType.xor:
-            case enumLogicGateType.or: {
-                pinComp.setSlots([
-                    {
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.top,
-                        type: enumPinSlotType.logicalEjector,
-                    },
-                    {
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.left,
-                        type: enumPinSlotType.logicalAcceptor,
-                    },
-                    {
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.right,
-                        type: enumPinSlotType.logicalAcceptor,
-                    },
-                ]);
-                break;
-            }
+            case enumLogicGateType.or:
+                {
+                    pinComp.setSlots([{
+                            pos: new Vector(0, 0),
+                            direction: enumDirection.top,
+                            type: enumPinSlotType.logicalEjector,
+                        },
+                        {
+                            pos: new Vector(0, 0),
+                            direction: enumDirection.left,
+                            type: enumPinSlotType.logicalAcceptor,
+                        },
+                        {
+                            pos: new Vector(0, 0),
+                            direction: enumDirection.right,
+                            type: enumPinSlotType.logicalAcceptor,
+                        },
+                    ]);
+                    break;
+                }
 
-            case enumLogicGateType.not: {
-                pinComp.setSlots([
-                    {
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.top,
-                        type: enumPinSlotType.logicalEjector,
-                    },
-                    {
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.bottom,
-                        type: enumPinSlotType.logicalAcceptor,
-                    },
-                ]);
-                break;
-            }
+            case enumLogicGateType.not:
+                {
+                    pinComp.setSlots([{
+                            pos: new Vector(0, 0),
+                            direction: enumDirection.top,
+                            type: enumPinSlotType.logicalEjector,
+                        },
+                        {
+                            pos: new Vector(0, 0),
+                            direction: enumDirection.bottom,
+                            type: enumPinSlotType.logicalAcceptor,
+                        },
+                    ]);
+                    break;
+                }
 
             default:
                 assertAlways("unknown logic gate type: " + gateType);
@@ -149,3 +154,7 @@ export class MetaLogicGateBuilding extends MetaBuilding {
         entity.addComponent(new LogicGateComponent({}));
     }
 }
+
+MetaLogicGateBuilding.getLayer = {
+    [defaultBuildingVariant]: "wires",
+};
