@@ -166,7 +166,10 @@ export class MetaMixerBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        let condition = MetaMixerBuilding.overlayMatrices[variant][rotation];
+        let condition = MetaMixerBuilding.overlayMatrices[variant];
+        if (condition) {
+            condition = condition[rotation];
+        }
         return condition ? condition : null;
     }
 

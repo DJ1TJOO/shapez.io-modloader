@@ -169,7 +169,10 @@ export class MetaHubBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        let condition = MetaHubBuilding.overlayMatrices[variant][rotation];
+        let condition = MetaHubBuilding.overlayMatrices[variant];
+        if (condition) {
+            condition = condition[rotation];
+        }
         return condition ? condition : null;
     }
 

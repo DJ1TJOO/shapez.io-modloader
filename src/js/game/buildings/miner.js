@@ -32,20 +32,7 @@ export class MetaMinerBuilding extends MetaBuilding {
      * @param {GameRoot} root
      */
     getIsUnlocked(root) {
-        let reward = MetaMinerBuilding.avaibleVariants[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward(root);
-        }
-
-        if (typeof reward === "boolean") {
-            // @ts-ignore
-            return reward;
-        }
-
-        // @ts-ignore
-        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
+        return true;
     }
 
     /**
@@ -165,7 +152,10 @@ export class MetaMinerBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        let condition = MetaMinerBuilding.overlayMatrices[variant][rotation];
+        let condition = MetaMinerBuilding.overlayMatrices[variant];
+        if (condition) {
+            condition = condition[rotation];
+        }
         return condition ? condition : null;
     }
 
@@ -229,7 +219,8 @@ MetaMinerBuilding.overlayMatrices = {
 MetaMinerBuilding.avaibleVariants = {
     [defaultBuildingVariant]: root =>
         !root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_miner_chainable),
-    [MetaMinerBuilding.variants.chainable]: enumHubGoalRewards.reward_miner_chainable,
+    [MetaMinerBuilding.variants.chainable]: root =>
+        root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_miner_chainable),
 };
 
 MetaMinerBuilding.additionalStatistics = {

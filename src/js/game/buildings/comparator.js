@@ -47,6 +47,36 @@ export class MetaComparatorBuilding extends MetaBuilding {
     }
 
     /**
+     * @param {string} variant
+     */
+    getIsRemovable(variant) {
+        let condition = MetaComparatorBuilding.isRemovable[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "boolean" ? condition : true;
+    }
+
+    /**
+     * @param {string} variant
+     */
+    getIsRotateable(variant) {
+        let condition = MetaComparatorBuilding.isRotateable[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "boolean" ? condition : true;
+    }
+
+    /**
      * @param {GameRoot} root
      */
     getAvailableVariants(root) {
@@ -106,18 +136,18 @@ export class MetaComparatorBuilding extends MetaBuilding {
     }
 
     /**
-     * @param {GameRoot} root
      * @param {string} variant
      */
-    getRenderPins(root, variant) {
-        let condition = MetaComparatorBuilding.renderPins[variant];
+    getShowLayerPreview(variant) {
+        let condition = MetaComparatorBuilding.layerPreview[variant];
 
         if (typeof condition === "function") {
-            condition = condition(root);
+            // @ts-ignore
+            condition = condition();
         }
 
         // @ts-ignore
-        return typeof condition === "boolean" ? condition : false;
+        return typeof condition === "string" ? condition : null;
     }
 
     /**
@@ -129,7 +159,23 @@ export class MetaComparatorBuilding extends MetaBuilding {
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
         let condition = MetaComparatorBuilding.overlayMatrices[variant];
-        return condition ? condition[rotation] : condition;
+        if (condition) {
+            condition = condition[rotation];
+        }
+        return condition ? condition : null;
+    }
+
+    /**
+     * @param {string} variant
+     */
+    getRenderPins(variant) {
+        let condition = MetaComparatorBuilding.renderPins[variant];
+
+        if (typeof condition === "function") {
+            condition = condition();
+        }
+
+        return typeof condition === "boolean" ? condition : true;
     }
 
     /**
@@ -187,8 +233,20 @@ MetaComparatorBuilding.silhouetteColors = {
     [defaultBuildingVariant]: "#823cab",
 };
 
+MetaComparatorBuilding.isRemovable = {
+    [defaultBuildingVariant]: true,
+};
+
+MetaComparatorBuilding.isRotateable = {
+    [defaultBuildingVariant]: true,
+};
+
 MetaComparatorBuilding.renderPins = {
     [defaultBuildingVariant]: false,
+};
+
+MetaComparatorBuilding.layerPreview = {
+    [defaultBuildingVariant]: "wires",
 };
 
 MetaComparatorBuilding.avaibleVariants = {

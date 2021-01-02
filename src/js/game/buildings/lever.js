@@ -158,7 +158,10 @@ export class MetaLeverBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        let condition = MetaLeverBuilding.overlayMatrices[variant][rotation];
+        let condition = MetaLeverBuilding.overlayMatrices[variant];
+        if (condition) {
+            condition = condition[rotation];
+        }
         return condition ? condition : null;
     }
 

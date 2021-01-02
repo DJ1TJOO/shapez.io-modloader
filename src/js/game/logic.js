@@ -70,7 +70,9 @@ export class GameLogic {
                 const otherEntity = this.root.map.getLayerContentXY(x, y, entity.layer);
                 if (otherEntity) {
                     const metaClass = otherEntity.components.StaticMapEntity.getMetaBuilding();
-                    if (!metaClass.getIsReplaceable()) {
+                    const staticComp = otherEntity.components.StaticMapEntity;
+                    const data = getBuildingDataFromCode(staticComp.code);
+                    if (!metaClass.getIsReplaceable(data.variant)) {
                         // This one is a direct blocker
                         return false;
                     }
@@ -128,8 +130,10 @@ export class GameLogic {
             for (let y = rect.y; y < rect.y + rect.h; ++y) {
                 const contents = this.root.map.getLayerContentXY(x, y, entity.layer);
                 if (contents) {
+                    const staticComp = contents.components.StaticMapEntity;
+                    const data = getBuildingDataFromCode(staticComp.code);
                     assertAlways(
-                        contents.components.StaticMapEntity.getMetaBuilding().getIsReplaceable(),
+                        contents.components.StaticMapEntity.getMetaBuilding().getIsReplaceable(data.variant),
                         "Tried to replace non-repleaceable entity"
                     );
                     if (!this.tryDeleteBuilding(contents)) {

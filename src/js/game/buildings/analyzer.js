@@ -48,6 +48,62 @@ export class MetaAnalyzerBuilding extends MetaBuilding {
     }
 
     /**
+     * @param {string} variant
+     */
+    getIsRemovable(variant) {
+        let condition = MetaAnalyzerBuilding.isRemovable[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "boolean" ? condition : true;
+    }
+
+    /**
+     * @param {string} variant
+     */
+    getIsRotateable(variant) {
+        let condition = MetaAnalyzerBuilding.isRotateable[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "boolean" ? condition : true;
+    }
+
+    /**
+     * @param {GameRoot} root
+     */
+    getAvailableVariants(root) {
+        const variants = MetaAnalyzerBuilding.avaibleVariants;
+
+        let available = [];
+        for (const variant in variants) {
+            let reward = variants[variant];
+            if (typeof reward === "function") {
+                // @ts-ignore
+                reward = reward(root);
+            }
+
+            if (typeof reward === "boolean") {
+                available.push(variant);
+                continue;
+            }
+
+            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
+            available.push(variant);
+        }
+
+        return available;
+    }
+
+    /**
      * Returns the edit layer of the building
      * @param {GameRoot} root
      * @param {string} variant
@@ -81,49 +137,43 @@ export class MetaAnalyzerBuilding extends MetaBuilding {
     }
 
     /**
-     * @param {GameRoot} root
      * @param {string} variant
      */
-    getRenderPins(root, variant) {
-        let condition = MetaAnalyzerBuilding.renderPins[variant];
+    getShowLayerPreview(variant) {
+        let condition = MetaAnalyzerBuilding.layerPreview[variant];
 
         if (typeof condition === "function") {
-            condition = condition(root);
+            // @ts-ignore
+            condition = condition();
         }
 
         // @ts-ignore
-        return typeof condition === "boolean" ? condition : false;
+        return typeof condition === "string" ? condition : null;
     }
 
-    getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant) {
+    /**
+     * @param {number} rotation
+     * @param {number} rotationVariant
+     * @param {string} variant
+     * @param {Entity} entity
+     * @returns {Array<number>|null}
+     */
+    getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
         let condition = MetaAnalyzerBuilding.overlayMatrices[variant][rotation];
         return condition ? condition : null;
     }
 
     /**
-     * @param {GameRoot} root
+     * @param {string} variant
      */
-    getAvailableVariants(root) {
-        const variants = MetaAnalyzerBuilding.avaibleVariants;
+    getRenderPins(variant) {
+        let condition = MetaAnalyzerBuilding.renderPins[variant];
 
-        let available = [];
-        for (const variant in variants) {
-            let reward = variants[variant];
-            if (typeof reward === "function") {
-                // @ts-ignore
-                reward = reward(root);
-            }
-
-            if (typeof reward === "boolean") {
-                available.push(variant);
-                continue;
-            }
-
-            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
-            available.push(variant);
+        if (typeof condition === "function") {
+            condition = condition();
         }
 
-        return available;
+        return typeof condition === "boolean" ? condition : true;
     }
 
     /**
@@ -169,6 +219,10 @@ export class MetaAnalyzerBuilding extends MetaBuilding {
     }
 }
 
+MetaAnalyzerBuilding.silhouetteColors = {
+    [defaultBuildingVariant]: "#555759",
+};
+
 MetaAnalyzerBuilding.avaibleVariants = {
     [defaultBuildingVariant]: enumHubGoalRewards.reward_virtual_processing,
 };
@@ -186,6 +240,18 @@ MetaAnalyzerBuilding.renderPins = {
 };
 
 MetaAnalyzerBuilding.layerByVariant = {
+    [defaultBuildingVariant]: "wires",
+};
+
+MetaAnalyzerBuilding.isRemovable = {
+    [defaultBuildingVariant]: true,
+};
+
+MetaAnalyzerBuilding.isRotateable = {
+    [defaultBuildingVariant]: true,
+};
+
+MetaAnalyzerBuilding.layerPreview = {
     [defaultBuildingVariant]: "wires",
 };
 
@@ -210,8 +276,4 @@ MetaAnalyzerBuilding.componentVariations = {
 
         entity.components.LogicGate.type = enumLogicGateType.analyzer;
     },
-};
-
-MetaAnalyzerBuilding.silhouetteColors = {
-    [defaultBuildingVariant]: "#555759",
 };

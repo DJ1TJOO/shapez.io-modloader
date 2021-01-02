@@ -14,7 +14,7 @@ import {
     Vector,
 } from "../../core/vector";
 import { BaseItem } from "../base_item";
-import { arrayWireRotationVariantToType, MetaWireBuilding } from "../buildings/wire";
+import { MetaWireBuilding } from "../buildings/wire";
 import { getCodeFromBuildingData } from "../building_codes";
 import { enumWireType, enumWireVariant, WireComponent } from "../components/wire";
 import { enumPinSlotType, WiredPinsComponent } from "../components/wired_pins";
@@ -738,7 +738,7 @@ export class WireSystem extends GameSystemWithFilter {
                     });
 
                     // Compute delta to see if anything changed
-                    const newType = arrayWireRotationVariantToType[rotationVariant];
+                    const newType = MetaWireBuilding.rotationVariantToType[rotationVariant];
 
                     if (targetStaticComp.rotation !== rotation || newType !== targetWireComp.type) {
                         // Change stuff

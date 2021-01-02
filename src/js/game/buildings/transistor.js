@@ -7,30 +7,100 @@ import { defaultBuildingVariant, MetaBuilding } from "../meta_building";
 import { GameRoot } from "../root";
 import { enumHubGoalRewards } from "../tutorial_goals";
 
-/** @enum {string} */
-export const enumTransistorVariants = {
-    mirrored: "mirrored",
-};
-
-const overlayMatrices = {
-    [defaultBuildingVariant]: generateMatrixRotations([0, 1, 0, 1, 1, 0, 0, 1, 0]),
-    [enumTransistorVariants.mirrored]: generateMatrixRotations([0, 1, 0, 0, 1, 1, 0, 1, 0]),
-};
-
 export class MetaTransistorBuilding extends MetaBuilding {
     constructor() {
         super("transistor");
     }
 
-    getSilhouetteColor() {
-        return "#bc3a61";
+    /**
+     * @param {string} variant
+     */
+    getSilhouetteColor(variant) {
+        let condition = MetaTransistorBuilding.silhouetteColors[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "string" ? condition : "#ffffff";
     }
 
     /**
      * @param {GameRoot} root
      */
     getIsUnlocked(root) {
-        return root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_logic_gates);
+        let reward = MetaTransistorBuilding.avaibleVariants[defaultBuildingVariant];
+
+        if (typeof reward === "function") {
+            // @ts-ignore
+            reward = reward(root);
+        }
+
+        if (typeof reward === "boolean") {
+            // @ts-ignore
+            return reward;
+        }
+
+        // @ts-ignore
+        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
+    }
+
+    /**
+     * @param {string} variant
+     */
+    getIsRemovable(variant) {
+        let condition = MetaTransistorBuilding.isRemovable[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "boolean" ? condition : true;
+    }
+
+    /**
+     * @param {string} variant
+     */
+    getIsRotateable(variant) {
+        let condition = MetaTransistorBuilding.isRotateable[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "boolean" ? condition : true;
+    }
+
+    /**
+     * @param {GameRoot} root
+     */
+    getAvailableVariants(root) {
+        const variants = MetaTransistorBuilding.avaibleVariants;
+
+        let available = [];
+        for (const variant in variants) {
+            let reward = variants[variant];
+            if (typeof reward === "function") {
+                // @ts-ignore
+                reward = reward(root);
+            }
+
+            if (typeof reward === "boolean") {
+                available.push(variant);
+                continue;
+            }
+
+            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
+            available.push(variant);
+        }
+
+        return available;
     }
 
     /**
@@ -40,45 +110,73 @@ export class MetaTransistorBuilding extends MetaBuilding {
      * @returns {Layer}
      */
     getLayer(root, variant) {
-        return MetaTransistorBuilding.getLayer[variant];
-    }
+        let reward = MetaTransistorBuilding.layerByVariant[defaultBuildingVariant];
 
-    getDimensions() {
-        return new Vector(1, 1);
-    }
+        if (typeof reward === "function") {
+            // @ts-ignore
+            reward = reward();
+        }
 
-    getAvailableVariants() {
-        return [defaultBuildingVariant, enumTransistorVariants.mirrored];
-    }
-
-    getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant) {
-        return overlayMatrices[variant][rotation];
+        // @ts-ignore
+        return typeof reward === "string" ? reward : "regular";
     }
 
     /**
-     * @param {GameRoot} root
      * @param {string} variant
      */
-    getRenderPins(root, variant) {
-        const condition = MetaTransistorBuilding.renderPins[variant];
+    getDimensions(variant) {
+        let condition = MetaTransistorBuilding.dimensions[variant];
 
         if (typeof condition === "function") {
-            return condition(root);
-        } else if (typeof condition === "boolean") {
-            return condition;
-        } else {
-            return false;
+            // @ts-ignore
+            condition = condition();
         }
+
+        // @ts-ignore
+        return typeof condition === "object" ? condition : new Vector(1, 1);
     }
 
     /**
-     *
-     * @param {Entity} entity
-     * @param {number} rotationVariant
+     * @param {string} variant
      */
-    updateVariants(entity, rotationVariant, variant) {
-        entity.components.WiredPins.slots[1].direction =
-            variant === enumTransistorVariants.mirrored ? enumDirection.right : enumDirection.left;
+    getShowLayerPreview(variant) {
+            let condition = MetaTransistorBuilding.layerPreview[variant];
+
+            if (typeof condition === "function") {
+                // @ts-ignore
+                condition = condition();
+            }
+
+            // @ts-ignore
+            return typeof condition === "string" ? condition : null;
+        }
+        /**
+         * @param {number} rotation
+         * @param {number} rotationVariant
+         * @param {string} variant
+         * @param {Entity} entity
+         * @returns {Array<number>|null}
+         */
+    getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
+        let condition = MetaTransistorBuilding.overlayMatrices[variant];
+        if (condition) {
+            condition = condition[rotation];
+        }
+        return condition ? condition : null;
+    }
+
+    /**
+     * @param {string} variant
+     */
+    getRenderPins(variant) {
+        let condition = MetaTransistorBuilding.renderPins[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        return typeof condition === "boolean" ? condition : true;
     }
 
     /**
@@ -113,12 +211,72 @@ export class MetaTransistorBuilding extends MetaBuilding {
             })
         );
     }
+
+    /**
+     * @param {Entity} entity
+     * @param {number} rotationVariant
+     * @param {string} variant
+     */
+    updateVariants(entity, rotationVariant, variant) {
+        MetaTransistorBuilding.componentVariations[variant](entity, rotationVariant);
+    }
 }
 
-MetaTransistorBuilding.getLayer = {
-    [defaultBuildingVariant]: "wires",
+MetaTransistorBuilding.variants = {
+    mirrored: "mirrored",
+};
+
+MetaTransistorBuilding.overlayMatrices = {
+    [defaultBuildingVariant]: generateMatrixRotations([0, 1, 0, 1, 1, 0, 0, 1, 0]),
+    [MetaTransistorBuilding.variants.mirrored]: generateMatrixRotations([0, 1, 0, 0, 1, 1, 0, 1, 0]),
+};
+
+MetaTransistorBuilding.dimensions = {
+    [defaultBuildingVariant]: new Vector(1, 1),
+    [MetaTransistorBuilding.variants.mirrored]: new Vector(1, 1),
+};
+
+MetaTransistorBuilding.silhouetteColors = {
+    [defaultBuildingVariant]: "#823cab",
+    [MetaTransistorBuilding.variants.mirrored]: "#823cab",
+};
+
+MetaTransistorBuilding.isRemovable = {
+    [defaultBuildingVariant]: true,
+    [MetaTransistorBuilding.variants.mirrored]: true,
+};
+
+MetaTransistorBuilding.isRotateable = {
+    [defaultBuildingVariant]: true,
+    [MetaTransistorBuilding.variants.mirrored]: true,
 };
 
 MetaTransistorBuilding.renderPins = {
     [defaultBuildingVariant]: false,
+    [MetaTransistorBuilding.variants.mirrored]: false,
+};
+
+MetaTransistorBuilding.layerPreview = {
+    [defaultBuildingVariant]: "wires",
+    [MetaTransistorBuilding.variants.mirrored]: "wires",
+};
+
+MetaTransistorBuilding.avaibleVariants = {
+    [defaultBuildingVariant]: enumHubGoalRewards.reward_logic_gates,
+    [MetaTransistorBuilding.variants.mirrored]: enumHubGoalRewards.reward_logic_gates,
+};
+
+MetaTransistorBuilding.layerByVariant = {
+    [defaultBuildingVariant]: "wires",
+    [MetaTransistorBuilding.variants.mirrored]: "wires",
+};
+
+MetaTransistorBuilding.componentVariations = {
+    [defaultBuildingVariant]: (entity, rotationVariant) => {
+        entity.components.WiredPins.slots[1].direction = enumDirection.left;
+    },
+
+    [MetaTransistorBuilding.variants.mirrored]: (entity, rotationVariant) => {
+        entity.components.WiredPins.slots[1].direction = enumDirection.right;
+    },
 };

@@ -18,52 +18,6 @@ export class MetaBalancerBuilding extends MetaBuilding {
     /**
      * @param {string} variant
      */
-    getDimensions(variant) {
-        let condition = MetaBalancerBuilding.dimensions[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "object" ? condition : new Vector(1, 1);
-    }
-
-    /**
-     * @param {number} rotation
-     * @param {number} rotationVariant
-     * @param {string} variant
-     * @param {Entity} entity
-     * @returns {Array<number>|null}
-     */
-    getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        let condition = MetaBalancerBuilding.overlayMatrices[variant][rotation];
-        return condition ? condition : null;
-    }
-
-    /**
-     * @param {GameRoot} root
-     * @param {string} variant
-     * @returns {Array<[string, string]>}
-     */
-    getAdditionalStatistics(root, variant) {
-        let speed = 0;
-        if (typeof MetaBalancerBuilding.additionalStatistics[variant] === "function") {
-            // @ts-ignore
-            speed = MetaBalancerBuilding.additionalStatistics[variant](root);
-        } else {
-            // @ts-ignore
-            speed = MetaBalancerBuilding.additionalStatistics[variant];
-        }
-        return [
-            [T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(speed)]
-        ];
-    }
-
-    /**
-     * @param {string} variant
-     */
     getSilhouetteColor(variant) {
         let condition = MetaBalancerBuilding.silhouetteColors[variant];
 
@@ -74,6 +28,56 @@ export class MetaBalancerBuilding extends MetaBuilding {
 
         // @ts-ignore
         return typeof condition === "string" ? condition : "#ffffff";
+    }
+
+    /**
+     * @param {GameRoot} root
+     */
+    getIsUnlocked(root) {
+        let reward = MetaBalancerBuilding.avaibleVariants[defaultBuildingVariant];
+
+        if (typeof reward === "function") {
+            // @ts-ignore
+            reward = reward(root);
+        }
+
+        if (typeof reward === "boolean") {
+            // @ts-ignore
+            return reward;
+        }
+
+        // @ts-ignore
+        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
+    }
+
+    /**
+     * @param {string} variant
+     */
+    getIsRemovable(variant) {
+        let condition = MetaBalancerBuilding.isRemovable[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "boolean" ? condition : true;
+    }
+
+    /**
+     * @param {string} variant
+     */
+    getIsRotateable(variant) {
+        let condition = MetaBalancerBuilding.isRotateable[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "boolean" ? condition : true;
     }
 
     /**
@@ -103,24 +107,98 @@ export class MetaBalancerBuilding extends MetaBuilding {
     }
 
     /**
+     * Returns the edit layer of the building
      * @param {GameRoot} root
+     * @param {string} variant
+     * @returns {Layer}
      */
-    // @ts-ignore
-    getIsUnlocked(root) {
-        let reward = MetaBalancerBuilding.avaibleVariants[defaultBuildingVariant];
+    getLayer(root, variant) {
+        let reward = MetaBalancerBuilding.layerByVariant[defaultBuildingVariant];
 
         if (typeof reward === "function") {
             // @ts-ignore
-            reward = reward(root);
-        }
-
-        if (typeof reward === "boolean") {
-            // @ts-ignore
-            return reward;
+            reward = reward();
         }
 
         // @ts-ignore
-        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
+        return typeof reward === "string" ? reward : "regular";
+    }
+
+    /**
+     * @param {string} variant
+     */
+    getDimensions(variant) {
+        let condition = MetaBalancerBuilding.dimensions[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "object" ? condition : new Vector(1, 1);
+    }
+
+    /**
+     * @param {string} variant
+     */
+    getShowLayerPreview(variant) {
+        let condition = MetaBalancerBuilding.layerPreview[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "string" ? condition : null;
+    }
+
+    /**
+     * @param {number} rotation
+     * @param {number} rotationVariant
+     * @param {string} variant
+     * @param {Entity} entity
+     * @returns {Array<number>|null}
+     */
+    getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
+        let condition = MetaBalancerBuilding.overlayMatrices[variant];
+        if (condition) {
+            condition = condition[rotation];
+        }
+        return condition ? condition : null;
+    }
+
+    /**
+     * @param {string} variant
+     */
+    getRenderPins(variant) {
+        let condition = MetaBalancerBuilding.renderPins[variant];
+
+        if (typeof condition === "function") {
+            condition = condition();
+        }
+
+        return typeof condition === "boolean" ? condition : true;
+    }
+
+    /**
+     * @param {GameRoot} root
+     * @param {string} variant
+     * @returns {Array<[string, string]>}
+     */
+    getAdditionalStatistics(root, variant) {
+        let speed = 0;
+        if (typeof MetaBalancerBuilding.additionalStatistics[variant] === "function") {
+            // @ts-ignore
+            speed = MetaBalancerBuilding.additionalStatistics[variant](root);
+        } else {
+            // @ts-ignore
+            speed = MetaBalancerBuilding.additionalStatistics[variant];
+        }
+        return [
+            [T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(speed)]
+        ];
     }
 
     /**
@@ -190,6 +268,46 @@ MetaBalancerBuilding.dimensions = {
     [MetaBalancerBuilding.variants.mergerInverse]: new Vector(1, 1),
     [MetaBalancerBuilding.variants.splitter]: new Vector(1, 1),
     [MetaBalancerBuilding.variants.splitterInverse]: new Vector(1, 1),
+};
+
+MetaBalancerBuilding.isRemovable = {
+    [defaultBuildingVariant]: true,
+    [MetaBalancerBuilding.variants.merger]: true,
+    [MetaBalancerBuilding.variants.mergerInverse]: true,
+    [MetaBalancerBuilding.variants.splitter]: true,
+    [MetaBalancerBuilding.variants.splitterInverse]: true,
+};
+
+MetaBalancerBuilding.isRotateable = {
+    [defaultBuildingVariant]: true,
+    [MetaBalancerBuilding.variants.merger]: true,
+    [MetaBalancerBuilding.variants.mergerInverse]: true,
+    [MetaBalancerBuilding.variants.splitter]: true,
+    [MetaBalancerBuilding.variants.splitterInverse]: true,
+};
+
+MetaBalancerBuilding.renderPins = {
+    [defaultBuildingVariant]: null,
+    [MetaBalancerBuilding.variants.merger]: null,
+    [MetaBalancerBuilding.variants.mergerInverse]: null,
+    [MetaBalancerBuilding.variants.splitter]: null,
+    [MetaBalancerBuilding.variants.splitterInverse]: null,
+};
+
+MetaBalancerBuilding.layerPreview = {
+    [defaultBuildingVariant]: null,
+    [MetaBalancerBuilding.variants.merger]: null,
+    [MetaBalancerBuilding.variants.mergerInverse]: null,
+    [MetaBalancerBuilding.variants.splitter]: null,
+    [MetaBalancerBuilding.variants.splitterInverse]: null,
+};
+
+MetaBalancerBuilding.layerByVariant = {
+    [defaultBuildingVariant]: "regular",
+    [MetaBalancerBuilding.variants.merger]: "regular",
+    [MetaBalancerBuilding.variants.mergerInverse]: "regular",
+    [MetaBalancerBuilding.variants.splitter]: "regular",
+    [MetaBalancerBuilding.variants.splitterInverse]: "regular",
 };
 
 MetaBalancerBuilding.additionalStatistics = {

@@ -14,8 +14,184 @@ export class MetaBeltBuilding extends MetaBuilding {
         super("belt");
     }
 
+    /**
+     * @param {string} variant
+     */
     getSilhouetteColor(variant) {
-        return MetaBeltBuilding.silhouetteColors[variant];
+        let condition = MetaBeltBuilding.silhouetteColors[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "string" ? condition : "#ffffff";
+    }
+
+    /**
+     * @param {GameRoot} root
+     */
+    getIsUnlocked(root) {
+        let reward = MetaBeltBuilding.avaibleVariants[defaultBuildingVariant];
+
+        if (typeof reward === "function") {
+            // @ts-ignore
+            reward = reward(root);
+        }
+
+        if (typeof reward === "boolean") {
+            // @ts-ignore
+            return reward;
+        }
+
+        // @ts-ignore
+        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
+    }
+
+    /**
+     * @param {string} variant
+     */
+    getIsRemovable(variant) {
+        let condition = MetaBeltBuilding.isRemovable[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "boolean" ? condition : true;
+    }
+
+    /**
+     * @param {string} variant
+     */
+    getIsRotateable(variant) {
+        let condition = MetaBeltBuilding.isRotateable[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "boolean" ? condition : true;
+    }
+
+    /**
+     * @param {GameRoot} root
+     */
+    getAvailableVariants(root) {
+        const variants = MetaBeltBuilding.avaibleVariants;
+
+        let available = [];
+        for (const variant in variants) {
+            let reward = variants[variant];
+            if (typeof reward === "function") {
+                // @ts-ignore
+                reward = reward(root);
+            }
+
+            if (typeof reward === "boolean") {
+                available.push(variant);
+                continue;
+            }
+
+            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
+            available.push(variant);
+        }
+
+        return available;
+    }
+
+    /**
+     * Returns the edit layer of the building
+     * @param {GameRoot} root
+     * @param {string} variant
+     * @returns {Layer}
+     */
+    getLayer(root, variant) {
+        let reward = MetaBeltBuilding.layerByVariant[defaultBuildingVariant];
+
+        if (typeof reward === "function") {
+            // @ts-ignore
+            reward = reward();
+        }
+
+        // @ts-ignore
+        return typeof reward === "string" ? reward : "regular";
+    }
+
+    /**
+     * @param {string} variant
+     */
+    getDimensions(variant) {
+        let condition = MetaBeltBuilding.dimensions[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "object" ? condition : new Vector(1, 1);
+    }
+
+    /**
+     * @param {GameRoot} root
+     * @param {string} variant
+     * @returns {Array<[string, string]>}
+     */
+    getAdditionalStatistics(root, variant) {
+        return MetaBeltBuilding.additionalStatistics[variant](root);
+    }
+
+    getIsReplaceable(variant) {
+        return MetaBeltBuilding.isReplaceable[variant];
+    }
+
+    /**
+     * @param {string} variant
+     */
+    getShowLayerPreview(variant) {
+        let condition = MetaBeltBuilding.layerPreview[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "string" ? condition : null;
+    }
+
+    /**
+     * @param {number} rotation
+     * @param {number} rotationVariant
+     * @param {string} variant
+     * @param {Entity} entity
+     * @returns {Array<number>|null}
+     */
+    getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
+        let condition = MetaBeltBuilding.beltOverlayMatrices[entity.components.Belt.direction];
+        if (condition) {
+            condition = condition[rotation];
+        }
+        return condition ? condition : null;
+    }
+
+    /**
+     * @param {string} variant
+     */
+    getRenderPins(variant) {
+        let condition = MetaBeltBuilding.renderPins[variant];
+
+        if (typeof condition === "function") {
+            condition = condition();
+        }
+
+        return typeof condition === "boolean" ? condition : true;
     }
 
     getPlacementSound(variant) {
@@ -37,24 +213,8 @@ export class MetaBeltBuilding extends MetaBuilding {
         return null;
     }
 
-    getIsReplaceable() {
-        return true;
-    }
-
-    /**
-     * @param {GameRoot} root
-     * @param {string} variant
-     * @returns {Array<[string, string]>}
-     */
-    getAdditionalStatistics(root, variant) {
-        const beltSpeed = root.hubGoals.getBeltBaseSpeed();
-        return [
-            [T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(beltSpeed)]
-        ];
-    }
-
     getPreviewSprite(rotationVariant) {
-        switch (MetaBeltBuilding.arrayBeltVariantToRotation[rotationVariant]) {
+        switch (MetaBeltBuilding.variantToRotation[rotationVariant]) {
             case enumDirection.top:
                 {
                     return Loader.getSprite("sprites/buildings/belt_top.png");
@@ -75,7 +235,7 @@ export class MetaBeltBuilding extends MetaBuilding {
     }
 
     getBlueprintSprite(rotationVariant) {
-        switch (MetaBeltBuilding.arrayBeltVariantToRotation[rotationVariant]) {
+        switch (MetaBeltBuilding.variantToRotation[rotationVariant]) {
             case enumDirection.top:
                 {
                     return Loader.getSprite("sprites/blueprints/belt_top.png");
@@ -96,17 +256,6 @@ export class MetaBeltBuilding extends MetaBuilding {
     }
 
     /**
-     *
-     * @param {number} rotation
-     * @param {number} rotationVariant
-     * @param {string} variant
-     * @param {Entity} entity
-     */
-    getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        return MetaBeltBuilding.beltOverlayMatrices[entity.components.Belt.direction][rotation];
-    }
-
-    /**
      * Creates the entity at the given location
      * @param {Entity} entity
      */
@@ -119,12 +268,12 @@ export class MetaBeltBuilding extends MetaBuilding {
     }
 
     /**
-     *
      * @param {Entity} entity
      * @param {number} rotationVariant
+     * @param {string} variant
      */
-    updateVariants(entity, rotationVariant) {
-        entity.components.Belt.direction = MetaBeltBuilding.arrayBeltVariantToRotation[rotationVariant];
+    updateVariants(entity, rotationVariant, variant) {
+        MetaBeltBuilding.componentVariations[variant](entity, rotationVariant);
     }
 
     /**
@@ -229,11 +378,12 @@ export class MetaBeltBuilding extends MetaBuilding {
         };
     }
 }
+
 MetaBeltBuilding.silhouetteColors = {
     [defaultBuildingVariant]: THEME.map.chunkOverview.beltColor,
 };
 
-MetaBeltBuilding.arrayBeltVariantToRotation = [enumDirection.top, enumDirection.left, enumDirection.right];
+MetaBeltBuilding.variantToRotation = [enumDirection.top, enumDirection.left, enumDirection.right];
 
 MetaBeltBuilding.beltOverlayMatrices = {
     [enumDirection.top]: generateMatrixRotations([0, 1, 0, 0, 1, 0, 0, 1, 0]),
@@ -246,3 +396,47 @@ MetaBeltBuilding.placementSounds = {
 };
 
 MetaBeltBuilding.rotationVariants = [0, 1, 2];
+
+MetaBeltBuilding.avaibleVariants = {
+    [defaultBuildingVariant]: true,
+};
+
+MetaBeltBuilding.dimensions = {
+    [defaultBuildingVariant]: new Vector(1, 1),
+};
+
+MetaBeltBuilding.isRemovable = {
+    [defaultBuildingVariant]: true,
+};
+
+MetaBeltBuilding.isReplaceable = {
+    [defaultBuildingVariant]: true,
+};
+
+MetaBeltBuilding.isRotateable = {
+    [defaultBuildingVariant]: true,
+};
+
+MetaBeltBuilding.renderPins = {
+    [defaultBuildingVariant]: null,
+};
+
+MetaBeltBuilding.layerPreview = {
+    [defaultBuildingVariant]: null,
+};
+
+MetaBeltBuilding.layerByVariant = {
+    [defaultBuildingVariant]: "regular",
+};
+
+MetaBeltBuilding.componentVariations = {
+    [defaultBuildingVariant]: (entity, rotationVariant) => {
+        entity.components.Belt.direction = MetaBeltBuilding.variantToRotation[rotationVariant];
+    },
+};
+
+MetaBeltBuilding.additionalStatistics = {
+    [defaultBuildingVariant]: root => [
+        [T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(root.hubGoals.getBeltBaseSpeed())],
+    ],
+};

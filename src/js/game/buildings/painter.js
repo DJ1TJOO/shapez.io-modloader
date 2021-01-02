@@ -171,7 +171,10 @@ export class MetaPainterBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        let condition = MetaPainterBuilding.overlayMatrices[variant][rotation];
+        let condition = MetaPainterBuilding.overlayMatrices[variant];
+        if (condition) {
+            condition = condition[rotation];
+        }
         return condition ? condition : null;
     }
 

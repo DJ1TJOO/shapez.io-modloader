@@ -166,7 +166,7 @@ export class BeltSystem extends GameSystemWithFilter {
                     });
 
                     // Compute delta to see if anything changed
-                    const newDirection = MetaBeltBuilding.arrayBeltVariantToRotation[rotationVariant];
+                    const newDirection = MetaBeltBuilding.variantToRotation[rotationVariant];
 
                     if (targetStaticComp.rotation !== rotation || newDirection !== targetBeltComp.direction) {
                         const originalPath = targetBeltComp.assignedPath;

@@ -48,6 +48,36 @@ export class MetaConstantSignalBuilding extends MetaBuilding {
     }
 
     /**
+     * @param {string} variant
+     */
+    getIsRemovable(variant) {
+        let condition = MetaConstantSignalBuilding.isRemovable[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "boolean" ? condition : true;
+    }
+
+    /**
+     * @param {string} variant
+     */
+    getIsRotateable(variant) {
+        let condition = MetaConstantSignalBuilding.isRotateable[variant];
+
+        if (typeof condition === "function") {
+            // @ts-ignore
+            condition = condition();
+        }
+
+        // @ts-ignore
+        return typeof condition === "boolean" ? condition : true;
+    }
+
+    /**
      * @param {GameRoot} root
      */
     getAvailableVariants(root) {
@@ -107,30 +137,45 @@ export class MetaConstantSignalBuilding extends MetaBuilding {
     }
 
     /**
-     * @param {GameRoot} root
      * @param {string} variant
      */
-    getRenderPins(root, variant) {
-        let condition = MetaConstantSignalBuilding.renderPins[variant];
+    getShowLayerPreview(variant) {
+            let condition = MetaConstantSignalBuilding.layerPreview[variant];
 
-        if (typeof condition === "function") {
-            condition = condition(root);
+            if (typeof condition === "function") {
+                // @ts-ignore
+                condition = condition();
+            }
+
+            // @ts-ignore
+            return typeof condition === "string" ? condition : null;
         }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : false;
+        /**
+         * @param {number} rotation
+         * @param {number} rotationVariant
+         * @param {string} variant
+         * @param {Entity} entity
+         * @returns {Array<number>|null}
+         */
+    getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
+        let condition = MetaConstantSignalBuilding.overlayMatrices[variant];
+        if (condition) {
+            condition = condition[rotation];
+        }
+        return condition ? condition : null;
     }
 
     /**
-     * @param {number} rotation
-     * @param {number} rotationVariant
      * @param {string} variant
-     * @param {Entity} entity
-     * @returns {Array<number>|null}
      */
-    getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        let condition = MetaConstantSignalBuilding.overlayMatrices[variant][rotation];
-        return condition ? condition : null;
+    getRenderPins(variant) {
+        let condition = MetaConstantSignalBuilding.renderPins[variant];
+
+        if (typeof condition === "function") {
+            condition = condition();
+        }
+
+        return typeof condition === "boolean" ? condition : true;
     }
 
     /**
@@ -172,6 +217,14 @@ MetaConstantSignalBuilding.silhouetteColors = {
     [defaultBuildingVariant]: "#2b84fd",
 };
 
+MetaConstantSignalBuilding.isRemovable = {
+    [defaultBuildingVariant]: true,
+};
+
+MetaConstantSignalBuilding.isRotateable = {
+    [defaultBuildingVariant]: true,
+};
+
 MetaConstantSignalBuilding.renderPins = {
     [defaultBuildingVariant]: false,
 };
@@ -181,6 +234,10 @@ MetaConstantSignalBuilding.avaibleVariants = {
 };
 
 MetaConstantSignalBuilding.layerByVariant = {
+    [defaultBuildingVariant]: "wires",
+};
+
+MetaConstantSignalBuilding.layerPreview = {
     [defaultBuildingVariant]: "wires",
 };
 

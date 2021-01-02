@@ -1,4 +1,4 @@
-import { formatItemsPerSecond } from "../../core/utils";
+import { formatBigNumber, formatItemsPerSecond } from "../../core/utils";
 import { enumDirection, Vector } from "../../core/vector";
 import { T } from "../../translations";
 import { ItemAcceptorComponent } from "../components/item_acceptor";
@@ -68,17 +68,8 @@ export class MetaCutterBuilding extends MetaBuilding {
      * @returns {Array<[string, string]>}
      */
     getAdditionalStatistics(root, variant) {
-        let speed = 0;
-        if (typeof MetaCutterBuilding.additionalStatistics[variant] === "function") {
-            // @ts-ignore
-            speed = MetaCutterBuilding.additionalStatistics[variant](root);
-        } else {
-            // @ts-ignore
-            speed = MetaCutterBuilding.additionalStatistics[variant];
-        }
-        return [
-            [T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(speed)]
-        ];
+        // @ts-ignore
+        return MetaCutterBuilding.additionalStatistics[variant](root);
     }
 
     /**
@@ -166,6 +157,7 @@ MetaCutterBuilding.variants = {
 
 MetaCutterBuilding.overlayMatrices = {
     [defaultBuildingVariant]: null,
+    [MetaCutterBuilding.variants.quad]: null,
 };
 
 MetaCutterBuilding.dimensions = {
@@ -175,21 +167,48 @@ MetaCutterBuilding.dimensions = {
 
 MetaCutterBuilding.silhouetteColors = {
     [defaultBuildingVariant]: "#7dcda2",
+    [MetaCutterBuilding.variants.quad]: "#7dcda2",
 };
 
 MetaCutterBuilding.avaibleVariants = {
     [defaultBuildingVariant]: enumHubGoalRewards.reward_cutter_and_trash,
+    [MetaCutterBuilding.variants.quad]: enumHubGoalRewards.reward_cutter_quad,
 };
 
 MetaCutterBuilding.layerByVariant = {
     [defaultBuildingVariant]: "regular",
+    [MetaCutterBuilding.variants.quad]: "regular",
+};
+
+MetaCutterBuilding.layerPreview = {
+    [defaultBuildingVariant]: null,
+    [MetaCutterBuilding.variants.quad]: null,
+};
+
+MetaCutterBuilding.isRemovable = {
+    [defaultBuildingVariant]: true,
+    [MetaCutterBuilding.variants.quad]: true,
+};
+
+MetaCutterBuilding.isRotateable = {
+    [defaultBuildingVariant]: true,
+    [MetaCutterBuilding.variants.quad]: true,
 };
 
 MetaCutterBuilding.additionalStatistics = {
-    [defaultBuildingVariant]: root =>
-        (root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.cutter) / 2) * 1,
-    [MetaCutterBuilding.variants.quad]: root =>
-        (root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.cutterQuad) / 2) * 1,
+    [defaultBuildingVariant]: root => [
+        [
+            T.ingame.buildingPlacement.infoTexts.speed,
+            formatItemsPerSecond(root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.cutter) / 2),
+        ],
+    ],
+
+    [MetaCutterBuilding.variants.quad]: root => [
+        [
+            T.ingame.buildingPlacement.infoTexts.speed,
+            formatItemsPerSecond(root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.cutterQuad) / 2),
+        ],
+    ],
 };
 
 MetaCutterBuilding.componentVariations = {

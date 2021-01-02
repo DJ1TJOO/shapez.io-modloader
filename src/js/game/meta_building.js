@@ -83,7 +83,7 @@ export class MetaBuilding {
      * Returns whether this building can get replaced
      */
     getIsReplaceable(variant = defaultBuildingVariant) {
-        return false; // TODO: Test this!!!
+        return false;
     }
 
     /**

@@ -228,7 +228,7 @@ export class MapChunkView extends MapChunk {
             }
         }
 
-        if (this.root.currentLayer === "regular") {
+        if (this.root.currentLayer === "wires") {
             // Draw layers overlay
 
             context.fillStyle = THEME.map.wires.overlayColor;
@@ -250,26 +250,23 @@ export class MapChunkView extends MapChunk {
                     });
                 }
             }
-
-            //For later
-            // for (const [layer, array2D] of this.layersContents) {
-            //     for (let x = 0; x < globalConfig.mapChunkSize; ++x) {
-            //         const array = array2D[x];
-            //         for (let y = 0; y < globalConfig.mapChunkSize; ++y) {
-            //             const content = array[y];
-            //             if (!content) {
-            //                 continue;
-            //             }
-            //             MapChunkView.drawSingleOverviewTile({
-            //                 context,
-            //                 x: x * CHUNK_OVERLAY_RES,
-            //                 y: y * CHUNK_OVERLAY_RES,
-            //                 entity: content,
-            //                 tileSizePixels: CHUNK_OVERLAY_RES,
-            //             });
-            //         }
-            //     }
-            // }
+        } else if (this.root.currentLayer !== "regular") {
+            for (let x = 0; x < globalConfig.mapChunkSize; ++x) {
+                const array = this.layersContents[this.root.currentLayer][x];
+                for (let y = 0; y < globalConfig.mapChunkSize; ++y) {
+                    const content = array[y];
+                    if (!content) {
+                        continue;
+                    }
+                    MapChunkView.drawSingleOverviewTile({
+                        context,
+                        x: x * CHUNK_OVERLAY_RES,
+                        y: y * CHUNK_OVERLAY_RES,
+                        entity: content,
+                        tileSizePixels: CHUNK_OVERLAY_RES,
+                    });
+                }
+            }
         }
     }
 

@@ -181,7 +181,10 @@ export class MetaFilterBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        let condition = MetaFilterBuilding.overlayMatrices[variant][rotation];
+        let condition = MetaFilterBuilding.overlayMatrices[variant];
+        if (condition) {
+            condition = condition[rotation];
+        }
         return condition ? condition : null;
     }
 
@@ -270,7 +273,7 @@ MetaFilterBuilding.isRotateable = {
 };
 
 MetaFilterBuilding.avaibleVariants = {
-    [defaultBuildingVariant]: enumHubGoalRewards.reward_display,
+    [defaultBuildingVariant]: enumHubGoalRewards.reward_filter,
 };
 
 MetaFilterBuilding.layerByVariant = {
