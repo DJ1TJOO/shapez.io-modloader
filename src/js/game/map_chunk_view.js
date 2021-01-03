@@ -120,7 +120,7 @@ export class MapChunkView extends MapChunk {
 
             for (let i = 0; i < this.patches.length; ++i) {
                 const patch = this.patches[i];
-                if (patch.item.getItemType() === "shape") {
+                if (patch.item.getItemType && patch.item.getItemType() === "shape") {
                     const destX = this.x * dims + patch.pos.x * globalConfig.tileSize;
                     const destY = this.y * dims + patch.pos.y * globalConfig.tileSize;
                     patch.item.drawItemCenteredClipped(destX, destY, parameters, diameter);
@@ -217,7 +217,12 @@ export class MapChunkView extends MapChunk {
 
                 const lowerContent = lowerArray[y];
                 if (lowerContent) {
-                    context.fillStyle = lowerContent.getBackgroundColorAsResource();
+                    if (lowerContent.getBackgroundColorAsResource) {
+                        context.fillStyle = lowerContent.getBackgroundColorAsResource();
+                    } else {
+                        // @ts-ignore
+                        context.fillStyle = lowerContent;
+                    }
                     context.fillRect(
                         x * CHUNK_OVERLAY_RES,
                         y * CHUNK_OVERLAY_RES,

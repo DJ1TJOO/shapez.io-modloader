@@ -144,29 +144,32 @@ export class MetaUndergroundBeltBuilding extends MetaBuilding {
      * @param {string} variant
      */
     getShowLayerPreview(variant) {
-            let condition = MetaUndergroundBeltBuilding.layerPreview[variant];
+        let condition = MetaUndergroundBeltBuilding.layerPreview[variant];
 
-            if (typeof condition === "function") {
-                // @ts-ignore
-                condition = condition();
-            }
-
+        if (typeof condition === "function") {
             // @ts-ignore
-            return typeof condition === "string" ? condition : null;
+            condition = condition();
         }
-        /**
-         * @param {number} rotation
-         * @param {number} rotationVariant
-         * @param {string} variant
-         * @param {Entity} entity
-         * @returns {Array<number>|null}
-         */
-        //TODO: look at virtual processor and wire/wire_tunnel
+
+        // @ts-ignore
+        return typeof condition === "string" ? condition : null;
+    }
+
+    /**
+     * @param {number} rotation
+     * @param {number} rotationVariant
+     * @param {string} variant
+     * @param {Entity} entity
+     * @returns {Array<number>|null}
+     */
+    //TODO: look at virtual processor and wire/wire_tunnel
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
         let condition = MetaUndergroundBeltBuilding.overlayMatricesByRotation[rotationVariant];
         if (condition) {
+            // @ts-ignore
             condition = condition[rotation];
         }
+        // @ts-ignore
         return condition ? condition : null;
     }
 
@@ -326,8 +329,9 @@ export class MetaUndergroundBeltBuilding extends MetaBuilding {
      * @param {string} variant
      */
     updateVariants(entity, rotationVariant, variant) {
-        const vari = MetaUndergroundBeltBuilding.rotationVariantToMode[rotationVariant];
-        MetaUndergroundBeltBuilding.componentVariationsByRotation[vari](entity, rotationVariant);
+        const mode = MetaUndergroundBeltBuilding.rotationVariantToMode[rotationVariant];
+        entity.components.UndergroundBelt.tier = MetaUndergroundBeltBuilding.variantToTier[variant];
+        MetaUndergroundBeltBuilding.componentVariationsByRotation[mode](entity, rotationVariant);
     }
 }
 
@@ -336,6 +340,7 @@ MetaUndergroundBeltBuilding.rotationVariants = [0, 1];
 MetaUndergroundBeltBuilding.variants = {
     tier2: "tier2",
 };
+
 MetaUndergroundBeltBuilding.overlayMatricesByRotation = [
     // Sender
     generateMatrixRotations([1, 1, 1, 0, 1, 0, 0, 1, 0]),
@@ -422,6 +427,7 @@ MetaUndergroundBeltBuilding.additionalStatistics = {
 MetaUndergroundBeltBuilding.componentVariationsByRotation = {
     [enumUndergroundBeltMode.sender]: (entity, rotationVariant) => {
         entity.components.UndergroundBelt.mode = enumUndergroundBeltMode.sender;
+        //console.log(entity.components.UndergroundBelt.mode);
         entity.components.ItemEjector.setSlots([]);
         entity.components.ItemAcceptor.setSlots([{
             pos: new Vector(0, 0),
@@ -431,6 +437,7 @@ MetaUndergroundBeltBuilding.componentVariationsByRotation = {
 
     [enumUndergroundBeltMode.receiver]: (entity, rotationVariant) => {
         entity.components.UndergroundBelt.mode = enumUndergroundBeltMode.receiver;
+        //console.log(entity.components.UndergroundBelt.mode);
         entity.components.ItemAcceptor.setSlots([]);
         entity.components.ItemEjector.setSlots([{
             pos: new Vector(0, 0),

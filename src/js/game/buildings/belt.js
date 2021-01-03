@@ -176,8 +176,10 @@ export class MetaBeltBuilding extends MetaBuilding {
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
         let condition = MetaBeltBuilding.beltOverlayMatrices[entity.components.Belt.direction];
         if (condition) {
+            // @ts-ignore
             condition = condition[rotation];
         }
+        // @ts-ignore
         return condition ? condition : null;
     }
 

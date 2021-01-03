@@ -132,6 +132,7 @@ export class MetaVirtualProcessorBuilding extends MetaBuilding {
 
         if (typeof condition === "function") {
             // @ts-ignore
+
             condition = condition();
         }
 
@@ -203,9 +204,20 @@ export class MetaVirtualProcessorBuilding extends MetaBuilding {
      * @param {string} variant
      */
     updateVariants(entity, rotationVariant, variant) {
+        // for (let i = 0; i < MetaVirtualProcessorBuilding.updateVariants.length; i++) {
+        //     const ret = MetaVirtualProcessorBuilding.updateVariants[i](entity, rotationVariant, variant);
+        //     if (typeof ret !== "undefined") return ret;
+        // }
         MetaVirtualProcessorBuilding.componentVariations[variant](entity, rotationVariant);
     }
 }
+
+MetaVirtualProcessorBuilding.updateVariants = [
+    // (entity, rotationVariant, variant) => {},
+    // (entity, rotationVariant, variant) => {
+    //     return "dd";
+    // },
+];
 
 MetaVirtualProcessorBuilding.variants = {
     rotater: "rotater",
@@ -231,7 +243,7 @@ MetaVirtualProcessorBuilding.avaibleVariants = {
 };
 
 MetaVirtualProcessorBuilding.dimensions = {
-    [defaultBuildingVariant]: new Vector(2, 1),
+    [defaultBuildingVariant]: new Vector(1, 1),
     [MetaVirtualProcessorBuilding.variants.rotater]: new Vector(1, 1),
     [MetaVirtualProcessorBuilding.variants.unstacker]: new Vector(1, 1),
     [MetaVirtualProcessorBuilding.variants.stacker]: new Vector(1, 1),
@@ -312,6 +324,8 @@ MetaVirtualProcessorBuilding.componentVariations = {
                 type: enumPinSlotType.logicalAcceptor,
             },
         ]);
+
+        entity.components.LogicGate.type = enumLogicGateType.cutter;
     },
 
     [MetaVirtualProcessorBuilding.variants.rotater]: (entity, rotationVariant) => {
@@ -326,6 +340,8 @@ MetaVirtualProcessorBuilding.componentVariations = {
                 type: enumPinSlotType.logicalAcceptor,
             },
         ]);
+
+        entity.components.LogicGate.type = enumLogicGateType.rotater;
     },
 
     [MetaVirtualProcessorBuilding.variants.unstacker]: (entity, rotationVariant) => {
@@ -345,6 +361,8 @@ MetaVirtualProcessorBuilding.componentVariations = {
                 type: enumPinSlotType.logicalAcceptor,
             },
         ]);
+
+        entity.components.LogicGate.type = enumLogicGateType.unstacker;
     },
 
     [MetaVirtualProcessorBuilding.variants.stacker]: (entity, rotationVariant) => {
@@ -364,6 +382,8 @@ MetaVirtualProcessorBuilding.componentVariations = {
                 type: enumPinSlotType.logicalAcceptor,
             },
         ]);
+
+        entity.components.LogicGate.type = enumLogicGateType.stacker;
     },
 
     [MetaVirtualProcessorBuilding.variants.painter]: (entity, rotationVariant) => {
@@ -383,5 +403,7 @@ MetaVirtualProcessorBuilding.componentVariations = {
                 type: enumPinSlotType.logicalAcceptor,
             },
         ]);
+
+        entity.components.LogicGate.type = enumLogicGateType.painter;
     },
 };

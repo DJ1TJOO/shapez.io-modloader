@@ -55,7 +55,7 @@ export class BeltUnderlaysSystem extends GameSystemWithFilter {
     }
 
     static getId() {
-        return "undergroundBelt";
+        return "beltUnderlays";
     }
 
     update() {

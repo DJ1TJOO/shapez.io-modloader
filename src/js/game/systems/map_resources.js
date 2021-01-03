@@ -48,7 +48,9 @@ export class MapResourcesSystem extends GameSystem {
                 const destY = chunk.y * globalConfig.mapChunkWorldSize + patch.pos.y * globalConfig.tileSize;
                 const diameter = Math.min(80, 40 / parameters.zoomLevel);
 
-                patch.item.drawItemCenteredClipped(destX, destY, parameters, diameter);
+                if (patch.item.drawItemCenteredClipped) {
+                    patch.item.drawItemCenteredClipped(destX, destY, parameters, diameter);
+                }
             }
         } else {
             // HIGH QUALITY: Draw all items
@@ -73,12 +75,14 @@ export class MapResourcesSystem extends GameSystem {
                         const destX = worldX + globalConfig.halfTileSize;
                         const destY = worldY + globalConfig.halfTileSize;
 
-                        lowerItem.drawItemCenteredClipped(
-                            destX,
-                            destY,
-                            parameters,
-                            globalConfig.defaultItemDiameter
-                        );
+                        if (lowerItem.drawItemCenteredClipped) {
+                            lowerItem.drawItemCenteredClipped(
+                                destX,
+                                destY,
+                                parameters,
+                                globalConfig.defaultItemDiameter
+                            );
+                        }
                     }
                 }
             }
@@ -111,7 +115,12 @@ export class MapResourcesSystem extends GameSystem {
             for (let y = 0; y < globalConfig.mapChunkSize; ++y) {
                 const item = row[y];
                 if (item) {
-                    context.fillStyle = item.getBackgroundColorAsResource();
+                    if (item.getBackgroundColorAsResource) {
+                        context.fillStyle = item.getBackgroundColorAsResource();
+                    } else {
+                        // @ts-ignore
+                        context.fillStyle = item;
+                    }
                     context.fillRect(x, y, 1, 1);
                 }
             }

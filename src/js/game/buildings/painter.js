@@ -231,7 +231,7 @@ MetaPainterBuilding.silhouetteColors = {
 };
 
 MetaPainterBuilding.dimensions = {
-    [defaultBuildingVariant]: new Vector(1, 1),
+    [defaultBuildingVariant]: new Vector(2, 1),
     [MetaPainterBuilding.variants.mirrored]: new Vector(2, 1),
     [MetaPainterBuilding.variants.double]: new Vector(2, 2),
     [MetaPainterBuilding.variants.quad]: new Vector(4, 1),
