@@ -1,0 +1,41 @@
+
+atlas0_lq.png
+size: 256, 64
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+sprites/blueprints/trasher
+  rotate: false
+  xy: 1, 1
+  size: 48, 48
+  orig: 48, 48
+  offset: 0, 0
+  index: -1
+sprites/blueprints/trasher-pink
+  rotate: false
+  xy: 101, 1
+  size: 48, 48
+  orig: 48, 48
+  offset: 0, 0
+  index: -1
+sprites/buildings/trasher
+  rotate: false
+  xy: 51, 1
+  size: 48, 48
+  orig: 48, 48
+  offset: 0, 0
+  index: -1
+sprites/buildings/trasher-pink
+  rotate: false
+  xy: 151, 1
+  size: 48, 48
+  orig: 48, 48
+  offset: 0, 0
+  index: -1
+sprites/fluids/water
+  rotate: false
+  xy: 201, 31
+  size: 14, 18
+  orig: 18, 18
+  offset: 2, 0
+  index: -1
