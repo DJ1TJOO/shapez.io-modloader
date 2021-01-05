@@ -19,65 +19,28 @@ export class MetaFilterBuilding extends MetaBuilding {
      * @param {string} variant
      */
     getSilhouetteColor(variant) {
-        let condition = MetaFilterBuilding.silhouetteColors[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : "#ffffff";
+        return MetaFilterBuilding.silhouetteColors[variant]();
     }
 
     /**
      * @param {GameRoot} root
      */
     getIsUnlocked(root) {
-        let reward = MetaFilterBuilding.avaibleVariants[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward(root);
-        }
-
-        if (typeof reward === "boolean") {
-            // @ts-ignore
-            return reward;
-        }
-
-        // @ts-ignore
-        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
+        return this.getAvailableVariants(root).length > 0;
     }
 
     /**
      * @param {string} variant
      */
     getIsRemovable(variant) {
-        let condition = MetaFilterBuilding.isRemovable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaFilterBuilding.isRemovable[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getIsRotateable(variant) {
-        let condition = MetaFilterBuilding.isRotateable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaFilterBuilding.isRotateable[variant]();
     }
 
     /**
@@ -88,19 +51,7 @@ export class MetaFilterBuilding extends MetaBuilding {
 
         let available = [];
         for (const variant in variants) {
-            let reward = variants[variant];
-            if (typeof reward === "function") {
-                // @ts-ignore
-                reward = reward(root);
-            }
-
-            if (typeof reward === "boolean") {
-                available.push(variant);
-                continue;
-            }
-
-            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
-            available.push(variant);
+            if (variants[variant](root)) available.push(variant);
         }
 
         return available;
@@ -113,45 +64,22 @@ export class MetaFilterBuilding extends MetaBuilding {
      * @returns {Layer}
      */
     getLayer(root, variant) {
-        let reward = MetaFilterBuilding.layerByVariant[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward();
-        }
-
-        // @ts-ignore
-        return typeof reward === "string" ? reward : "regular";
+        //@ts-ignore
+        return MetaFilterBuilding.layerByVariant[defaultBuildingVariant](root);
     }
 
     /**
      * @param {string} variant
      */
     getDimensions(variant) {
-        let condition = MetaFilterBuilding.dimensions[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "object" ? condition : new Vector(1, 1);
+        return MetaFilterBuilding.dimensions[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getShowLayerPreview(variant) {
-        let condition = MetaFilterBuilding.layerPreview[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : null;
+        return MetaFilterBuilding.layerPreview[variant]();
     }
 
     /**
@@ -160,17 +88,7 @@ export class MetaFilterBuilding extends MetaBuilding {
      * @returns {Array<[string, string]>}
      */
     getAdditionalStatistics(root, variant) {
-        let speed = 0;
-        if (typeof MetaFilterBuilding.additionalStatistics[variant] === "function") {
-            // @ts-ignore
-            speed = MetaFilterBuilding.additionalStatistics[variant](root);
-        } else {
-            // @ts-ignore
-            speed = MetaFilterBuilding.additionalStatistics[variant];
-        }
-        return [
-            [T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(speed)]
-        ];
+        return MetaFilterBuilding.additionalStatistics[variant](root);
     }
 
     /**
@@ -181,24 +99,14 @@ export class MetaFilterBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        let condition = MetaFilterBuilding.overlayMatrices[variant];
-        if (condition) {
-            condition = condition[rotation];
-        }
-        return condition ? condition : null;
+        return MetaFilterBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
     }
 
     /**
      * @param {string} variant
      */
     getRenderPins(variant) {
-        let condition = MetaFilterBuilding.renderPins[variant];
-
-        if (typeof condition === "function") {
-            condition = condition();
-        }
-
-        return typeof condition === "boolean" ? condition : true;
+        return MetaFilterBuilding.renderPins[variant]();
     }
 
     /**
@@ -206,40 +114,7 @@ export class MetaFilterBuilding extends MetaBuilding {
      * @param {Entity} entity
      */
     setupEntityComponents(entity) {
-        entity.addComponent(
-            new WiredPinsComponent({
-                slots: [{
-                    pos: new Vector(0, 0),
-                    direction: enumDirection.left,
-                    type: enumPinSlotType.logicalAcceptor,
-                }, ],
-            })
-        );
-
-        entity.addComponent(
-            new ItemAcceptorComponent({
-                slots: [{
-                    pos: new Vector(0, 0),
-                    directions: [enumDirection.bottom],
-                }, ],
-            })
-        );
-
-        entity.addComponent(
-            new ItemEjectorComponent({
-                slots: [{
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.top,
-                    },
-                    {
-                        pos: new Vector(1, 0),
-                        direction: enumDirection.right,
-                    },
-                ],
-            })
-        );
-
-        entity.addComponent(new FilterComponent());
+        MetaFilterBuilding.setupEntityComponents.forEach(func => func(entity));
     }
 
     /**
@@ -252,44 +127,87 @@ export class MetaFilterBuilding extends MetaBuilding {
     }
 }
 
+MetaFilterBuilding.setupEntityComponents = [
+    entity =>
+    entity.addComponent(
+        new WiredPinsComponent({
+            slots: [{
+                pos: new Vector(0, 0),
+                direction: enumDirection.left,
+                type: enumPinSlotType.logicalAcceptor,
+            }, ],
+        })
+    ),
+
+    entity =>
+    entity.addComponent(
+        new ItemAcceptorComponent({
+            slots: [{
+                pos: new Vector(0, 0),
+                directions: [enumDirection.bottom],
+            }, ],
+        })
+    ),
+
+    entity =>
+    entity.addComponent(
+        new ItemEjectorComponent({
+            slots: [{
+                    pos: new Vector(0, 0),
+                    direction: enumDirection.top,
+                },
+                {
+                    pos: new Vector(1, 0),
+                    direction: enumDirection.right,
+                },
+            ],
+        })
+    ),
+
+    entity => entity.addComponent(new FilterComponent()),
+];
+
 MetaFilterBuilding.overlayMatrices = {
-    [defaultBuildingVariant]: null,
+    [defaultBuildingVariant]: () => null,
 };
 
 MetaFilterBuilding.dimensions = {
-    [defaultBuildingVariant]: new Vector(2, 1),
+    [defaultBuildingVariant]: () => new Vector(2, 1),
 };
 
 MetaFilterBuilding.silhouetteColors = {
-    [defaultBuildingVariant]: "#c45c2e",
+    [defaultBuildingVariant]: () => "#c45c2e",
 };
 
 MetaFilterBuilding.isRemovable = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaFilterBuilding.isRotateable = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaFilterBuilding.avaibleVariants = {
-    [defaultBuildingVariant]: enumHubGoalRewards.reward_filter,
+    [defaultBuildingVariant]: root => root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_filter),
 };
 
 MetaFilterBuilding.layerByVariant = {
-    [defaultBuildingVariant]: "regular",
+    [defaultBuildingVariant]: root => "regular",
 };
 
 MetaFilterBuilding.layerPreview = {
-    [defaultBuildingVariant]: "wires",
+    [defaultBuildingVariant]: () => "wires",
 };
 
 MetaFilterBuilding.additionalStatistics = {
-    [defaultBuildingVariant]: root => root.hubGoals.getBeltBaseSpeed(),
+    [defaultBuildingVariant]: root => [
+        T.ingame.buildingPlacement.infoTexts.speed,
+        formatItemsPerSecond(root.hubGoals.getBeltBaseSpeed()),
+    ],
 };
 
 MetaFilterBuilding.renderPins = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaFilterBuilding.componentVariations = {

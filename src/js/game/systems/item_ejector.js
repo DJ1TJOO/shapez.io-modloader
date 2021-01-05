@@ -167,9 +167,9 @@ export class ItemEjectorSystem extends GameSystemWithFilter {
                 sourceSlot.progress = Math.min(
                     1,
                     sourceSlot.progress +
-                    progressGrowth *
-                    this.root.hubGoals.getBeltBaseSpeed() *
-                    globalConfig.itemSpacingOnBelts
+                        progressGrowth *
+                            this.root.hubGoals.getBeltBaseSpeed() *
+                            globalConfig.itemSpacingOnBelts
                 );
 
                 if (G_IS_DEV && globalConfig.debug.disableEjectorProcessing) {

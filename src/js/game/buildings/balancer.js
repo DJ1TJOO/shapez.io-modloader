@@ -19,65 +19,28 @@ export class MetaBalancerBuilding extends MetaBuilding {
      * @param {string} variant
      */
     getSilhouetteColor(variant) {
-        let condition = MetaBalancerBuilding.silhouetteColors[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : "#ffffff";
+        return MetaBalancerBuilding.silhouetteColors[variant]();
     }
 
     /**
      * @param {GameRoot} root
      */
     getIsUnlocked(root) {
-        let reward = MetaBalancerBuilding.avaibleVariants[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward(root);
-        }
-
-        if (typeof reward === "boolean") {
-            // @ts-ignore
-            return reward;
-        }
-
-        // @ts-ignore
-        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
+        return this.getAvailableVariants(root).length > 0;
     }
 
     /**
      * @param {string} variant
      */
     getIsRemovable(variant) {
-        let condition = MetaBalancerBuilding.isRemovable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaBalancerBuilding.isRemovable[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getIsRotateable(variant) {
-        let condition = MetaBalancerBuilding.isRotateable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaBalancerBuilding.isRotateable[variant]();
     }
 
     /**
@@ -88,19 +51,7 @@ export class MetaBalancerBuilding extends MetaBuilding {
 
         let available = [];
         for (const variant in variants) {
-            let reward = variants[variant];
-            if (typeof reward === "function") {
-                // @ts-ignore
-                reward = reward(root);
-            }
-
-            if (typeof reward === "boolean") {
-                available.push(variant);
-                continue;
-            }
-
-            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
-            available.push(variant);
+            if (variants[variant](root)) available.push(variant);
         }
 
         return available;
@@ -113,45 +64,22 @@ export class MetaBalancerBuilding extends MetaBuilding {
      * @returns {Layer}
      */
     getLayer(root, variant) {
-        let reward = MetaBalancerBuilding.layerByVariant[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward();
-        }
-
         // @ts-ignore
-        return typeof reward === "string" ? reward : "regular";
+        return MetaBalancerBuilding.layerByVariant[variant](root);
     }
 
     /**
      * @param {string} variant
      */
     getDimensions(variant) {
-        let condition = MetaBalancerBuilding.dimensions[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "object" ? condition : new Vector(1, 1);
+        return MetaBalancerBuilding.dimensions[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getShowLayerPreview(variant) {
-        let condition = MetaBalancerBuilding.layerPreview[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : null;
+        return MetaBalancerBuilding.layerPreview[variant]();
     }
 
     /**
@@ -162,24 +90,14 @@ export class MetaBalancerBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        let condition = MetaBalancerBuilding.overlayMatrices[variant];
-        if (condition) {
-            condition = condition[rotation];
-        }
-        return condition ? condition : null;
+        return MetaBalancerBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
     }
 
     /**
      * @param {string} variant
      */
     getRenderPins(variant) {
-        let condition = MetaBalancerBuilding.renderPins[variant];
-
-        if (typeof condition === "function") {
-            condition = condition();
-        }
-
-        return typeof condition === "boolean" ? condition : true;
+        return MetaBalancerBuilding.renderPins[variant]();
     }
 
     /**
@@ -188,17 +106,7 @@ export class MetaBalancerBuilding extends MetaBuilding {
      * @returns {Array<[string, string]>}
      */
     getAdditionalStatistics(root, variant) {
-        let speed = 0;
-        if (typeof MetaBalancerBuilding.additionalStatistics[variant] === "function") {
-            // @ts-ignore
-            speed = MetaBalancerBuilding.additionalStatistics[variant](root);
-        } else {
-            // @ts-ignore
-            speed = MetaBalancerBuilding.additionalStatistics[variant];
-        }
-        return [
-            [T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(speed)]
-        ];
+        return MetaBalancerBuilding.additionalStatistics[variant](root);
     }
 
     /**
@@ -206,27 +114,7 @@ export class MetaBalancerBuilding extends MetaBuilding {
      * @param {Entity} entity
      */
     setupEntityComponents(entity) {
-        entity.addComponent(
-            new ItemAcceptorComponent({
-                slots: [], // set later
-            })
-        );
-
-        entity.addComponent(
-            new ItemProcessorComponent({
-                inputsPerCharge: 1,
-                processorType: enumItemProcessorTypes.balancer,
-            })
-        );
-
-        entity.addComponent(
-            new ItemEjectorComponent({
-                slots: [], // set later
-                renderFloatingItems: false,
-            })
-        );
-
-        entity.addComponent(new BeltUnderlaysComponent({ underlays: [] }));
+        MetaBalancerBuilding.setupEntityComponents.forEach(func => func(entity));
     }
 
     /**
@@ -239,6 +127,33 @@ export class MetaBalancerBuilding extends MetaBuilding {
     }
 }
 
+MetaBalancerBuilding.setupEntityComponents = [
+    entity =>
+    entity.addComponent(
+        new ItemAcceptorComponent({
+            slots: [], // set later
+        })
+    ),
+
+    entity =>
+    entity.addComponent(
+        new ItemProcessorComponent({
+            inputsPerCharge: 1,
+            processorType: enumItemProcessorTypes.balancer,
+        })
+    ),
+
+    entity =>
+    entity.addComponent(
+        new ItemEjectorComponent({
+            slots: [], // set later
+            renderFloatingItems: false,
+        })
+    ),
+
+    entity => entity.addComponent(new BeltUnderlaysComponent({ underlays: [] })),
+];
+
 MetaBalancerBuilding.variants = {
     merger: "merger",
     mergerInverse: "merger-inverse",
@@ -247,88 +162,136 @@ MetaBalancerBuilding.variants = {
 };
 
 MetaBalancerBuilding.overlayMatrices = {
-    [defaultBuildingVariant]: null,
-    [MetaBalancerBuilding.variants.merger]: generateMatrixRotations([0, 1, 0, 0, 1, 1, 0, 1, 0]),
-    [MetaBalancerBuilding.variants.mergerInverse]: generateMatrixRotations([0, 1, 0, 1, 1, 0, 0, 1, 0]),
-    [MetaBalancerBuilding.variants.splitter]: generateMatrixRotations([0, 1, 0, 0, 1, 1, 0, 1, 0]),
-    [MetaBalancerBuilding.variants.splitterInverse]: generateMatrixRotations([0, 1, 0, 1, 1, 0, 0, 1, 0]),
+    [defaultBuildingVariant]: (entity, rotationVariant) => null,
+    [MetaBalancerBuilding.variants.merger]: (entity, rotationVariant) =>
+        generateMatrixRotations([0, 1, 0, 0, 1, 1, 0, 1, 0]),
+    [MetaBalancerBuilding.variants.mergerInverse]: (entity, rotationVariant) =>
+        generateMatrixRotations([0, 1, 0, 1, 1, 0, 0, 1, 0]),
+    [MetaBalancerBuilding.variants.splitter]: (entity, rotationVariant) =>
+        generateMatrixRotations([0, 1, 0, 0, 1, 1, 0, 1, 0]),
+    [MetaBalancerBuilding.variants.splitterInverse]: (entity, rotationVariant) =>
+        generateMatrixRotations([0, 1, 0, 1, 1, 0, 0, 1, 0]),
 };
 
 MetaBalancerBuilding.avaibleVariants = {
-    [defaultBuildingVariant]: enumHubGoalRewards.reward_balancer,
-    [MetaBalancerBuilding.variants.merger]: enumHubGoalRewards.reward_merger,
-    [MetaBalancerBuilding.variants.mergerInverse]: enumHubGoalRewards.reward_merger,
-    [MetaBalancerBuilding.variants.splitter]: enumHubGoalRewards.reward_splitter,
-    [MetaBalancerBuilding.variants.splitterInverse]: enumHubGoalRewards.reward_splitter,
+    [defaultBuildingVariant]: root => root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_balancer),
+    [MetaBalancerBuilding.variants.merger]: root =>
+        root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_merger),
+    [MetaBalancerBuilding.variants.mergerInverse]: root =>
+        root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_merger),
+    [MetaBalancerBuilding.variants.splitter]: root =>
+        root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_splitter),
+    [MetaBalancerBuilding.variants.splitterInverse]: root =>
+        root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_splitter),
 };
 
 MetaBalancerBuilding.dimensions = {
-    [defaultBuildingVariant]: new Vector(2, 1),
-    [MetaBalancerBuilding.variants.merger]: new Vector(1, 1),
-    [MetaBalancerBuilding.variants.mergerInverse]: new Vector(1, 1),
-    [MetaBalancerBuilding.variants.splitter]: new Vector(1, 1),
-    [MetaBalancerBuilding.variants.splitterInverse]: new Vector(1, 1),
+    [defaultBuildingVariant]: () => new Vector(2, 1),
+    [MetaBalancerBuilding.variants.merger]: () => new Vector(1, 1),
+    [MetaBalancerBuilding.variants.mergerInverse]: () => new Vector(1, 1),
+    [MetaBalancerBuilding.variants.splitter]: () => new Vector(1, 1),
+    [MetaBalancerBuilding.variants.splitterInverse]: () => new Vector(1, 1),
 };
 
 MetaBalancerBuilding.isRemovable = {
-    [defaultBuildingVariant]: true,
-    [MetaBalancerBuilding.variants.merger]: true,
-    [MetaBalancerBuilding.variants.mergerInverse]: true,
-    [MetaBalancerBuilding.variants.splitter]: true,
-    [MetaBalancerBuilding.variants.splitterInverse]: true,
+    [defaultBuildingVariant]: () => true,
+    [MetaBalancerBuilding.variants.merger]: () => true,
+    [MetaBalancerBuilding.variants.mergerInverse]: () => true,
+    [MetaBalancerBuilding.variants.splitter]: () => true,
+    [MetaBalancerBuilding.variants.splitterInverse]: () => true,
 };
 
 MetaBalancerBuilding.isRotateable = {
-    [defaultBuildingVariant]: true,
-    [MetaBalancerBuilding.variants.merger]: true,
-    [MetaBalancerBuilding.variants.mergerInverse]: true,
-    [MetaBalancerBuilding.variants.splitter]: true,
-    [MetaBalancerBuilding.variants.splitterInverse]: true,
+    [defaultBuildingVariant]: () => true,
+    [MetaBalancerBuilding.variants.merger]: () => true,
+    [MetaBalancerBuilding.variants.mergerInverse]: () => true,
+    [MetaBalancerBuilding.variants.splitter]: () => true,
+    [MetaBalancerBuilding.variants.splitterInverse]: () => true,
 };
 
 MetaBalancerBuilding.renderPins = {
-    [defaultBuildingVariant]: null,
-    [MetaBalancerBuilding.variants.merger]: null,
-    [MetaBalancerBuilding.variants.mergerInverse]: null,
-    [MetaBalancerBuilding.variants.splitter]: null,
-    [MetaBalancerBuilding.variants.splitterInverse]: null,
+    [defaultBuildingVariant]: () => null,
+    [MetaBalancerBuilding.variants.merger]: () => null,
+    [MetaBalancerBuilding.variants.mergerInverse]: () => null,
+    [MetaBalancerBuilding.variants.splitter]: () => null,
+    [MetaBalancerBuilding.variants.splitterInverse]: () => null,
 };
 
 MetaBalancerBuilding.layerPreview = {
-    [defaultBuildingVariant]: null,
-    [MetaBalancerBuilding.variants.merger]: null,
-    [MetaBalancerBuilding.variants.mergerInverse]: null,
-    [MetaBalancerBuilding.variants.splitter]: null,
-    [MetaBalancerBuilding.variants.splitterInverse]: null,
+    [defaultBuildingVariant]: () => null,
+    [MetaBalancerBuilding.variants.merger]: () => null,
+    [MetaBalancerBuilding.variants.mergerInverse]: () => null,
+    [MetaBalancerBuilding.variants.splitter]: () => null,
+    [MetaBalancerBuilding.variants.splitterInverse]: () => null,
 };
 
 MetaBalancerBuilding.layerByVariant = {
-    [defaultBuildingVariant]: "regular",
-    [MetaBalancerBuilding.variants.merger]: "regular",
-    [MetaBalancerBuilding.variants.mergerInverse]: "regular",
-    [MetaBalancerBuilding.variants.splitter]: "regular",
-    [MetaBalancerBuilding.variants.splitterInverse]: "regular",
+    [defaultBuildingVariant]: root => "regular",
+    [MetaBalancerBuilding.variants.merger]: root => "regular",
+    [MetaBalancerBuilding.variants.mergerInverse]: root => "regular",
+    [MetaBalancerBuilding.variants.splitter]: root => "regular",
+    [MetaBalancerBuilding.variants.splitterInverse]: root => "regular",
 };
 
 MetaBalancerBuilding.additionalStatistics = {
-    [defaultBuildingVariant]: root =>
-        (root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.balancer) / 2) * 2,
-    [MetaBalancerBuilding.variants.merger]: root =>
-        (root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.balancer) / 2) * 1,
-    [MetaBalancerBuilding.variants.mergerInverse]: root =>
-        (root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.balancer) / 2) * 1,
-    [MetaBalancerBuilding.variants.splitter]: root =>
-        (root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.balancer) / 2) * 1,
-    [MetaBalancerBuilding.variants.splitterInverse]: root =>
-        (root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.balancer) / 2) * 1,
+    /**
+     * @param {*} root
+     * @returns {Array<[string, string]>}
+     */
+    [defaultBuildingVariant]: root => [
+        [
+            T.ingame.buildingPlacement.infoTexts.speed,
+            formatItemsPerSecond(root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.balancer)),
+        ],
+    ],
+    /**
+     * @param {*} root
+     * @returns {Array<[string, string]>}
+     */
+    [MetaBalancerBuilding.variants.merger]: root => [
+        [
+            T.ingame.buildingPlacement.infoTexts.speed,
+            formatItemsPerSecond(root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.balancer) / 2),
+        ],
+    ],
+    /**
+     * @param {*} root
+     * @returns {Array<[string, string]>}
+     */
+    [MetaBalancerBuilding.variants.mergerInverse]: root => [
+        [
+            T.ingame.buildingPlacement.infoTexts.speed,
+            formatItemsPerSecond(root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.balancer) / 2),
+        ],
+    ],
+    /**
+     * @param {*} root
+     * @returns {Array<[string, string]>}
+     */
+    [MetaBalancerBuilding.variants.splitter]: root => [
+        [
+            T.ingame.buildingPlacement.infoTexts.speed,
+            formatItemsPerSecond(root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.balancer) / 2),
+        ],
+    ],
+    /**
+     * @param {*} root
+     * @returns {Array<[string, string]>}
+     */
+    [MetaBalancerBuilding.variants.splitterInverse]: root => [
+        [
+            T.ingame.buildingPlacement.infoTexts.speed,
+            formatItemsPerSecond(root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.balancer) / 2),
+        ],
+    ],
 };
 
 MetaBalancerBuilding.silhouetteColors = {
-    [defaultBuildingVariant]: "#555759",
-    [MetaBalancerBuilding.variants.merger]: "#555759",
-    [MetaBalancerBuilding.variants.mergerInverse]: "#555759",
-    [MetaBalancerBuilding.variants.splitter]: "#555759",
-    [MetaBalancerBuilding.variants.splitterInverse]: "#555759",
+    [defaultBuildingVariant]: () => "#555759",
+    [MetaBalancerBuilding.variants.merger]: () => "#555759",
+    [MetaBalancerBuilding.variants.mergerInverse]: () => "#555759",
+    [MetaBalancerBuilding.variants.splitter]: () => "#555759",
+    [MetaBalancerBuilding.variants.splitterInverse]: () => "#555759",
 };
 
 MetaBalancerBuilding.componentVariations = {

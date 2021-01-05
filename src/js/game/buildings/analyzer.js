@@ -16,65 +16,28 @@ export class MetaAnalyzerBuilding extends MetaBuilding {
      * @param {string} variant
      */
     getSilhouetteColor(variant) {
-        let condition = MetaAnalyzerBuilding.silhouetteColors[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : "#ffffff";
+        return MetaAnalyzerBuilding.silhouetteColors[variant]();
     }
 
     /**
      * @param {GameRoot} root
      */
     getIsUnlocked(root) {
-        let reward = MetaAnalyzerBuilding.avaibleVariants[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward(root);
-        }
-
-        if (typeof reward === "boolean") {
-            // @ts-ignore
-            return reward;
-        }
-
-        // @ts-ignore
-        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
+        return this.getAvailableVariants(root).length > 0;
     }
 
     /**
      * @param {string} variant
      */
     getIsRemovable(variant) {
-        let condition = MetaAnalyzerBuilding.isRemovable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaAnalyzerBuilding.isRemovable[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getIsRotateable(variant) {
-        let condition = MetaAnalyzerBuilding.isRotateable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaAnalyzerBuilding.isRotateable[variant]();
     }
 
     /**
@@ -85,19 +48,7 @@ export class MetaAnalyzerBuilding extends MetaBuilding {
 
         let available = [];
         for (const variant in variants) {
-            let reward = variants[variant];
-            if (typeof reward === "function") {
-                // @ts-ignore
-                reward = reward(root);
-            }
-
-            if (typeof reward === "boolean") {
-                available.push(variant);
-                continue;
-            }
-
-            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
-            available.push(variant);
+            if (variants[variant](root)) available.push(variant);
         }
 
         return available;
@@ -110,45 +61,21 @@ export class MetaAnalyzerBuilding extends MetaBuilding {
      * @returns {Layer}
      */
     getLayer(root, variant) {
-        let reward = MetaAnalyzerBuilding.layerByVariant[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward();
-        }
-
-        // @ts-ignore
-        return typeof reward === "string" ? reward : "regular";
+        return MetaAnalyzerBuilding.layerByVariant[variant](root);
     }
 
     /**
      * @param {string} variant
      */
     getDimensions(variant) {
-        let condition = MetaAnalyzerBuilding.dimensions[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "object" ? condition : new Vector(1, 1);
+        return MetaAnalyzerBuilding.dimensions[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getShowLayerPreview(variant) {
-        let condition = MetaAnalyzerBuilding.layerPreview[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : null;
+        return MetaAnalyzerBuilding.layerPreview[variant]();
     }
 
     /**
@@ -159,21 +86,14 @@ export class MetaAnalyzerBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        let condition = MetaAnalyzerBuilding.overlayMatrices[variant][rotation];
-        return condition ? condition : null;
+        return MetaAnalyzerBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
     }
 
     /**
      * @param {string} variant
      */
     getRenderPins(variant) {
-        let condition = MetaAnalyzerBuilding.renderPins[variant];
-
-        if (typeof condition === "function") {
-            condition = condition();
-        }
-
-        return typeof condition === "boolean" ? condition : true;
+        return MetaAnalyzerBuilding.renderPins[variant]();
     }
 
     /**
@@ -181,32 +101,7 @@ export class MetaAnalyzerBuilding extends MetaBuilding {
      * @param {Entity} entity
      */
     setupEntityComponents(entity) {
-        entity.addComponent(
-            new WiredPinsComponent({
-                slots: [{
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.left,
-                        type: enumPinSlotType.logicalEjector,
-                    },
-                    {
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.right,
-                        type: enumPinSlotType.logicalEjector,
-                    },
-                    {
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.bottom,
-                        type: enumPinSlotType.logicalAcceptor,
-                    },
-                ],
-            })
-        );
-
-        entity.addComponent(
-            new LogicGateComponent({
-                type: enumLogicGateType.analyzer,
-            })
-        );
+        MetaAnalyzerBuilding.setupEntityComponents.forEach(func => func(entity));
     }
 
     /**
@@ -219,40 +114,73 @@ export class MetaAnalyzerBuilding extends MetaBuilding {
     }
 }
 
+MetaAnalyzerBuilding.setupEntityComponents = [
+    entity =>
+    entity.addComponent(
+        new WiredPinsComponent({
+            slots: [{
+                    pos: new Vector(0, 0),
+                    direction: enumDirection.left,
+                    type: enumPinSlotType.logicalEjector,
+                },
+                {
+                    pos: new Vector(0, 0),
+                    direction: enumDirection.right,
+                    type: enumPinSlotType.logicalEjector,
+                },
+                {
+                    pos: new Vector(0, 0),
+                    direction: enumDirection.bottom,
+                    type: enumPinSlotType.logicalAcceptor,
+                },
+            ],
+        })
+    ),
+
+    entity =>
+    entity.addComponent(
+        new LogicGateComponent({
+            type: enumLogicGateType.analyzer,
+        })
+    ),
+];
+
 MetaAnalyzerBuilding.silhouetteColors = {
-    [defaultBuildingVariant]: "#555759",
+    [defaultBuildingVariant]: () => "#555759",
 };
 
 MetaAnalyzerBuilding.avaibleVariants = {
-    [defaultBuildingVariant]: enumHubGoalRewards.reward_virtual_processing,
+    [defaultBuildingVariant]: root =>
+        root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_virtual_processing),
 };
 
 MetaAnalyzerBuilding.overlayMatrices = {
-    [defaultBuildingVariant]: generateMatrixRotations([1, 1, 0, 1, 1, 1, 0, 1, 0]),
+    [defaultBuildingVariant]: (entity, rotationVariant) =>
+        generateMatrixRotations([1, 1, 0, 1, 1, 1, 0, 1, 0]),
 };
 
 MetaAnalyzerBuilding.dimensions = {
-    [defaultBuildingVariant]: new Vector(1, 1),
+    [defaultBuildingVariant]: () => new Vector(1, 1),
 };
 
 MetaAnalyzerBuilding.renderPins = {
-    [defaultBuildingVariant]: false,
+    [defaultBuildingVariant]: () => false,
 };
 
 MetaAnalyzerBuilding.layerByVariant = {
-    [defaultBuildingVariant]: "wires",
+    [defaultBuildingVariant]: root => "wires",
 };
 
 MetaAnalyzerBuilding.isRemovable = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaAnalyzerBuilding.isRotateable = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaAnalyzerBuilding.layerPreview = {
-    [defaultBuildingVariant]: "wires",
+    [defaultBuildingVariant]: () => "wires",
 };
 
 MetaAnalyzerBuilding.componentVariations = {
@@ -277,3 +205,271 @@ MetaAnalyzerBuilding.componentVariations = {
         entity.components.LogicGate.type = enumLogicGateType.analyzer;
     },
 };
+
+//TODO: keep this for later
+// import { generateMatrixRotations } from "../../core/utils";
+// import { enumDirection, Vector } from "../../core/vector";
+// import { enumLogicGateType, LogicGateComponent } from "../components/logic_gate";
+// import { enumPinSlotType, WiredPinsComponent } from "../components/wired_pins";
+// import { Entity } from "../entity";
+// import { defaultBuildingVariant, MetaBuilding } from "../meta_building";
+// import { GameRoot } from "../root";
+// import { enumHubGoalRewards } from "../tutorial_goals";
+
+// export class MetaAnalyzerBuilding extends MetaBuilding {
+//     constructor() {
+//         super("analyzer");
+//     }
+
+//     /**
+//      * @param {string} variant
+//      */
+//     getSilhouetteColor(variant) {
+//         let functions = MetaAnalyzerBuilding.getSilhouetteColor.slice().reverse();
+//         let ret = undefined;
+//         for (let i = 0; i < functions.length; i++) {
+//             const localRet = functions[i](variant, ret);
+//             if (typeof localRet !== "undefined") ret = localRet;
+//         }
+//         return ret;
+//     }
+
+//     /**
+//      * @param {GameRoot} root
+//      */
+//     getIsUnlocked(root) {
+//         if (this.getAvailableVariants(root).indexOf(defaultBuildingVariant) >= 0) return true;
+//         else return false;
+//     }
+
+//     /**
+//      * @param {string} variant
+//      */
+//     getIsRemovable(variant) {
+//         for (let i = 0; i < MetaAnalyzerBuilding.getIsRemovable.length; i++) {
+//             const ret = MetaAnalyzerBuilding.getIsRemovable[i](variant);
+//             if (typeof ret !== "undefined") return ret;
+//         }
+//     }
+
+//     /**
+//      * @param {string} variant
+//      */
+//     getIsRotateable(variant) {
+//         for (let i = 0; i < MetaAnalyzerBuilding.getIsRotateable.length; i++) {
+//             const ret = MetaAnalyzerBuilding.getIsRotateable[i](variant);
+//             if (typeof ret !== "undefined") return ret;
+//         }
+//     }
+
+//     /**
+//      * @param {GameRoot} root
+//      */
+//     getAvailableVariants(root) {
+//         let avaibleVariants = [];
+//         for (let i = 0; i < MetaAnalyzerBuilding.avaibleVariants.length; i++) {
+//             const ret = MetaAnalyzerBuilding.avaibleVariants[i](root);
+//             if (typeof ret !== "undefined") avaibleVariants = [...avaibleVariants, ...ret];
+//         }
+//         return avaibleVariants;
+//     }
+
+//     /**
+//      * Returns the edit layer of the building
+//      * @param {GameRoot} root
+//      * @param {string} variant
+//      * @returns {Layer}
+//      */
+//     getLayer(root, variant) {
+//         for (let i = 0; i < MetaAnalyzerBuilding.getLayer.length; i++) {
+//             const ret = MetaAnalyzerBuilding.getLayer[i](root, variant);
+//             // @ts-ignore
+//             if (typeof ret !== "undefined") return ret;
+//         }
+//     }
+
+//     /**
+//      * @param {string} variant
+//      */
+//     getDimensions(variant) {
+//         for (let i = 0; i < MetaAnalyzerBuilding.getDimensions.length; i++) {
+//             const ret = MetaAnalyzerBuilding.getDimensions[i](variant);
+//             if (typeof ret !== "undefined") return ret;
+//         }
+//     }
+
+//     /**
+//      * @param {string} variant
+//      */
+//     getShowLayerPreview(variant) {
+//         for (let i = 0; i < MetaAnalyzerBuilding.getShowLayerPreview.length; i++) {
+//             const ret = MetaAnalyzerBuilding.getShowLayerPreview[i](variant);
+//             if (typeof ret !== "undefined") return ret;
+//         }
+//     }
+
+//     /**
+//      * @param {number} rotation
+//      * @param {number} rotationVariant
+//      * @param {string} variant
+//      * @param {Entity} entity
+//      * @returns {Array<number>|null}
+//      */
+//     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
+//         for (let i = 0; i < MetaAnalyzerBuilding.getSpecialOverlayRenderMatrix.length; i++) {
+//             const ret = MetaAnalyzerBuilding.getSpecialOverlayRenderMatrix[i](
+//                 rotation,
+//                 rotationVariant,
+//                 variant,
+//                 entity
+//             );
+//             // @ts-ignore
+//             if (typeof ret !== "undefined") return ret;
+//         }
+//     }
+
+//     /**
+//      * @param {string} variant
+//      */
+//     getRenderPins(variant) {
+//         for (let i = 0; i < MetaAnalyzerBuilding.getRenderPins.length; i++) {
+//             const ret = MetaAnalyzerBuilding.getRenderPins[i](variant);
+//             if (typeof ret !== "undefined") return ret;
+//         }
+//     }
+
+//     /**
+//      * Creates the entity at the given location
+//      * @param {Entity} entity
+//      */
+//     setupEntityComponents(entity) {
+//         for (let i = 0; i < MetaAnalyzerBuilding.setupEntityComponents.length; i++) {
+//             MetaAnalyzerBuilding.setupEntityComponents[i](entity);
+//         }
+//     }
+
+//     /**
+//      * @param {Entity} entity
+//      * @param {number} rotationVariant
+//      * @param {string} variant
+//      */
+//     updateVariants(entity, rotationVariant, variant) {
+//         for (let i = 0; i < MetaAnalyzerBuilding.updateVariants.length; i++) {
+//             MetaAnalyzerBuilding.updateVariants[i](entity, rotationVariant, variant);
+//         }
+//     }
+// }
+
+// MetaAnalyzerBuilding.getSilhouetteColor = [
+//     (variant, ret) => {
+//         if (variant === defaultBuildingVariant) return "#555759";
+//     },
+// ];
+
+// MetaAnalyzerBuilding.avaibleVariants = [
+//     root => {
+//         if (root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_virtual_processing))
+//             return [defaultBuildingVariant];
+//     },
+// ];
+
+// MetaAnalyzerBuilding.getSpecialOverlayRenderMatrix = [
+//     (rotation, rotationVariant, variant, entity) => {
+//         if (variant === defaultBuildingVariant) return generateMatrixRotations([1, 1, 0, 1, 1, 1, 0, 1, 0]);
+//     },
+// ];
+
+// MetaAnalyzerBuilding.getDimensions = [
+//     variant => {
+//         if (variant === defaultBuildingVariant) return new Vector(1, 1);
+//     },
+// ];
+
+// MetaAnalyzerBuilding.getRenderPins = [
+//     variant => {
+//         if (variant === defaultBuildingVariant) return false;
+//     },
+// ];
+
+// MetaAnalyzerBuilding.getLayer = [
+//     (root, variant) => {
+//         if (variant === defaultBuildingVariant) return "wires";
+//     },
+// ];
+
+// MetaAnalyzerBuilding.getIsRemovable = [
+//     variant => {
+//         if (variant === defaultBuildingVariant) return true;
+//     },
+// ];
+
+// MetaAnalyzerBuilding.getIsRotateable = [
+//     variant => {
+//         if (variant === defaultBuildingVariant) return true;
+//     },
+// ];
+
+// MetaAnalyzerBuilding.getShowLayerPreview = [
+//     variant => {
+//         if (variant === defaultBuildingVariant) return "wires";
+//     },
+// ];
+
+// MetaAnalyzerBuilding.updateVariants = [
+//     (entity, rotationVariant, variant) => {
+//         if (variant === defaultBuildingVariant) {
+//             entity.components.WiredPins.setSlots([
+//                 {
+//                     pos: new Vector(0, 0),
+//                     direction: enumDirection.left,
+//                     type: enumPinSlotType.logicalEjector,
+//                 },
+//                 {
+//                     pos: new Vector(0, 0),
+//                     direction: enumDirection.right,
+//                     type: enumPinSlotType.logicalEjector,
+//                 },
+//                 {
+//                     pos: new Vector(0, 0),
+//                     direction: enumDirection.bottom,
+//                     type: enumPinSlotType.logicalAcceptor,
+//                 },
+//             ]);
+
+//             entity.components.LogicGate.type = enumLogicGateType.analyzer;
+//         }
+//     },
+// ];
+
+// MetaAnalyzerBuilding.setupEntityComponents = [
+//     entity => {
+//         entity.addComponent(
+//             new WiredPinsComponent({
+//                 slots: [
+//                     {
+//                         pos: new Vector(0, 0),
+//                         direction: enumDirection.left,
+//                         type: enumPinSlotType.logicalEjector,
+//                     },
+//                     {
+//                         pos: new Vector(0, 0),
+//                         direction: enumDirection.right,
+//                         type: enumPinSlotType.logicalEjector,
+//                     },
+//                     {
+//                         pos: new Vector(0, 0),
+//                         direction: enumDirection.bottom,
+//                         type: enumPinSlotType.logicalAcceptor,
+//                     },
+//                 ],
+//             })
+//         );
+//     },
+//     entity => {
+//         entity.addComponent(
+//             new LogicGateComponent({
+//                 type: enumLogicGateType.analyzer,
+//             })
+//         );
+//     },
+// ];

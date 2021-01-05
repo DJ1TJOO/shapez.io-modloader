@@ -21,65 +21,28 @@ export class MetaStorageBuilding extends MetaBuilding {
      * @param {string} variant
      */
     getSilhouetteColor(variant) {
-        let condition = MetaStorageBuilding.silhouetteColors[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : "#ffffff";
+        return MetaStorageBuilding.silhouetteColors[variant]();
     }
 
     /**
      * @param {GameRoot} root
      */
     getIsUnlocked(root) {
-        let reward = MetaStorageBuilding.avaibleVariants[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward(root);
-        }
-
-        if (typeof reward === "boolean") {
-            // @ts-ignore
-            return reward;
-        }
-
-        // @ts-ignore
-        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
+        return this.getAvailableVariants(root).length > 0;
     }
 
     /**
      * @param {string} variant
      */
     getIsRemovable(variant) {
-        let condition = MetaStorageBuilding.isRemovable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaStorageBuilding.isRemovable[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getIsRotateable(variant) {
-        let condition = MetaStorageBuilding.isRotateable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaStorageBuilding.isRotateable[variant]();
     }
 
     /**
@@ -90,19 +53,7 @@ export class MetaStorageBuilding extends MetaBuilding {
 
         let available = [];
         for (const variant in variants) {
-            let reward = variants[variant];
-            if (typeof reward === "function") {
-                // @ts-ignore
-                reward = reward(root);
-            }
-
-            if (typeof reward === "boolean") {
-                available.push(variant);
-                continue;
-            }
-
-            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
-            available.push(variant);
+            if (variants[variant](root)) available.push(variant);
         }
 
         return available;
@@ -115,45 +66,22 @@ export class MetaStorageBuilding extends MetaBuilding {
      * @returns {Layer}
      */
     getLayer(root, variant) {
-        let reward = MetaStorageBuilding.layerByVariant[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward();
-        }
-
         // @ts-ignore
-        return typeof reward === "string" ? reward : "regular";
+        return MetaStorageBuilding.layerByVariant[variant](root);
     }
 
     /**
      * @param {string} variant
      */
     getDimensions(variant) {
-        let condition = MetaStorageBuilding.dimensions[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "object" ? condition : new Vector(1, 1);
+        return MetaStorageBuilding.dimensions[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getShowLayerPreview(variant) {
-        let condition = MetaStorageBuilding.layerPreview[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : null;
+        return MetaStorageBuilding.layerPreview[variant]();
     }
 
     /**
@@ -173,24 +101,14 @@ export class MetaStorageBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        let condition = MetaStorageBuilding.overlayMatrices[variant];
-        if (condition) {
-            condition = condition[rotation];
-        }
-        return condition ? condition : null;
+        return MetaStorageBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
     }
 
     /**
      * @param {string} variant
      */
     getRenderPins(variant) {
-        let condition = MetaStorageBuilding.renderPins[variant];
-
-        if (typeof condition === "function") {
-            condition = condition();
-        }
-
-        return typeof condition === "boolean" ? condition : true;
+        return MetaStorageBuilding.renderPins[variant]();
     }
 
     /**
@@ -198,56 +116,7 @@ export class MetaStorageBuilding extends MetaBuilding {
      * @param {Entity} entity
      */
     setupEntityComponents(entity) {
-        // Required, since the item processor needs this.
-        entity.addComponent(
-            new ItemEjectorComponent({
-                slots: [{
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.top,
-                    },
-                    {
-                        pos: new Vector(1, 0),
-                        direction: enumDirection.top,
-                    },
-                ],
-            })
-        );
-
-        entity.addComponent(
-            new ItemAcceptorComponent({
-                slots: [{
-                        pos: new Vector(0, 1),
-                        directions: [enumDirection.bottom],
-                    },
-                    {
-                        pos: new Vector(1, 1),
-                        directions: [enumDirection.bottom],
-                    },
-                ],
-            })
-        );
-
-        entity.addComponent(
-            new StorageComponent({
-                maximumStorage: storageSize,
-            })
-        );
-
-        entity.addComponent(
-            new WiredPinsComponent({
-                slots: [{
-                        pos: new Vector(1, 1),
-                        direction: enumDirection.right,
-                        type: enumPinSlotType.logicalEjector,
-                    },
-                    {
-                        pos: new Vector(0, 1),
-                        direction: enumDirection.left,
-                        type: enumPinSlotType.logicalEjector,
-                    },
-                ],
-            })
-        );
+        MetaStorageBuilding.setupEntityComponents.forEach(func => func(entity));
     }
 
     /**
@@ -260,30 +129,88 @@ export class MetaStorageBuilding extends MetaBuilding {
     }
 }
 
+MetaStorageBuilding.setupEntityComponents = [
+    entity =>
+    // Required, since the item processor needs this.
+    entity.addComponent(
+        new ItemEjectorComponent({
+            slots: [{
+                    pos: new Vector(0, 0),
+                    direction: enumDirection.top,
+                },
+                {
+                    pos: new Vector(1, 0),
+                    direction: enumDirection.top,
+                },
+            ],
+        })
+    ),
+    entity =>
+    entity.addComponent(
+        new ItemAcceptorComponent({
+            slots: [{
+                    pos: new Vector(0, 1),
+                    directions: [enumDirection.bottom],
+                },
+                {
+                    pos: new Vector(1, 1),
+                    directions: [enumDirection.bottom],
+                },
+            ],
+        })
+    ),
+    entity =>
+    entity.addComponent(
+        new StorageComponent({
+            maximumStorage: storageSize,
+        })
+    ),
+    entity =>
+    entity.addComponent(
+        new WiredPinsComponent({
+            slots: [{
+                    pos: new Vector(1, 1),
+                    direction: enumDirection.right,
+                    type: enumPinSlotType.logicalEjector,
+                },
+                {
+                    pos: new Vector(0, 1),
+                    direction: enumDirection.left,
+                    type: enumPinSlotType.logicalEjector,
+                },
+            ],
+        })
+    ),
+];
+
 MetaStorageBuilding.dimensions = {
-    [defaultBuildingVariant]: new Vector(2, 2),
+    [defaultBuildingVariant]: () => new Vector(2, 2),
 };
 
 MetaStorageBuilding.silhouetteColors = {
-    [defaultBuildingVariant]: "#bbdf6d",
+    [defaultBuildingVariant]: () => "#bbdf6d",
 };
 
 MetaStorageBuilding.isRemovable = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaStorageBuilding.isRotateable = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaStorageBuilding.additionalStatistics = {
+    /**
+     * @param {*} root
+     * @returns {Array<[string, string]>}
+     */
     [defaultBuildingVariant]: root => [
         [T.ingame.buildingPlacement.infoTexts.storage, formatBigNumber(storageSize)],
     ],
 };
 
 MetaStorageBuilding.overlayMatrices = {
-    [defaultBuildingVariant]: null,
+    [defaultBuildingVariant]: (entity, rotationVariant) => null,
 };
 
 MetaStorageBuilding.avaibleVariants = {
@@ -291,15 +218,15 @@ MetaStorageBuilding.avaibleVariants = {
 };
 
 MetaStorageBuilding.layerByVariant = {
-    [defaultBuildingVariant]: "regular",
+    [defaultBuildingVariant]: root => "regular",
 };
 
 MetaStorageBuilding.layerPreview = {
-    [defaultBuildingVariant]: "wires",
+    [defaultBuildingVariant]: () => "wires",
 };
 
 MetaStorageBuilding.renderPins = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaStorageBuilding.componentVariations = {

@@ -1,3 +1,4 @@
+import { root } from "postcss";
 import { enumDirection, Vector } from "../../core/vector";
 import { enumLogicGateType, LogicGateComponent } from "../components/logic_gate";
 import { enumPinSlotType, WiredPinsComponent } from "../components/wired_pins";
@@ -15,65 +16,28 @@ export class MetaComparatorBuilding extends MetaBuilding {
      * @param {string} variant
      */
     getSilhouetteColor(variant) {
-        let condition = MetaComparatorBuilding.silhouetteColors[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : "#ffffff";
+        return MetaComparatorBuilding.silhouetteColors[variant]();
     }
 
     /**
      * @param {GameRoot} root
      */
     getIsUnlocked(root) {
-        let reward = MetaComparatorBuilding.avaibleVariants[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward(root);
-        }
-
-        if (typeof reward === "boolean") {
-            // @ts-ignore
-            return reward;
-        }
-
-        // @ts-ignore
-        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
+        return this.getAvailableVariants(root).length > 0;
     }
 
     /**
      * @param {string} variant
      */
     getIsRemovable(variant) {
-        let condition = MetaComparatorBuilding.isRemovable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaComparatorBuilding.isRemovable[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getIsRotateable(variant) {
-        let condition = MetaComparatorBuilding.isRotateable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaComparatorBuilding.isRotateable[variant]();
     }
 
     /**
@@ -84,19 +48,7 @@ export class MetaComparatorBuilding extends MetaBuilding {
 
         let available = [];
         for (const variant in variants) {
-            let reward = variants[variant];
-            if (typeof reward === "function") {
-                // @ts-ignore
-                reward = reward(root);
-            }
-
-            if (typeof reward === "boolean") {
-                available.push(variant);
-                continue;
-            }
-
-            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
-            available.push(variant);
+            if (variants[variant](root)) available.push(variant);
         }
 
         return available;
@@ -109,45 +61,22 @@ export class MetaComparatorBuilding extends MetaBuilding {
      * @returns {Layer}
      */
     getLayer(root, variant) {
-        let reward = MetaComparatorBuilding.layerByVariant[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward();
-        }
-
         // @ts-ignore
-        return typeof reward === "string" ? reward : "regular";
+        return MetaComparatorBuilding.layerByVariant[variant](root);
     }
 
     /**
      * @param {string} variant
      */
     getDimensions(variant) {
-        let condition = MetaComparatorBuilding.dimensions[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "object" ? condition : new Vector(1, 1);
+        return MetaComparatorBuilding.dimensions[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getShowLayerPreview(variant) {
-        let condition = MetaComparatorBuilding.layerPreview[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : null;
+        return MetaComparatorBuilding.layerPreview[variant]();
     }
 
     /**
@@ -158,24 +87,14 @@ export class MetaComparatorBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        let condition = MetaComparatorBuilding.overlayMatrices[variant];
-        if (condition) {
-            condition = condition[rotation];
-        }
-        return condition ? condition : null;
+        return MetaComparatorBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
     }
 
     /**
      * @param {string} variant
      */
     getRenderPins(variant) {
-        let condition = MetaComparatorBuilding.renderPins[variant];
-
-        if (typeof condition === "function") {
-            condition = condition();
-        }
-
-        return typeof condition === "boolean" ? condition : true;
+        return MetaComparatorBuilding.renderPins[variant]();
     }
 
     /**
@@ -183,32 +102,7 @@ export class MetaComparatorBuilding extends MetaBuilding {
      * @param {Entity} entity
      */
     setupEntityComponents(entity) {
-        entity.addComponent(
-            new WiredPinsComponent({
-                slots: [{
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.top,
-                        type: enumPinSlotType.logicalEjector,
-                    },
-                    {
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.left,
-                        type: enumPinSlotType.logicalAcceptor,
-                    },
-                    {
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.right,
-                        type: enumPinSlotType.logicalAcceptor,
-                    },
-                ],
-            })
-        );
-
-        entity.addComponent(
-            new LogicGateComponent({
-                type: enumLogicGateType.compare,
-            })
-        );
+        MetaComparatorBuilding.setupEntityComponents.forEach(func => func(entity));
     }
 
     /**
@@ -221,40 +115,71 @@ export class MetaComparatorBuilding extends MetaBuilding {
     }
 }
 
+MetaComparatorBuilding.setupEntityComponents = [
+    (entity, rotationVariant) =>
+    entity.addComponent(
+        new WiredPinsComponent({
+            slots: [{
+                    pos: new Vector(0, 0),
+                    direction: enumDirection.top,
+                    type: enumPinSlotType.logicalEjector,
+                },
+                {
+                    pos: new Vector(0, 0),
+                    direction: enumDirection.left,
+                    type: enumPinSlotType.logicalAcceptor,
+                },
+                {
+                    pos: new Vector(0, 0),
+                    direction: enumDirection.right,
+                    type: enumPinSlotType.logicalAcceptor,
+                },
+            ],
+        })
+    ),
+    (entity, rotationVariant) =>
+    entity.addComponent(
+        new LogicGateComponent({
+            type: enumLogicGateType.compare,
+        })
+    ),
+];
+
 MetaComparatorBuilding.overlayMatrices = {
-    [defaultBuildingVariant]: null,
+    [defaultBuildingVariant]: () => null,
 };
 
 MetaComparatorBuilding.dimensions = {
-    [defaultBuildingVariant]: new Vector(1, 1),
+    [defaultBuildingVariant]: () => new Vector(1, 1),
 };
 
 MetaComparatorBuilding.silhouetteColors = {
-    [defaultBuildingVariant]: "#823cab",
+    [defaultBuildingVariant]: () => "#823cab",
 };
 
 MetaComparatorBuilding.isRemovable = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaComparatorBuilding.isRotateable = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaComparatorBuilding.renderPins = {
-    [defaultBuildingVariant]: false,
+    [defaultBuildingVariant]: () => false,
 };
 
 MetaComparatorBuilding.layerPreview = {
-    [defaultBuildingVariant]: "wires",
+    [defaultBuildingVariant]: () => "wires",
 };
 
 MetaComparatorBuilding.avaibleVariants = {
-    [defaultBuildingVariant]: enumHubGoalRewards.reward_virtual_processing,
+    [defaultBuildingVariant]: root =>
+        root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_virtual_processing),
 };
 
 MetaComparatorBuilding.layerByVariant = {
-    [defaultBuildingVariant]: "wires",
+    [defaultBuildingVariant]: () => "wires",
 };
 
 MetaComparatorBuilding.componentVariations = {

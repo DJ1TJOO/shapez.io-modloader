@@ -15,65 +15,35 @@ export class MetaLeverBuilding extends MetaBuilding {
      * @param {string} variant
      */
     getSilhouetteColor(variant) {
-        let condition = MetaLeverBuilding.silhouetteColors[variant];
+        return MetaLeverBuilding.silhouetteColors[variant]();
+    }
 
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : "#ffffff";
+    /**
+     * @param {string} variant
+     */
+    getDimensions(variant) {
+        return MetaLeverBuilding.dimensions[variant]();
     }
 
     /**
      * @param {GameRoot} root
      */
     getIsUnlocked(root) {
-        let reward = MetaLeverBuilding.avaibleVariants[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward(root);
-        }
-
-        if (typeof reward === "boolean") {
-            // @ts-ignore
-            return reward;
-        }
-
-        // @ts-ignore
-        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
+        return this.getAvailableVariants(root).length > 0;
     }
 
     /**
      * @param {string} variant
      */
     getIsRemovable(variant) {
-        let condition = MetaLeverBuilding.isRemovable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaLeverBuilding.isRemovable[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getIsRotateable(variant) {
-        let condition = MetaLeverBuilding.isRotateable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaLeverBuilding.isRotateable[variant]();
     }
 
     /**
@@ -84,19 +54,7 @@ export class MetaLeverBuilding extends MetaBuilding {
 
         let available = [];
         for (const variant in variants) {
-            let reward = variants[variant];
-            if (typeof reward === "function") {
-                // @ts-ignore
-                reward = reward(root);
-            }
-
-            if (typeof reward === "boolean") {
-                available.push(variant);
-                continue;
-            }
-
-            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
-            available.push(variant);
+            if (variants[variant](root)) available.push(variant);
         }
 
         return available;
@@ -109,45 +67,15 @@ export class MetaLeverBuilding extends MetaBuilding {
      * @returns {Layer}
      */
     getLayer(root, variant) {
-        let reward = MetaLeverBuilding.layerByVariant[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward();
-        }
-
         // @ts-ignore
-        return typeof reward === "string" ? reward : "regular";
-    }
-
-    /**
-     * @param {string} variant
-     */
-    getDimensions(variant) {
-        let condition = MetaLeverBuilding.dimensions[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "object" ? condition : new Vector(1, 1);
+        return MetaLeverBuilding.layerByVariant[variant](root);
     }
 
     /**
      * @param {string} variant
      */
     getShowLayerPreview(variant) {
-        let condition = MetaLeverBuilding.layerPreview[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : null;
+        return MetaLeverBuilding.layerPreview[variant]();
     }
 
     /**
@@ -158,11 +86,7 @@ export class MetaLeverBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        let condition = MetaLeverBuilding.overlayMatrices[variant];
-        if (condition) {
-            condition = condition[rotation];
-        }
-        return condition ? condition : null;
+        return MetaLeverBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
     }
 
     getSprite() {
@@ -173,13 +97,7 @@ export class MetaLeverBuilding extends MetaBuilding {
      * @param {string} variant
      */
     getRenderPins(variant) {
-        let condition = MetaLeverBuilding.renderPins[variant];
-
-        if (typeof condition === "function") {
-            condition = condition();
-        }
-
-        return typeof condition === "boolean" ? condition : true;
+        return MetaLeverBuilding.renderPins[variant]();
     }
 
     /**
@@ -187,17 +105,7 @@ export class MetaLeverBuilding extends MetaBuilding {
      * @param {Entity} entity
      */
     setupEntityComponents(entity) {
-        entity.addComponent(
-            new WiredPinsComponent({
-                slots: [{
-                    pos: new Vector(0, 0),
-                    direction: enumDirection.top,
-                    type: enumPinSlotType.logicalEjector,
-                }, ],
-            })
-        );
-
-        entity.addComponent(new LeverComponent({}));
+        MetaLeverBuilding.setupEntityComponents.forEach(func => func(entity));
     }
 
     /**
@@ -210,40 +118,55 @@ export class MetaLeverBuilding extends MetaBuilding {
     }
 }
 
+MetaLeverBuilding.setupEntityComponents = [
+    entity =>
+    entity.addComponent(
+        new WiredPinsComponent({
+            slots: [{
+                pos: new Vector(0, 0),
+                direction: enumDirection.top,
+                type: enumPinSlotType.logicalEjector,
+            }, ],
+        })
+    ),
+    entity => entity.addComponent(new LeverComponent({})),
+];
+
 MetaLeverBuilding.overlayMatrices = {
-    [defaultBuildingVariant]: null,
+    [defaultBuildingVariant]: (entity, rotationVariant) => null,
 };
 
 MetaLeverBuilding.dimensions = {
-    [defaultBuildingVariant]: new Vector(1, 1),
+    [defaultBuildingVariant]: () => new Vector(1, 1),
 };
 
 MetaLeverBuilding.silhouetteColors = {
-    [defaultBuildingVariant]: "#1a678b",
+    [defaultBuildingVariant]: () => "#1a678b",
 };
 
 MetaLeverBuilding.isRemovable = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaLeverBuilding.isRotateable = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaLeverBuilding.avaibleVariants = {
-    [defaultBuildingVariant]: enumHubGoalRewards.reward_wires_painter_and_levers,
+    [defaultBuildingVariant]: root =>
+        root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_wires_painter_and_levers),
 };
 
 MetaLeverBuilding.layerByVariant = {
-    [defaultBuildingVariant]: "regular",
+    [defaultBuildingVariant]: root => "regular",
 };
 
 MetaLeverBuilding.layerPreview = {
-    [defaultBuildingVariant]: "wires",
+    [defaultBuildingVariant]: () => "wires",
 };
 
 MetaLeverBuilding.renderPins = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaLeverBuilding.componentVariations = {

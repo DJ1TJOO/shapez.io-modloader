@@ -18,65 +18,28 @@ export class MetaMixerBuilding extends MetaBuilding {
      * @param {string} variant
      */
     getSilhouetteColor(variant) {
-        let condition = MetaMixerBuilding.silhouetteColors[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : "#ffffff";
+        return MetaMixerBuilding.silhouetteColors[variant]();
     }
 
     /**
      * @param {GameRoot} root
      */
     getIsUnlocked(root) {
-        let reward = MetaMixerBuilding.avaibleVariants[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward(root);
-        }
-
-        if (typeof reward === "boolean") {
-            // @ts-ignore
-            return reward;
-        }
-
-        // @ts-ignore
-        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
+        return this.getAvailableVariants(root).length > 0;
     }
 
     /**
      * @param {string} variant
      */
     getIsRemovable(variant) {
-        let condition = MetaMixerBuilding.isRemovable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaMixerBuilding.isRemovable[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getIsRotateable(variant) {
-        let condition = MetaMixerBuilding.isRotateable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaMixerBuilding.isRotateable[variant]();
     }
 
     /**
@@ -87,20 +50,7 @@ export class MetaMixerBuilding extends MetaBuilding {
 
         let available = [];
         for (const variant in variants) {
-            let reward = variants[variant];
-            if (typeof reward === "function") {
-                // @ts-ignore
-                reward = reward(root);
-            }
-
-            if (typeof reward === "boolean") {
-                available.push(variant);
-                continue;
-            }
-
-            // @ts-ignore
-            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
-            available.push(variant);
+            if (variants[variant](root)) available.push(variant);
         }
 
         return available;
@@ -113,30 +63,15 @@ export class MetaMixerBuilding extends MetaBuilding {
      * @returns {Layer}
      */
     getLayer(root, variant) {
-        let reward = MetaMixerBuilding.layerByVariant[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward();
-        }
-
         // @ts-ignore
-        return typeof reward === "string" ? reward : "regular";
+        return MetaMixerBuilding.layerByVariant[variant](root);
     }
 
     /**
      * @param {string} variant
      */
     getDimensions(variant) {
-        let condition = MetaMixerBuilding.dimensions[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "object" ? condition : new Vector(1, 1);
+        return MetaMixerBuilding.dimensions[variant]();
     }
 
     /**
@@ -145,17 +80,7 @@ export class MetaMixerBuilding extends MetaBuilding {
      * @returns {Array<[string, string]>}
      */
     getAdditionalStatistics(root, variant) {
-        let speed = 0;
-        if (typeof MetaMixerBuilding.additionalStatistics[variant] === "function") {
-            // @ts-ignore
-            speed = MetaMixerBuilding.additionalStatistics[variant](root);
-        } else {
-            // @ts-ignore
-            speed = MetaMixerBuilding.additionalStatistics[variant];
-        }
-        return [
-            [T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(speed)]
-        ];
+        return MetaMixerBuilding.additionalStatistics[variant](root);
     }
 
     /**
@@ -166,11 +91,7 @@ export class MetaMixerBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        let condition = MetaMixerBuilding.overlayMatrices[variant];
-        if (condition) {
-            condition = condition[rotation];
-        }
-        return condition ? condition : null;
+        return MetaMixerBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
     }
 
     /**
@@ -178,33 +99,7 @@ export class MetaMixerBuilding extends MetaBuilding {
      * @param {Entity} entity
      */
     setupEntityComponents(entity) {
-        entity.addComponent(
-            new ItemProcessorComponent({
-                inputsPerCharge: 2,
-                processorType: enumItemProcessorTypes.mixer,
-            })
-        );
-
-        entity.addComponent(
-            new ItemEjectorComponent({
-                slots: [{ pos: new Vector(0, 0), direction: enumDirection.top }],
-            })
-        );
-        entity.addComponent(
-            new ItemAcceptorComponent({
-                slots: [{
-                        pos: new Vector(0, 0),
-                        directions: [enumDirection.bottom],
-                        filter: "color",
-                    },
-                    {
-                        pos: new Vector(1, 0),
-                        directions: [enumDirection.bottom],
-                        filter: "color",
-                    },
-                ],
-            })
-        );
+        MetaMixerBuilding.setupEntityComponents.forEach(func => func(entity));
     }
 
     /**
@@ -217,36 +112,78 @@ export class MetaMixerBuilding extends MetaBuilding {
     }
 }
 
+MetaMixerBuilding.setupEntityComponents = [
+    entity =>
+    entity.addComponent(
+        new ItemProcessorComponent({
+            inputsPerCharge: 2,
+            processorType: enumItemProcessorTypes.mixer,
+        })
+    ),
+
+    entity =>
+    entity.addComponent(
+        new ItemEjectorComponent({
+            slots: [{ pos: new Vector(0, 0), direction: enumDirection.top }],
+        })
+    ),
+    entity =>
+    entity.addComponent(
+        new ItemAcceptorComponent({
+            slots: [{
+                    pos: new Vector(0, 0),
+                    directions: [enumDirection.bottom],
+                    filter: "color",
+                },
+                {
+                    pos: new Vector(1, 0),
+                    directions: [enumDirection.bottom],
+                    filter: "color",
+                },
+            ],
+        })
+    ),
+];
+
 MetaMixerBuilding.silhouetteColors = {
-    [defaultBuildingVariant]: "#cdbb7d",
+    [defaultBuildingVariant]: () => "#cdbb7d",
 };
 
 MetaMixerBuilding.dimensions = {
-    [defaultBuildingVariant]: new Vector(2, 1),
+    [defaultBuildingVariant]: () => new Vector(2, 1),
 };
 
 MetaMixerBuilding.isRemovable = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaMixerBuilding.isRotateable = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaMixerBuilding.layerByVariant = {
-    [defaultBuildingVariant]: "regular",
+    [defaultBuildingVariant]: root => "regular",
 };
 
 MetaMixerBuilding.overlayMatrices = {
-    [defaultBuildingVariant]: null,
+    [defaultBuildingVariant]: (entity, rotationVariant) => null,
 };
 
 MetaMixerBuilding.avaibleVariants = {
-    [defaultBuildingVariant]: enumHubGoalRewards.reward_mixer,
+    [defaultBuildingVariant]: root => root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_mixer),
 };
 
 MetaMixerBuilding.additionalStatistics = {
-    [defaultBuildingVariant]: root => root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.mixer),
+    /**
+     * @param {*} root
+     * @returns {Array<[string, string]>}
+     */
+    [defaultBuildingVariant]: root => [
+        [
+            T.ingame.buildingPlacement.infoTexts.speed,
+            formatItemsPerSecond(root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.mixer)),
+        ],
+    ],
 };
 
 MetaMixerBuilding.componentVariations = {

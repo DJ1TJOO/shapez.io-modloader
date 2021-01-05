@@ -23,65 +23,28 @@ export class MetaPainterBuilding extends MetaBuilding {
      * @param {string} variant
      */
     getSilhouetteColor(variant) {
-        let condition = MetaPainterBuilding.silhouetteColors[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : "#ffffff";
+        return MetaPainterBuilding.silhouetteColors[variant]();
     }
 
     /**
      * @param {GameRoot} root
      */
     getIsUnlocked(root) {
-        let reward = MetaPainterBuilding.avaibleVariants[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward(root);
-        }
-
-        if (typeof reward === "boolean") {
-            // @ts-ignore
-            return reward;
-        }
-
-        // @ts-ignore
-        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
+        return this.getAvailableVariants(root).length > 0;
     }
 
     /**
      * @param {string} variant
      */
     getIsRemovable(variant) {
-        let condition = MetaPainterBuilding.isRemovable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaPainterBuilding.isRemovable[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getIsRotateable(variant) {
-        let condition = MetaPainterBuilding.isRotateable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaPainterBuilding.isRotateable[variant]();
     }
 
     /**
@@ -92,20 +55,7 @@ export class MetaPainterBuilding extends MetaBuilding {
 
         let available = [];
         for (const variant in variants) {
-            let reward = variants[variant];
-            if (typeof reward === "function") {
-                // @ts-ignore
-                reward = reward(root);
-            }
-
-            if (typeof reward === "boolean") {
-                available.push(variant);
-                continue;
-            }
-
-            // @ts-ignore
-            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
-            available.push(variant);
+            if (variants[variant](root)) available.push(variant);
         }
 
         return available;
@@ -118,30 +68,15 @@ export class MetaPainterBuilding extends MetaBuilding {
      * @returns {Layer}
      */
     getLayer(root, variant) {
-        let reward = MetaPainterBuilding.layerByVariant[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward();
-        }
-
         // @ts-ignore
-        return typeof reward === "string" ? reward : "regular";
+        return MetaPainterBuilding.layerByVariant[variant](root);
     }
 
     /**
      * @param {string} variant
      */
     getDimensions(variant) {
-        let condition = MetaPainterBuilding.dimensions[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "object" ? condition : new Vector(1, 1);
+        return MetaPainterBuilding.dimensions[variant]();
     }
 
     /**
@@ -150,17 +85,7 @@ export class MetaPainterBuilding extends MetaBuilding {
      * @returns {Array<[string, string]>}
      */
     getAdditionalStatistics(root, variant) {
-        let speed = 0;
-        if (typeof MetaPainterBuilding.additionalStatistics[variant] === "function") {
-            // @ts-ignore
-            speed = MetaPainterBuilding.additionalStatistics[variant](root);
-        } else {
-            // @ts-ignore
-            speed = MetaPainterBuilding.additionalStatistics[variant];
-        }
-        return [
-            [T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(speed)]
-        ];
+        return MetaPainterBuilding.additionalStatistics[variant](root);
     }
 
     /**
@@ -171,11 +96,7 @@ export class MetaPainterBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        let condition = MetaPainterBuilding.overlayMatrices[variant];
-        if (condition) {
-            condition = condition[rotation];
-        }
-        return condition ? condition : null;
+        return MetaPainterBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
     }
 
     /**
@@ -183,28 +104,7 @@ export class MetaPainterBuilding extends MetaBuilding {
      * @param {Entity} entity
      */
     setupEntityComponents(entity) {
-        entity.addComponent(new ItemProcessorComponent({}));
-
-        entity.addComponent(
-            new ItemEjectorComponent({
-                slots: [{ pos: new Vector(1, 0), direction: enumDirection.right }],
-            })
-        );
-        entity.addComponent(
-            new ItemAcceptorComponent({
-                slots: [{
-                        pos: new Vector(0, 0),
-                        directions: [enumDirection.left],
-                        filter: "shape",
-                    },
-                    {
-                        pos: new Vector(1, 0),
-                        directions: [enumDirection.top],
-                        filter: "color",
-                    },
-                ],
-            })
-        );
+        MetaPainterBuilding.setupEntityComponents.forEach(func => func(entity));
     }
 
     /**
@@ -217,6 +117,32 @@ export class MetaPainterBuilding extends MetaBuilding {
     }
 }
 
+MetaPainterBuilding.setupEntityComponents = [
+    entity => entity.addComponent(new ItemProcessorComponent({})),
+    entity =>
+    entity.addComponent(
+        new ItemEjectorComponent({
+            slots: [{ pos: new Vector(1, 0), direction: enumDirection.right }],
+        })
+    ),
+    entity =>
+    entity.addComponent(
+        new ItemAcceptorComponent({
+            slots: [{
+                    pos: new Vector(0, 0),
+                    directions: [enumDirection.left],
+                    filter: "shape",
+                },
+                {
+                    pos: new Vector(1, 0),
+                    directions: [enumDirection.top],
+                    filter: "color",
+                },
+            ],
+        })
+    ),
+];
+
 MetaPainterBuilding.variants = {
     mirrored: "mirrored",
     double: "double",
@@ -224,45 +150,45 @@ MetaPainterBuilding.variants = {
 };
 
 MetaPainterBuilding.silhouetteColors = {
-    [defaultBuildingVariant]: "#cd9b7d",
-    [MetaPainterBuilding.variants.mirrored]: "#cd9b7d",
-    [MetaPainterBuilding.variants.double]: "#cd9b7d",
-    [MetaPainterBuilding.variants.quad]: "#cd9b7d",
+    [defaultBuildingVariant]: () => "#cd9b7d",
+    [MetaPainterBuilding.variants.mirrored]: () => "#cd9b7d",
+    [MetaPainterBuilding.variants.double]: () => "#cd9b7d",
+    [MetaPainterBuilding.variants.quad]: () => "#cd9b7d",
 };
 
 MetaPainterBuilding.dimensions = {
-    [defaultBuildingVariant]: new Vector(2, 1),
-    [MetaPainterBuilding.variants.mirrored]: new Vector(2, 1),
-    [MetaPainterBuilding.variants.double]: new Vector(2, 2),
-    [MetaPainterBuilding.variants.quad]: new Vector(4, 1),
+    [defaultBuildingVariant]: () => new Vector(2, 1),
+    [MetaPainterBuilding.variants.mirrored]: () => new Vector(2, 1),
+    [MetaPainterBuilding.variants.double]: () => new Vector(2, 2),
+    [MetaPainterBuilding.variants.quad]: () => new Vector(4, 1),
 };
 
 MetaPainterBuilding.isRemovable = {
-    [defaultBuildingVariant]: true,
-    [MetaPainterBuilding.variants.mirrored]: true,
-    [MetaPainterBuilding.variants.double]: true,
-    [MetaPainterBuilding.variants.quad]: true,
+    [defaultBuildingVariant]: () => true,
+    [MetaPainterBuilding.variants.mirrored]: () => true,
+    [MetaPainterBuilding.variants.double]: () => true,
+    [MetaPainterBuilding.variants.quad]: () => true,
 };
 
 MetaPainterBuilding.isRotateable = {
-    [defaultBuildingVariant]: true,
-    [MetaPainterBuilding.variants.mirrored]: true,
-    [MetaPainterBuilding.variants.double]: true,
-    [MetaPainterBuilding.variants.quad]: true,
+    [defaultBuildingVariant]: () => true,
+    [MetaPainterBuilding.variants.mirrored]: () => true,
+    [MetaPainterBuilding.variants.double]: () => true,
+    [MetaPainterBuilding.variants.quad]: () => true,
 };
 
 MetaPainterBuilding.layerByVariant = {
-    [defaultBuildingVariant]: "regular",
-    [MetaPainterBuilding.variants.mirrored]: "regular",
-    [MetaPainterBuilding.variants.double]: "regular",
-    [MetaPainterBuilding.variants.quad]: "regular",
+    [defaultBuildingVariant]: root => "regular",
+    [MetaPainterBuilding.variants.mirrored]: root => "regular",
+    [MetaPainterBuilding.variants.double]: root => "regular",
+    [MetaPainterBuilding.variants.quad]: root => "regular",
 };
 
 MetaPainterBuilding.overlayMatrices = {
-    [defaultBuildingVariant]: null,
-    [MetaPainterBuilding.variants.mirrored]: null,
-    [MetaPainterBuilding.variants.double]: null,
-    [MetaPainterBuilding.variants.quad]: null,
+    [defaultBuildingVariant]: (entity, rotationVariant) => null,
+    [MetaPainterBuilding.variants.mirrored]: (entity, rotationVariant) => null,
+    [MetaPainterBuilding.variants.double]: (entity, rotationVariant) => null,
+    [MetaPainterBuilding.variants.quad]: (entity, rotationVariant) => null,
 };
 
 MetaPainterBuilding.avaibleVariants = {
@@ -276,13 +202,46 @@ MetaPainterBuilding.avaibleVariants = {
 };
 
 MetaPainterBuilding.additionalStatistics = {
-    [defaultBuildingVariant]: root => root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.painter),
-    [MetaPainterBuilding.variants.mirrored]: root =>
-        root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.painter),
-    [MetaPainterBuilding.variants.double]: root =>
-        root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.painterDouble),
-    [MetaPainterBuilding.variants.quad]: root =>
-        root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.painterQuad),
+    /**
+     * @param {*} root
+     * @returns {Array<[string, string]>}
+     */
+    [defaultBuildingVariant]: root => [
+        [
+            T.ingame.buildingPlacement.infoTexts.speed,
+            formatItemsPerSecond(root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.painter)),
+        ],
+    ],
+    /**
+     * @param {*} root
+     * @returns {Array<[string, string]>}
+     */
+    [MetaPainterBuilding.variants.mirrored]: root => [
+        [
+            T.ingame.buildingPlacement.infoTexts.speed,
+            formatItemsPerSecond(root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.painter)),
+        ],
+    ],
+    /**
+     * @param {*} root
+     * @returns {Array<[string, string]>}
+     */
+    [MetaPainterBuilding.variants.double]: root => [
+        [
+            T.ingame.buildingPlacement.infoTexts.speed,
+            formatItemsPerSecond(root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.painterDouble)),
+        ],
+    ],
+    /**
+     * @param {*} root
+     * @returns {Array<[string, string]>}
+     */
+    [MetaPainterBuilding.variants.quad]: root => [
+        [
+            T.ingame.buildingPlacement.infoTexts.speed,
+            formatItemsPerSecond(root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.painterQuad)),
+        ],
+    ],
 };
 
 MetaPainterBuilding.componentVariations = {

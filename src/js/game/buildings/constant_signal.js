@@ -16,65 +16,28 @@ export class MetaConstantSignalBuilding extends MetaBuilding {
      * @param {string} variant
      */
     getSilhouetteColor(variant) {
-        let condition = MetaConstantSignalBuilding.silhouetteColors[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : "#ffffff";
+        return MetaConstantSignalBuilding.silhouetteColors[variant]();
     }
 
     /**
      * @param {GameRoot} root
      */
     getIsUnlocked(root) {
-        let reward = MetaConstantSignalBuilding.avaibleVariants[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward(root);
-        }
-
-        if (typeof reward === "boolean") {
-            // @ts-ignore
-            return reward;
-        }
-
-        // @ts-ignore
-        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
+        return this.getAvailableVariants(root).length > 0;
     }
 
     /**
      * @param {string} variant
      */
     getIsRemovable(variant) {
-        let condition = MetaConstantSignalBuilding.isRemovable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaConstantSignalBuilding.isRemovable[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getIsRotateable(variant) {
-        let condition = MetaConstantSignalBuilding.isRotateable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaConstantSignalBuilding.isRotateable[variant]();
     }
 
     /**
@@ -85,19 +48,7 @@ export class MetaConstantSignalBuilding extends MetaBuilding {
 
         let available = [];
         for (const variant in variants) {
-            let reward = variants[variant];
-            if (typeof reward === "function") {
-                // @ts-ignore
-                reward = reward(root);
-            }
-
-            if (typeof reward === "boolean") {
-                available.push(variant);
-                continue;
-            }
-
-            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
-            available.push(variant);
+            if (variants[variant](root)) available.push(variant);
         }
 
         return available;
@@ -110,45 +61,22 @@ export class MetaConstantSignalBuilding extends MetaBuilding {
      * @returns {Layer}
      */
     getLayer(root, variant) {
-        let reward = MetaConstantSignalBuilding.layerByVariant[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward();
-        }
-
         // @ts-ignore
-        return typeof reward === "string" ? reward : "regular";
+        return MetaConstantSignalBuilding.layerByVariant[variant](root);
     }
 
     /**
      * @param {string} variant
      */
     getDimensions(variant) {
-        let condition = MetaConstantSignalBuilding.dimensions[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "object" ? condition : new Vector(1, 1);
+        return MetaConstantSignalBuilding.dimensions[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getShowLayerPreview(variant) {
-            let condition = MetaConstantSignalBuilding.layerPreview[variant];
-
-            if (typeof condition === "function") {
-                // @ts-ignore
-                condition = condition();
-            }
-
-            // @ts-ignore
-            return typeof condition === "string" ? condition : null;
+            return MetaConstantSignalBuilding.layerPreview[variant]();
         }
         /**
          * @param {number} rotation
@@ -158,24 +86,14 @@ export class MetaConstantSignalBuilding extends MetaBuilding {
          * @returns {Array<number>|null}
          */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        let condition = MetaConstantSignalBuilding.overlayMatrices[variant];
-        if (condition) {
-            condition = condition[rotation];
-        }
-        return condition ? condition : null;
+        return MetaConstantSignalBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
     }
 
     /**
      * @param {string} variant
      */
     getRenderPins(variant) {
-        let condition = MetaConstantSignalBuilding.renderPins[variant];
-
-        if (typeof condition === "function") {
-            condition = condition();
-        }
-
-        return typeof condition === "boolean" ? condition : true;
+        return MetaConstantSignalBuilding.renderPins[variant]();
     }
 
     /**
@@ -183,16 +101,7 @@ export class MetaConstantSignalBuilding extends MetaBuilding {
      * @param {Entity} entity
      */
     setupEntityComponents(entity) {
-        entity.addComponent(
-            new WiredPinsComponent({
-                slots: [{
-                    pos: new Vector(0, 0),
-                    direction: enumDirection.top,
-                    type: enumPinSlotType.logicalEjector,
-                }, ],
-            })
-        );
-        entity.addComponent(new ConstantSignalComponent({}));
+        MetaConstantSignalBuilding.setupEntityComponents.forEach(func => func(entity));
     }
 
     /**
@@ -205,40 +114,56 @@ export class MetaConstantSignalBuilding extends MetaBuilding {
     }
 }
 
+MetaConstantSignalBuilding.setupEntityComponents = [
+    entity =>
+    entity.addComponent(
+        new WiredPinsComponent({
+            slots: [{
+                pos: new Vector(0, 0),
+                direction: enumDirection.top,
+                type: enumPinSlotType.logicalEjector,
+            }, ],
+        })
+    ),
+    entity => entity.addComponent(new ConstantSignalComponent({})),
+];
+
 MetaConstantSignalBuilding.overlayMatrices = {
-    [defaultBuildingVariant]: generateMatrixRotations([0, 1, 0, 1, 1, 1, 1, 1, 1]),
+    [defaultBuildingVariant]: (entity, rotationVariant) =>
+        generateMatrixRotations([0, 1, 0, 1, 1, 1, 1, 1, 1]),
 };
 
 MetaConstantSignalBuilding.dimensions = {
-    [defaultBuildingVariant]: new Vector(1, 1),
+    [defaultBuildingVariant]: () => new Vector(1, 1),
 };
 
 MetaConstantSignalBuilding.silhouetteColors = {
-    [defaultBuildingVariant]: "#2b84fd",
+    [defaultBuildingVariant]: () => "#2b84fd",
 };
 
 MetaConstantSignalBuilding.isRemovable = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaConstantSignalBuilding.isRotateable = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaConstantSignalBuilding.renderPins = {
-    [defaultBuildingVariant]: false,
+    [defaultBuildingVariant]: () => false,
 };
 
 MetaConstantSignalBuilding.avaibleVariants = {
-    [defaultBuildingVariant]: enumHubGoalRewards.reward_constant_signal,
+    [defaultBuildingVariant]: root =>
+        root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_constant_signal),
 };
 
 MetaConstantSignalBuilding.layerByVariant = {
-    [defaultBuildingVariant]: "wires",
+    [defaultBuildingVariant]: root => "wires",
 };
 
 MetaConstantSignalBuilding.layerPreview = {
-    [defaultBuildingVariant]: "wires",
+    [defaultBuildingVariant]: () => "wires",
 };
 
 MetaConstantSignalBuilding.componentVariations = {

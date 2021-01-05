@@ -15,80 +15,35 @@ export class MetaItemProducerBuilding extends MetaBuilding {
      * @param {string} variant
      */
     getSilhouetteColor(variant) {
-        let condition = MetaItemProducerBuilding.silhouetteColors[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : "#ffffff";
+        return MetaItemProducerBuilding.silhouetteColors[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getDimensions(variant) {
-        let condition = MetaItemProducerBuilding.dimensions[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "object" ? condition : new Vector(1, 1);
+        return MetaItemProducerBuilding.dimensions[variant]();
     }
 
     /**
      * @param {GameRoot} root
      */
     getIsUnlocked(root) {
-        let reward = MetaItemProducerBuilding.avaibleVariants[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward(root);
-        }
-
-        if (typeof reward === "boolean") {
-            // @ts-ignore
-            return reward;
-        }
-
-        // @ts-ignore
-        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
+        return this.getAvailableVariants(root).length > 0;
     }
 
     /**
      * @param {string} variant
      */
     getIsRemovable(variant) {
-        let condition = MetaItemProducerBuilding.isRemovable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaItemProducerBuilding.isRemovable[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getIsRotateable(variant) {
-        let condition = MetaItemProducerBuilding.isRotateable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaItemProducerBuilding.isRotateable[variant]();
     }
 
     /**
@@ -99,19 +54,7 @@ export class MetaItemProducerBuilding extends MetaBuilding {
 
         let available = [];
         for (const variant in variants) {
-            let reward = variants[variant];
-            if (typeof reward === "function") {
-                // @ts-ignore
-                reward = reward(root);
-            }
-
-            if (typeof reward === "boolean") {
-                available.push(variant);
-                continue;
-            }
-
-            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
-            available.push(variant);
+            if (variants[variant](root)) available.push(variant);
         }
 
         return available;
@@ -124,30 +67,15 @@ export class MetaItemProducerBuilding extends MetaBuilding {
      * @returns {Layer}
      */
     getLayer(root, variant) {
-        let reward = MetaItemProducerBuilding.layerByVariant[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward();
-        }
-
         // @ts-ignore
-        return typeof reward === "string" ? reward : "regular";
+        return MetaItemProducerBuilding.layerByVariant[variant](root);
     }
 
     /**
      * @param {string} variant
      */
     getShowLayerPreview(variant) {
-        let condition = MetaItemProducerBuilding.layerPreview[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : null;
+        return MetaItemProducerBuilding.layerPreview[variant]();
     }
 
     /**
@@ -155,22 +83,7 @@ export class MetaItemProducerBuilding extends MetaBuilding {
      * @param {Entity} entity
      */
     setupEntityComponents(entity) {
-        entity.addComponent(
-            new ItemEjectorComponent({
-                slots: [{ pos: new Vector(0, 0), direction: enumDirection.top }],
-            })
-        );
-        entity.addComponent(
-            new WiredPinsComponent({
-                slots: [{
-                    pos: new Vector(0, 0),
-                    type: enumPinSlotType.logicalAcceptor,
-                    direction: enumDirection.bottom,
-                }, ],
-            })
-        );
-
-        entity.addComponent(new ItemProducerComponent());
+        MetaItemProducerBuilding.setupEntityComponents.forEach(func => func(entity));
     }
 
     /**
@@ -183,36 +96,57 @@ export class MetaItemProducerBuilding extends MetaBuilding {
     }
 }
 
+MetaItemProducerBuilding.setupEntityComponents = [
+    entity =>
+    entity.addComponent(
+        new ItemEjectorComponent({
+            slots: [{ pos: new Vector(0, 0), direction: enumDirection.top }],
+        })
+    ),
+    entity =>
+    entity.addComponent(
+        new WiredPinsComponent({
+            slots: [{
+                pos: new Vector(0, 0),
+                type: enumPinSlotType.logicalAcceptor,
+                direction: enumDirection.bottom,
+            }, ],
+        })
+    ),
+
+    entity => entity.addComponent(new ItemProducerComponent()),
+];
+
 MetaItemProducerBuilding.overlayMatrices = {
-    [defaultBuildingVariant]: null,
+    [defaultBuildingVariant]: (entity, rotationVariant) => null,
 };
 
 MetaItemProducerBuilding.dimensions = {
-    [defaultBuildingVariant]: new Vector(1, 1),
+    [defaultBuildingVariant]: () => new Vector(1, 1),
 };
 
 MetaItemProducerBuilding.silhouetteColors = {
-    [defaultBuildingVariant]: "#b37dcd",
+    [defaultBuildingVariant]: () => "#b37dcd",
 };
 
 MetaItemProducerBuilding.isRemovable = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaItemProducerBuilding.isRotateable = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaItemProducerBuilding.avaibleVariants = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: root => true,
 };
 
 MetaItemProducerBuilding.layerByVariant = {
-    [defaultBuildingVariant]: "regular",
+    [defaultBuildingVariant]: root => "regular",
 };
 
 MetaItemProducerBuilding.layerPreview = {
-    [defaultBuildingVariant]: "wires",
+    [defaultBuildingVariant]: () => "wires",
 };
 
 MetaItemProducerBuilding.componentVariations = {

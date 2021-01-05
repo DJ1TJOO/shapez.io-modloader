@@ -16,65 +16,35 @@ export class MetaLogicGateBuilding extends MetaBuilding {
      * @param {string} variant
      */
     getSilhouetteColor(variant) {
-        let condition = MetaLogicGateBuilding.silhouetteColors[variant];
+        return MetaLogicGateBuilding.silhouetteColors[variant]();
+    }
 
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : "#ffffff";
+    /**
+     * @param {string} variant
+     */
+    getDimensions(variant) {
+        return MetaLogicGateBuilding.dimensions[variant]();
     }
 
     /**
      * @param {GameRoot} root
      */
     getIsUnlocked(root) {
-        let reward = MetaLogicGateBuilding.avaibleVariants[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward(root);
-        }
-
-        if (typeof reward === "boolean") {
-            // @ts-ignore
-            return reward;
-        }
-
-        // @ts-ignore
-        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
+        return this.getAvailableVariants(root).length > 0;
     }
 
     /**
      * @param {string} variant
      */
     getIsRemovable(variant) {
-        let condition = MetaLogicGateBuilding.isRemovable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaLogicGateBuilding.isRemovable[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getIsRotateable(variant) {
-        let condition = MetaLogicGateBuilding.isRotateable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaLogicGateBuilding.isRotateable[variant]();
     }
 
     /**
@@ -85,19 +55,7 @@ export class MetaLogicGateBuilding extends MetaBuilding {
 
         let available = [];
         for (const variant in variants) {
-            let reward = variants[variant];
-            if (typeof reward === "function") {
-                // @ts-ignore
-                reward = reward(root);
-            }
-
-            if (typeof reward === "boolean") {
-                available.push(variant);
-                continue;
-            }
-
-            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
-            available.push(variant);
+            if (variants[variant](root)) available.push(variant);
         }
 
         return available;
@@ -110,45 +68,15 @@ export class MetaLogicGateBuilding extends MetaBuilding {
      * @returns {Layer}
      */
     getLayer(root, variant) {
-        let reward = MetaLogicGateBuilding.layerByVariant[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward();
-        }
-
         // @ts-ignore
-        return typeof reward === "string" ? reward : "regular";
-    }
-
-    /**
-     * @param {string} variant
-     */
-    getDimensions(variant) {
-        let condition = MetaLogicGateBuilding.dimensions[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "object" ? condition : new Vector(1, 1);
+        return MetaLogicGateBuilding.layerByVariant[variant](root);
     }
 
     /**
      * @param {string} variant
      */
     getShowLayerPreview(variant) {
-        let condition = MetaLogicGateBuilding.layerPreview[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : null;
+        return MetaLogicGateBuilding.layerPreview[variant]();
     }
 
     /**
@@ -159,25 +87,14 @@ export class MetaLogicGateBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        let condition = MetaLogicGateBuilding.overlayMatrices[variant];
-        if (condition) {
-            condition = condition[rotation];
-        }
-        return condition ? condition : null;
+        return MetaLogicGateBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
     }
 
     /**
      * @param {string} variant
      */
     getRenderPins(variant) {
-        let condition = MetaLogicGateBuilding.renderPins[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        return typeof condition === "boolean" ? condition : true;
+        return MetaLogicGateBuilding.renderPins[variant]();
     }
 
     /**
@@ -185,13 +102,7 @@ export class MetaLogicGateBuilding extends MetaBuilding {
      * @param {Entity} entity
      */
     setupEntityComponents(entity) {
-        entity.addComponent(
-            new WiredPinsComponent({
-                slots: [],
-            })
-        );
-
-        entity.addComponent(new LogicGateComponent({}));
+        MetaLogicGateBuilding.setupEntityComponents.forEach(func => func(entity));
     }
 
     /**
@@ -203,6 +114,15 @@ export class MetaLogicGateBuilding extends MetaBuilding {
         MetaLogicGateBuilding.componentVariations[variant](entity, rotationVariant);
     }
 }
+MetaLogicGateBuilding.setupEntityComponents = [
+    entity =>
+    entity.addComponent(
+        new WiredPinsComponent({
+            slots: [],
+        })
+    ),
+    entity => entity.addComponent(new LogicGateComponent({})),
+];
 
 MetaLogicGateBuilding.variants = {
     not: "not",
@@ -211,65 +131,72 @@ MetaLogicGateBuilding.variants = {
 };
 
 MetaLogicGateBuilding.overlayMatrices = {
-    [defaultBuildingVariant]: generateMatrixRotations([0, 1, 0, 1, 1, 1, 0, 1, 1]),
-    [MetaLogicGateBuilding.variants.xor]: generateMatrixRotations([0, 1, 0, 1, 1, 1, 0, 1, 1]),
-    [MetaLogicGateBuilding.variants.or]: generateMatrixRotations([0, 1, 0, 1, 1, 1, 0, 1, 1]),
-    [MetaLogicGateBuilding.variants.not]: generateMatrixRotations([0, 1, 0, 0, 1, 0, 0, 1, 0]),
+    [defaultBuildingVariant]: (entity, rotationVariant) =>
+        generateMatrixRotations([0, 1, 0, 1, 1, 1, 0, 1, 1]),
+    [MetaLogicGateBuilding.variants.xor]: (entity, rotationVariant) =>
+        generateMatrixRotations([0, 1, 0, 1, 1, 1, 0, 1, 1]),
+    [MetaLogicGateBuilding.variants.or]: (entity, rotationVariant) =>
+        generateMatrixRotations([0, 1, 0, 1, 1, 1, 0, 1, 1]),
+    [MetaLogicGateBuilding.variants.not]: (entity, rotationVariant) =>
+        generateMatrixRotations([0, 1, 0, 0, 1, 0, 0, 1, 0]),
 };
 MetaLogicGateBuilding.dimensions = {
-    [defaultBuildingVariant]: new Vector(1, 1),
-    [MetaLogicGateBuilding.variants.xor]: new Vector(1, 1),
-    [MetaLogicGateBuilding.variants.or]: new Vector(1, 1),
-    [MetaLogicGateBuilding.variants.not]: new Vector(1, 1),
+    [defaultBuildingVariant]: () => new Vector(1, 1),
+    [MetaLogicGateBuilding.variants.xor]: () => new Vector(1, 1),
+    [MetaLogicGateBuilding.variants.or]: () => new Vector(1, 1),
+    [MetaLogicGateBuilding.variants.not]: () => new Vector(1, 1),
 };
 
 MetaLogicGateBuilding.silhouetteColors = {
-    [defaultBuildingVariant]: "#f48d41",
-    [MetaLogicGateBuilding.variants.xor]: "#f4a241",
-    [MetaLogicGateBuilding.variants.or]: "#f4d041",
-    [MetaLogicGateBuilding.variants.not]: "#f44184",
+    [defaultBuildingVariant]: () => "#f48d41",
+    [MetaLogicGateBuilding.variants.xor]: () => "#f4a241",
+    [MetaLogicGateBuilding.variants.or]: () => "#f4d041",
+    [MetaLogicGateBuilding.variants.not]: () => "#f44184",
 };
 
 MetaLogicGateBuilding.isRemovable = {
-    [defaultBuildingVariant]: true,
-    [MetaLogicGateBuilding.variants.xor]: true,
-    [MetaLogicGateBuilding.variants.or]: true,
-    [MetaLogicGateBuilding.variants.not]: true,
+    [defaultBuildingVariant]: () => true,
+    [MetaLogicGateBuilding.variants.xor]: () => true,
+    [MetaLogicGateBuilding.variants.or]: () => true,
+    [MetaLogicGateBuilding.variants.not]: () => true,
 };
 
 MetaLogicGateBuilding.isRotateable = {
-    [defaultBuildingVariant]: true,
-    [MetaLogicGateBuilding.variants.xor]: true,
-    [MetaLogicGateBuilding.variants.or]: true,
-    [MetaLogicGateBuilding.variants.not]: true,
+    [defaultBuildingVariant]: () => true,
+    [MetaLogicGateBuilding.variants.xor]: () => true,
+    [MetaLogicGateBuilding.variants.or]: () => true,
+    [MetaLogicGateBuilding.variants.not]: () => true,
 };
 
 MetaLogicGateBuilding.avaibleVariants = {
-    [defaultBuildingVariant]: enumHubGoalRewards.reward_logic_gates,
-    [MetaLogicGateBuilding.variants.xor]: enumHubGoalRewards.reward_logic_gates,
-    [MetaLogicGateBuilding.variants.or]: enumHubGoalRewards.reward_logic_gates,
-    [MetaLogicGateBuilding.variants.not]: enumHubGoalRewards.reward_logic_gates,
+    [defaultBuildingVariant]: root => root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_logic_gates),
+    [MetaLogicGateBuilding.variants.xor]: root =>
+        root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_logic_gates),
+    [MetaLogicGateBuilding.variants.or]: root =>
+        root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_logic_gates),
+    [MetaLogicGateBuilding.variants.not]: root =>
+        root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_logic_gates),
 };
 
 MetaLogicGateBuilding.layerByVariant = {
-    [defaultBuildingVariant]: "wires",
-    [MetaLogicGateBuilding.variants.xor]: "wires",
-    [MetaLogicGateBuilding.variants.or]: "wires",
-    [MetaLogicGateBuilding.variants.not]: "wires",
+    [defaultBuildingVariant]: root => "wires",
+    [MetaLogicGateBuilding.variants.xor]: root => "wires",
+    [MetaLogicGateBuilding.variants.or]: root => "wires",
+    [MetaLogicGateBuilding.variants.not]: root => "wires",
 };
 
 MetaLogicGateBuilding.renderPins = {
-    [defaultBuildingVariant]: false,
-    [MetaLogicGateBuilding.variants.xor]: false,
-    [MetaLogicGateBuilding.variants.or]: false,
-    [MetaLogicGateBuilding.variants.not]: false,
+    [defaultBuildingVariant]: () => false,
+    [MetaLogicGateBuilding.variants.xor]: () => false,
+    [MetaLogicGateBuilding.variants.or]: () => false,
+    [MetaLogicGateBuilding.variants.not]: () => false,
 };
 
 MetaLogicGateBuilding.layerPreview = {
-    [defaultBuildingVariant]: "wires",
-    [MetaLogicGateBuilding.variants.xor]: "wires",
-    [MetaLogicGateBuilding.variants.or]: "wires",
-    [MetaLogicGateBuilding.variants.not]: "wires",
+    [defaultBuildingVariant]: () => "wires",
+    [MetaLogicGateBuilding.variants.xor]: () => "wires",
+    [MetaLogicGateBuilding.variants.or]: () => "wires",
+    [MetaLogicGateBuilding.variants.not]: () => "wires",
 };
 
 MetaLogicGateBuilding.componentVariations = {

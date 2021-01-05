@@ -6,8 +6,6 @@ import { Entity } from "../entity";
 import { defaultBuildingVariant, MetaBuilding } from "../meta_building";
 import { WiredPinsComponent, enumPinSlotType } from "../components/wired_pins";
 import { GameRoot } from "../root";
-import { formatItemsPerSecond } from "../../core/utils";
-import { T } from "../../translations";
 
 export class MetaHubBuilding extends MetaBuilding {
     constructor() {
@@ -18,45 +16,21 @@ export class MetaHubBuilding extends MetaBuilding {
      * @param {string} variant
      */
     getSilhouetteColor(variant) {
-        let condition = MetaHubBuilding.silhouetteColors[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : "#ffffff";
+        return MetaHubBuilding.silhouetteColors[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getDimensions(variant) {
-        let condition = MetaHubBuilding.dimensions[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "object" ? condition : new Vector(1, 1);
+        return MetaHubBuilding.dimensions[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getIsRotateable(variant) {
-        let condition = MetaHubBuilding.isRotateable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaHubBuilding.isRotateable[variant]();
     }
 
     getBlueprintSprite() {
@@ -71,15 +45,7 @@ export class MetaHubBuilding extends MetaBuilding {
      * @param {string} variant
      */
     getIsRemovable(variant) {
-        let condition = MetaHubBuilding.isRemovable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaHubBuilding.isRemovable[variant]();
     }
 
     /**
@@ -89,35 +55,15 @@ export class MetaHubBuilding extends MetaBuilding {
      * @returns {Layer}
      */
     getLayer(root, variant) {
-        let reward = MetaHubBuilding.layerByVariant[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward();
-        }
-
         // @ts-ignore
-        return typeof reward === "string" ? reward : "regular";
+        return MetaHubBuilding.layerByVariant[variant](root);
     }
 
     /**
      * @param {GameRoot} root
      */
     getIsUnlocked(root) {
-        let reward = MetaHubBuilding.avaibleVariants[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward(root);
-        }
-
-        if (typeof reward === "boolean") {
-            // @ts-ignore
-            return reward;
-        }
-
-        // @ts-ignore
-        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
+        return this.getAvailableVariants(root).length > 0;
     }
 
     /**
@@ -128,19 +74,7 @@ export class MetaHubBuilding extends MetaBuilding {
 
         let available = [];
         for (const variant in variants) {
-            let reward = variants[variant];
-            if (typeof reward === "function") {
-                // @ts-ignore
-                reward = reward(root);
-            }
-
-            if (typeof reward === "boolean") {
-                available.push(variant);
-                continue;
-            }
-
-            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
-            available.push(variant);
+            if (variants[variant](root)) available.push(variant);
         }
 
         return available;
@@ -150,15 +84,7 @@ export class MetaHubBuilding extends MetaBuilding {
      * @param {string} variant
      */
     getShowLayerPreview(variant) {
-        let condition = MetaHubBuilding.layerPreview[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : null;
+        return MetaHubBuilding.layerPreview[variant]();
     }
 
     /**
@@ -169,11 +95,7 @@ export class MetaHubBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        let condition = MetaHubBuilding.overlayMatrices[variant];
-        if (condition) {
-            condition = condition[rotation];
-        }
-        return condition ? condition : null;
+        return MetaHubBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
     }
 
     /**
@@ -181,99 +103,7 @@ export class MetaHubBuilding extends MetaBuilding {
      * @param {Entity} entity
      */
     setupEntityComponents(entity) {
-        entity.addComponent(new HubComponent());
-        entity.addComponent(
-            new ItemProcessorComponent({
-                inputsPerCharge: 1,
-                processorType: enumItemProcessorTypes.hub,
-            })
-        );
-
-        entity.addComponent(
-            new WiredPinsComponent({
-                slots: [{
-                    pos: new Vector(0, 2),
-                    type: enumPinSlotType.logicalEjector,
-                    direction: enumDirection.left,
-                }, ],
-            })
-        );
-
-        entity.addComponent(
-            new ItemAcceptorComponent({
-                slots: [{
-                        pos: new Vector(0, 0),
-                        directions: [enumDirection.top, enumDirection.left],
-                        filter: "shape",
-                    },
-                    {
-                        pos: new Vector(1, 0),
-                        directions: [enumDirection.top],
-                        filter: "shape",
-                    },
-                    {
-                        pos: new Vector(2, 0),
-                        directions: [enumDirection.top],
-                        filter: "shape",
-                    },
-                    {
-                        pos: new Vector(3, 0),
-                        directions: [enumDirection.top, enumDirection.right],
-                        filter: "shape",
-                    },
-                    {
-                        pos: new Vector(0, 3),
-                        directions: [enumDirection.bottom, enumDirection.left],
-                        filter: "shape",
-                    },
-                    {
-                        pos: new Vector(1, 3),
-                        directions: [enumDirection.bottom],
-                        filter: "shape",
-                    },
-                    {
-                        pos: new Vector(2, 3),
-                        directions: [enumDirection.bottom],
-                        filter: "shape",
-                    },
-                    {
-                        pos: new Vector(3, 3),
-                        directions: [enumDirection.bottom, enumDirection.right],
-                        filter: "shape",
-                    },
-                    {
-                        pos: new Vector(0, 1),
-                        directions: [enumDirection.left],
-                        filter: "shape",
-                    },
-                    {
-                        pos: new Vector(0, 2),
-                        directions: [enumDirection.left],
-                        filter: "shape",
-                    },
-                    {
-                        pos: new Vector(0, 3),
-                        directions: [enumDirection.left],
-                        filter: "shape",
-                    },
-                    {
-                        pos: new Vector(3, 1),
-                        directions: [enumDirection.right],
-                        filter: "shape",
-                    },
-                    {
-                        pos: new Vector(3, 2),
-                        directions: [enumDirection.right],
-                        filter: "shape",
-                    },
-                    {
-                        pos: new Vector(3, 3),
-                        directions: [enumDirection.right],
-                        filter: "shape",
-                    },
-                ],
-            })
-        );
+        MetaHubBuilding.setupEntityComponents.forEach(func => func(entity));
     }
 
     /**
@@ -286,36 +116,135 @@ export class MetaHubBuilding extends MetaBuilding {
     }
 }
 
+MetaHubBuilding.setupEntityComponents = [
+    entity => entity.addComponent(new HubComponent()),
+    entity =>
+    entity.addComponent(
+        new ItemProcessorComponent({
+            inputsPerCharge: 1,
+            processorType: enumItemProcessorTypes.hub,
+        })
+    ),
+
+    entity =>
+    entity.addComponent(
+        new WiredPinsComponent({
+            slots: [{
+                pos: new Vector(0, 2),
+                type: enumPinSlotType.logicalEjector,
+                direction: enumDirection.left,
+            }, ],
+        })
+    ),
+
+    entity =>
+    entity.addComponent(
+        new ItemAcceptorComponent({
+            slots: [{
+                    pos: new Vector(0, 0),
+                    directions: [enumDirection.top, enumDirection.left],
+                    filter: "shape",
+                },
+                {
+                    pos: new Vector(1, 0),
+                    directions: [enumDirection.top],
+                    filter: "shape",
+                },
+                {
+                    pos: new Vector(2, 0),
+                    directions: [enumDirection.top],
+                    filter: "shape",
+                },
+                {
+                    pos: new Vector(3, 0),
+                    directions: [enumDirection.top, enumDirection.right],
+                    filter: "shape",
+                },
+                {
+                    pos: new Vector(0, 3),
+                    directions: [enumDirection.bottom, enumDirection.left],
+                    filter: "shape",
+                },
+                {
+                    pos: new Vector(1, 3),
+                    directions: [enumDirection.bottom],
+                    filter: "shape",
+                },
+                {
+                    pos: new Vector(2, 3),
+                    directions: [enumDirection.bottom],
+                    filter: "shape",
+                },
+                {
+                    pos: new Vector(3, 3),
+                    directions: [enumDirection.bottom, enumDirection.right],
+                    filter: "shape",
+                },
+                {
+                    pos: new Vector(0, 1),
+                    directions: [enumDirection.left],
+                    filter: "shape",
+                },
+                {
+                    pos: new Vector(0, 2),
+                    directions: [enumDirection.left],
+                    filter: "shape",
+                },
+                {
+                    pos: new Vector(0, 3),
+                    directions: [enumDirection.left],
+                    filter: "shape",
+                },
+                {
+                    pos: new Vector(3, 1),
+                    directions: [enumDirection.right],
+                    filter: "shape",
+                },
+                {
+                    pos: new Vector(3, 2),
+                    directions: [enumDirection.right],
+                    filter: "shape",
+                },
+                {
+                    pos: new Vector(3, 3),
+                    directions: [enumDirection.right],
+                    filter: "shape",
+                },
+            ],
+        })
+    ),
+];
+
 MetaHubBuilding.silhouetteColors = {
-    [defaultBuildingVariant]: "#eb5555",
+    [defaultBuildingVariant]: () => "#eb5555",
 };
 
 MetaHubBuilding.dimensions = {
-    [defaultBuildingVariant]: new Vector(4, 4),
+    [defaultBuildingVariant]: () => new Vector(4, 4),
 };
 
 MetaHubBuilding.isRemovable = {
-    [defaultBuildingVariant]: false,
+    [defaultBuildingVariant]: () => false,
 };
 
 MetaHubBuilding.isRotateable = {
-    [defaultBuildingVariant]: false,
+    [defaultBuildingVariant]: () => false,
 };
 
 MetaHubBuilding.overlayMatrices = {
-    [defaultBuildingVariant]: null,
+    [defaultBuildingVariant]: (entity, rotationVariant) => null,
 };
 
 MetaHubBuilding.avaibleVariants = {
-    [defaultBuildingVariant]: false,
+    [defaultBuildingVariant]: root => false,
 };
 
 MetaHubBuilding.layerByVariant = {
-    [defaultBuildingVariant]: "regular",
+    [defaultBuildingVariant]: root => "regular",
 };
 
 MetaHubBuilding.layerPreview = {
-    [defaultBuildingVariant]: false,
+    [defaultBuildingVariant]: () => false,
 };
 
 MetaHubBuilding.componentVariations = {

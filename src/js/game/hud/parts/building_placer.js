@@ -34,7 +34,8 @@ export class HUDBuildingPlacer extends HUDBuildingPlacerLogic {
         this.buildingInfoElements.descText = makeDiv(this.buildingInfoElements.desc, null, ["text"], "");
         this.buildingInfoElements.additionalInfo = makeDiv(
             this.buildingInfoElements.desc,
-            null, ["additionalInfo"],
+            null,
+            ["additionalInfo"],
             ""
         );
         this.buildingInfoElements.hotkey = makeDiv(this.buildingInfoElements.desc, null, ["hotkey"], "");
@@ -135,9 +136,9 @@ export class HUDBuildingPlacer extends HUDBuildingPlacerLogic {
         this.buildingInfoElements.tutorialImage.setAttribute(
             "data-icon",
             "building_tutorials/" +
-            metaBuilding.getId() +
-            (variant === defaultBuildingVariant ? "" : "-" + variant) +
-            ".png"
+                metaBuilding.getId() +
+                (variant === defaultBuildingVariant ? "" : "-" + variant) +
+                ".png"
         );
 
         removeAllChildren(this.buildingInfoElements.additionalInfo);
@@ -189,14 +190,15 @@ export class HUDBuildingPlacer extends HUDBuildingPlacerLogic {
 
         makeDiv(
             this.variantsElement,
-            null, ["explanation"],
+            null,
+            ["explanation"],
             T.ingame.buildingPlacement.cycleBuildingVariants.replace(
                 "<key>",
                 "<code class='keybinding'>" +
-                this.root.keyMapper
-                .getBinding(KEYMAPPINGS.placement.cycleBuildingVariants)
-                .getKeyCodeString() +
-                "</code>"
+                    this.root.keyMapper
+                        .getBinding(KEYMAPPINGS.placement.cycleBuildingVariants)
+                        .getKeyCodeString() +
+                    "</code>"
             )
         );
 
@@ -259,7 +261,7 @@ export class HUDBuildingPlacer extends HUDBuildingPlacerLogic {
         const layer = metaBuilding.getShowLayerPreview(this.currentVariant.get());
 
         if (layer && layer != this.root.currentLayer) {
-            this.drawLayerPeek(parameters);
+            this.drawLayerPeek(parameters, layer);
         }
     }
 
@@ -267,7 +269,7 @@ export class HUDBuildingPlacer extends HUDBuildingPlacerLogic {
      *
      * @param {DrawParameters} parameters
      */
-    drawLayerPeek(parameters) {
+    drawLayerPeek(parameters, layer) {
         const mousePosition = this.root.app.mousePosition;
         if (!mousePosition) {
             // Not on screen
@@ -280,7 +282,8 @@ export class HUDBuildingPlacer extends HUDBuildingPlacerLogic {
         this.root.hud.parts.layerPreview.renderPreview(
             parameters,
             worldPosition,
-            1 / this.root.camera.zoomLevel
+            1 / this.root.camera.zoomLevel,
+            layer
         );
     }
 
@@ -441,10 +444,12 @@ export class HUDBuildingPlacer extends HUDBuildingPlacerLogic {
                 parameters.context.translate(worldPos.x, worldPos.y);
                 parameters.context.rotate(angle);
                 parameters.context.drawImage(
-                    arrowSprite, -6, -globalConfig.halfTileSize -
-                    clamp((this.root.time.realtimeNow() * 1.5) % 1.0, 0, 1) * 1 * globalConfig.tileSize +
-                    globalConfig.halfTileSize -
-                    6,
+                    arrowSprite,
+                    -6,
+                    -globalConfig.halfTileSize -
+                        clamp((this.root.time.realtimeNow() * 1.5) % 1.0, 0, 1) * 1 * globalConfig.tileSize +
+                        globalConfig.halfTileSize -
+                        6,
                     12,
                     12
                 );
@@ -497,7 +502,8 @@ export class HUDBuildingPlacer extends HUDBuildingPlacerLogic {
 
             // Go over all slots
             for (
-                let acceptorDirectionIndex = 0; acceptorDirectionIndex < slot.directions.length;
+                let acceptorDirectionIndex = 0;
+                acceptorDirectionIndex < slot.directions.length;
                 ++acceptorDirectionIndex
             ) {
                 const direction = slot.directions[acceptorDirectionIndex];
@@ -528,7 +534,7 @@ export class HUDBuildingPlacer extends HUDBuildingPlacerLogic {
                     } else if (
                         sourceBeltComp &&
                         sourceStaticComp.localDirectionToWorld(sourceBeltComp.direction) ===
-                        enumInvertedDirections[worldDirection]
+                            enumInvertedDirections[worldDirection]
                     ) {
                         // Belt connected
                         isConnected = true;

@@ -18,65 +18,28 @@ export class MetaBeltBuilding extends MetaBuilding {
      * @param {string} variant
      */
     getSilhouetteColor(variant) {
-        let condition = MetaBeltBuilding.silhouetteColors[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : "#ffffff";
+        return MetaBeltBuilding.silhouetteColors[variant]();
     }
 
     /**
      * @param {GameRoot} root
      */
     getIsUnlocked(root) {
-        let reward = MetaBeltBuilding.avaibleVariants[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward(root);
-        }
-
-        if (typeof reward === "boolean") {
-            // @ts-ignore
-            return reward;
-        }
-
-        // @ts-ignore
-        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
+        return this.getAvailableVariants(root).length > 0;
     }
 
     /**
      * @param {string} variant
      */
     getIsRemovable(variant) {
-        let condition = MetaBeltBuilding.isRemovable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaBeltBuilding.isRemovable[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getIsRotateable(variant) {
-        let condition = MetaBeltBuilding.isRotateable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaBeltBuilding.isRotateable[variant]();
     }
 
     /**
@@ -87,19 +50,7 @@ export class MetaBeltBuilding extends MetaBuilding {
 
         let available = [];
         for (const variant in variants) {
-            let reward = variants[variant];
-            if (typeof reward === "function") {
-                // @ts-ignore
-                reward = reward(root);
-            }
-
-            if (typeof reward === "boolean") {
-                available.push(variant);
-                continue;
-            }
-
-            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
-            available.push(variant);
+            if (variants[variant](root)) available.push(variant);
         }
 
         return available;
@@ -112,30 +63,15 @@ export class MetaBeltBuilding extends MetaBuilding {
      * @returns {Layer}
      */
     getLayer(root, variant) {
-        let reward = MetaBeltBuilding.layerByVariant[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward();
-        }
-
         // @ts-ignore
-        return typeof reward === "string" ? reward : "regular";
+        return MetaBeltBuilding.layerByVariant[variant](root);
     }
 
     /**
      * @param {string} variant
      */
     getDimensions(variant) {
-        let condition = MetaBeltBuilding.dimensions[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "object" ? condition : new Vector(1, 1);
+        return MetaBeltBuilding.dimensions[variant]();
     }
 
     /**
@@ -148,22 +84,14 @@ export class MetaBeltBuilding extends MetaBuilding {
     }
 
     getIsReplaceable(variant) {
-        return MetaBeltBuilding.isReplaceable[variant];
+        return MetaBeltBuilding.isReplaceable[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getShowLayerPreview(variant) {
-        let condition = MetaBeltBuilding.layerPreview[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : null;
+        return MetaBeltBuilding.layerPreview[variant]();
     }
 
     /**
@@ -174,35 +102,24 @@ export class MetaBeltBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        let condition = MetaBeltBuilding.beltOverlayMatrices[entity.components.Belt.direction];
-        if (condition) {
-            // @ts-ignore
-            condition = condition[rotation];
-        }
-        // @ts-ignore
-        return condition ? condition : null;
+        return MetaBeltBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
     }
 
     /**
      * @param {string} variant
      */
     getRenderPins(variant) {
-        let condition = MetaBeltBuilding.renderPins[variant];
-
-        if (typeof condition === "function") {
-            condition = condition();
-        }
-
-        return typeof condition === "boolean" ? condition : true;
+        return MetaBeltBuilding.renderPins[variant]();
     }
 
     getPlacementSound(variant) {
-        return MetaBeltBuilding.placementSounds[variant];
+        return MetaBeltBuilding.placementSounds[variant]();
     }
 
     getHasDirectionLockAvailable() {
         return true;
     }
+
     getStayInPlacementMode() {
         return true;
     }
@@ -262,11 +179,7 @@ export class MetaBeltBuilding extends MetaBuilding {
      * @param {Entity} entity
      */
     setupEntityComponents(entity) {
-        entity.addComponent(
-            new BeltComponent({
-                direction: enumDirection.top, // updated later
-            })
-        );
+        MetaBeltBuilding.setupEntityComponents.forEach(func => func(entity));
     }
 
     /**
@@ -381,54 +294,63 @@ export class MetaBeltBuilding extends MetaBuilding {
     }
 }
 
+MetaBeltBuilding.setupEntityComponents = [
+    entity =>
+    entity.addComponent(
+        new BeltComponent({
+            direction: enumDirection.top, // updated later
+        })
+    ),
+];
+
 MetaBeltBuilding.silhouetteColors = {
-    [defaultBuildingVariant]: THEME.map.chunkOverview.beltColor,
+    [defaultBuildingVariant]: () => THEME.map.chunkOverview.beltColor,
 };
 
 MetaBeltBuilding.variantToRotation = [enumDirection.top, enumDirection.left, enumDirection.right];
 
-MetaBeltBuilding.beltOverlayMatrices = {
-    [enumDirection.top]: generateMatrixRotations([0, 1, 0, 0, 1, 0, 0, 1, 0]),
-    [enumDirection.left]: generateMatrixRotations([0, 0, 0, 1, 1, 0, 0, 1, 0]),
-    [enumDirection.right]: generateMatrixRotations([0, 0, 0, 0, 1, 1, 0, 1, 0]),
+MetaBeltBuilding.overlayMatrices = {
+    [enumDirection.top]: (entity, rotationVariant) => generateMatrixRotations([0, 1, 0, 0, 1, 0, 0, 1, 0]),
+    [enumDirection.left]: (entity, rotationVariant) => generateMatrixRotations([0, 0, 0, 1, 1, 0, 0, 1, 0]),
+    [enumDirection.right]: (entity, rotationVariant) => generateMatrixRotations([0, 0, 0, 0, 1, 1, 0, 1, 0]),
 };
 
 MetaBeltBuilding.placementSounds = {
-    [defaultBuildingVariant]: SOUNDS.placeBelt,
+    [defaultBuildingVariant]: () => SOUNDS.placeBelt,
 };
 
 MetaBeltBuilding.rotationVariants = [0, 1, 2];
 
 MetaBeltBuilding.avaibleVariants = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: root => true,
 };
 
 MetaBeltBuilding.dimensions = {
-    [defaultBuildingVariant]: new Vector(1, 1),
+    [defaultBuildingVariant]: () => new Vector(1, 1),
 };
 
 MetaBeltBuilding.isRemovable = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaBeltBuilding.isReplaceable = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaBeltBuilding.isRotateable = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaBeltBuilding.renderPins = {
-    [defaultBuildingVariant]: null,
+    [defaultBuildingVariant]: () => null,
 };
 
 MetaBeltBuilding.layerPreview = {
-    [defaultBuildingVariant]: null,
+    [defaultBuildingVariant]: () => null,
 };
 
 MetaBeltBuilding.layerByVariant = {
-    [defaultBuildingVariant]: "regular",
+    [defaultBuildingVariant]: root => "regular",
 };
 
 MetaBeltBuilding.componentVariations = {
@@ -438,6 +360,10 @@ MetaBeltBuilding.componentVariations = {
 };
 
 MetaBeltBuilding.additionalStatistics = {
+    /**
+     * @param {*} root
+     * @returns {Array<[string, string]>}
+     */
     [defaultBuildingVariant]: root => [
         [T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(root.hubGoals.getBeltBaseSpeed())],
     ],

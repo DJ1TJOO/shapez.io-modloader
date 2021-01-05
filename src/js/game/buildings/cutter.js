@@ -18,15 +18,7 @@ export class MetaCutterBuilding extends MetaBuilding {
      * @param {string} variant
      */
     getSilhouetteColor(variant) {
-        let condition = MetaCutterBuilding.silhouetteColors[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : "#ffffff";
+        return MetaCutterBuilding.silhouetteColors[variant]();
     }
 
     /**
@@ -36,30 +28,15 @@ export class MetaCutterBuilding extends MetaBuilding {
      * @returns {Layer}
      */
     getLayer(root, variant) {
-        let reward = MetaCutterBuilding.layerByVariant[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward();
-        }
-
         // @ts-ignore
-        return typeof reward === "string" ? reward : "regular";
+        return MetaCutterBuilding.layerByVariant[variant](root);
     }
 
     /**
      * @param {string} variant
      */
     getDimensions(variant) {
-        let condition = MetaCutterBuilding.dimensions[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "object" ? condition : new Vector(1, 1);
+        return MetaCutterBuilding.dimensions[variant]();
     }
 
     /**
@@ -80,19 +57,7 @@ export class MetaCutterBuilding extends MetaBuilding {
 
         let available = [];
         for (const variant in variants) {
-            let reward = variants[variant];
-            if (typeof reward === "function") {
-                // @ts-ignore
-                reward = reward(root);
-            }
-
-            if (typeof reward === "boolean") {
-                available.push(variant);
-                continue;
-            }
-
-            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
-            available.push(variant);
+            if (variants[variant](root)) available.push(variant);
         }
 
         return available;
@@ -102,20 +67,7 @@ export class MetaCutterBuilding extends MetaBuilding {
      * @param {GameRoot} root
      */
     getIsUnlocked(root) {
-        let reward = MetaCutterBuilding.avaibleVariants[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward(root);
-        }
-
-        if (typeof reward === "boolean") {
-            // @ts-ignore
-            return reward;
-        }
-
-        // @ts-ignore
-        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
+        return this.getAvailableVariants(root).length > 0;
     }
 
     /**
@@ -123,22 +75,7 @@ export class MetaCutterBuilding extends MetaBuilding {
      * @param {Entity} entity
      */
     setupEntityComponents(entity) {
-        entity.addComponent(
-            new ItemProcessorComponent({
-                inputsPerCharge: 1,
-                processorType: enumItemProcessorTypes.cutter,
-            })
-        );
-        entity.addComponent(new ItemEjectorComponent({}));
-        entity.addComponent(
-            new ItemAcceptorComponent({
-                slots: [{
-                    pos: new Vector(0, 0),
-                    directions: [enumDirection.bottom],
-                    filter: "shape",
-                }, ],
-            })
-        );
+        MetaCutterBuilding.setupEntityComponents.forEach(func => func(entity));
     }
 
     /**
@@ -150,52 +87,78 @@ export class MetaCutterBuilding extends MetaBuilding {
         MetaCutterBuilding.componentVariations[variant](entity, rotationVariant);
     }
 }
+MetaCutterBuilding.setupEntityComponents = [
+    entity =>
+    entity.addComponent(
+        new ItemProcessorComponent({
+            inputsPerCharge: 1,
+            processorType: enumItemProcessorTypes.cutter,
+        })
+    ),
+    entity => entity.addComponent(new ItemEjectorComponent({})),
+    entity =>
+    entity.addComponent(
+        new ItemAcceptorComponent({
+            slots: [{
+                pos: new Vector(0, 0),
+                directions: [enumDirection.bottom],
+                filter: "shape",
+            }, ],
+        })
+    ),
+];
 
 MetaCutterBuilding.variants = {
     quad: "quad",
 };
 
 MetaCutterBuilding.overlayMatrices = {
-    [defaultBuildingVariant]: null,
-    [MetaCutterBuilding.variants.quad]: null,
+    [defaultBuildingVariant]: (entity, rotationVariant) => null,
+    [MetaCutterBuilding.variants.quad]: (entity, rotationVariant) => null,
 };
 
 MetaCutterBuilding.dimensions = {
-    [defaultBuildingVariant]: new Vector(2, 1),
-    [MetaCutterBuilding.variants.quad]: new Vector(4, 1),
+    [defaultBuildingVariant]: () => new Vector(2, 1),
+    [MetaCutterBuilding.variants.quad]: () => new Vector(4, 1),
 };
 
 MetaCutterBuilding.silhouetteColors = {
-    [defaultBuildingVariant]: "#7dcda2",
-    [MetaCutterBuilding.variants.quad]: "#7dcda2",
+    [defaultBuildingVariant]: () => "#7dcda2",
+    [MetaCutterBuilding.variants.quad]: () => "#7dcda2",
 };
 
 MetaCutterBuilding.avaibleVariants = {
-    [defaultBuildingVariant]: enumHubGoalRewards.reward_cutter_and_trash,
-    [MetaCutterBuilding.variants.quad]: enumHubGoalRewards.reward_cutter_quad,
+    [defaultBuildingVariant]: root =>
+        root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_cutter_and_trash),
+    [MetaCutterBuilding.variants.quad]: root =>
+        root.hubGoal.isRewardUnlocked(enumHubGoalRewards.reward_cutter_quad),
 };
 
 MetaCutterBuilding.layerByVariant = {
-    [defaultBuildingVariant]: "regular",
-    [MetaCutterBuilding.variants.quad]: "regular",
+    [defaultBuildingVariant]: root => "regular",
+    [MetaCutterBuilding.variants.quad]: root => "regular",
 };
 
 MetaCutterBuilding.layerPreview = {
-    [defaultBuildingVariant]: null,
-    [MetaCutterBuilding.variants.quad]: null,
+    [defaultBuildingVariant]: () => null,
+    [MetaCutterBuilding.variants.quad]: () => null,
 };
 
 MetaCutterBuilding.isRemovable = {
-    [defaultBuildingVariant]: true,
-    [MetaCutterBuilding.variants.quad]: true,
+    [defaultBuildingVariant]: () => true,
+    [MetaCutterBuilding.variants.quad]: () => true,
 };
 
 MetaCutterBuilding.isRotateable = {
-    [defaultBuildingVariant]: true,
-    [MetaCutterBuilding.variants.quad]: true,
+    [defaultBuildingVariant]: () => true,
+    [MetaCutterBuilding.variants.quad]: () => true,
 };
 
 MetaCutterBuilding.additionalStatistics = {
+    /**
+     * @param {*} root
+     * @returns {Array<[string, string]>}
+     */
     [defaultBuildingVariant]: root => [
         [
             T.ingame.buildingPlacement.infoTexts.speed,
@@ -203,6 +166,10 @@ MetaCutterBuilding.additionalStatistics = {
         ],
     ],
 
+    /**
+     * @param {*} root
+     * @returns {Array<[string, string]>}
+     */
     [MetaCutterBuilding.variants.quad]: root => [
         [
             T.ingame.buildingPlacement.infoTexts.speed,

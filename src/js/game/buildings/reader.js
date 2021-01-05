@@ -21,65 +21,28 @@ export class MetaReaderBuilding extends MetaBuilding {
      * @param {string} variant
      */
     getSilhouetteColor(variant) {
-        let condition = MetaReaderBuilding.silhouetteColors[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : "#ffffff";
+        return MetaReaderBuilding.silhouetteColors[variant]();
     }
 
     /**
      * @param {GameRoot} root
      */
     getIsUnlocked(root) {
-        let reward = MetaReaderBuilding.avaibleVariants[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward(root);
-        }
-
-        if (typeof reward === "boolean") {
-            // @ts-ignore
-            return reward;
-        }
-
-        // @ts-ignore
-        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
+        return this.getAvailableVariants(root).length > 0;
     }
 
     /**
      * @param {string} variant
      */
     getIsRemovable(variant) {
-        let condition = MetaReaderBuilding.isRemovable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaReaderBuilding.isRemovable[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getIsRotateable(variant) {
-        let condition = MetaReaderBuilding.isRotateable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaReaderBuilding.isRotateable[variant]();
     }
 
     /**
@@ -90,19 +53,7 @@ export class MetaReaderBuilding extends MetaBuilding {
 
         let available = [];
         for (const variant in variants) {
-            let reward = variants[variant];
-            if (typeof reward === "function") {
-                // @ts-ignore
-                reward = reward(root);
-            }
-
-            if (typeof reward === "boolean") {
-                available.push(variant);
-                continue;
-            }
-
-            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
-            available.push(variant);
+            if (variants[variant](root)) available.push(variant);
         }
 
         return available;
@@ -115,45 +66,22 @@ export class MetaReaderBuilding extends MetaBuilding {
      * @returns {Layer}
      */
     getLayer(root, variant) {
-        let reward = MetaReaderBuilding.layerByVariant[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward();
-        }
-
         // @ts-ignore
-        return typeof reward === "string" ? reward : "regular";
+        return MetaReaderBuilding.layerByVariant[variant](root);
     }
 
     /**
      * @param {string} variant
      */
     getDimensions(variant) {
-        let condition = MetaReaderBuilding.dimensions[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "object" ? condition : new Vector(1, 1);
+        return MetaReaderBuilding.dimensions[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getShowLayerPreview(variant) {
-        let condition = MetaReaderBuilding.layerPreview[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : null;
+        return MetaReaderBuilding.layerPreview[variant]();
     }
 
     /**
@@ -162,17 +90,7 @@ export class MetaReaderBuilding extends MetaBuilding {
      * @returns {Array<[string, string]>}
      */
     getAdditionalStatistics(root, variant) {
-        let speed = 0;
-        if (typeof MetaReaderBuilding.additionalStatistics[variant] === "function") {
-            // @ts-ignore
-            speed = MetaReaderBuilding.additionalStatistics[variant](root);
-        } else {
-            // @ts-ignore
-            speed = MetaReaderBuilding.additionalStatistics[variant];
-        }
-        return [
-            [T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(speed)]
-        ];
+        return MetaReaderBuilding.additionalStatistics[variant](root);
     }
 
     /**
@@ -183,24 +101,14 @@ export class MetaReaderBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        let condition = MetaReaderBuilding.overlayMatrices[variant];
-        if (condition) {
-            condition = condition[rotation];
-        }
-        return condition ? condition : null;
+        return MetaReaderBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
     }
 
     /**
      * @param {string} variant
      */
     getRenderPins(variant) {
-        let condition = MetaReaderBuilding.renderPins[variant];
-
-        if (typeof condition === "function") {
-            condition = condition();
-        }
-
-        return typeof condition === "boolean" ? condition : true;
+        return MetaReaderBuilding.renderPins[variant]();
     }
 
     /**
@@ -208,57 +116,7 @@ export class MetaReaderBuilding extends MetaBuilding {
      * @param {Entity} entity
      */
     setupEntityComponents(entity) {
-        entity.addComponent(
-            new WiredPinsComponent({
-                slots: [{
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.right,
-                        type: enumPinSlotType.logicalEjector,
-                    },
-                    {
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.left,
-                        type: enumPinSlotType.logicalEjector,
-                    },
-                ],
-            })
-        );
-
-        entity.addComponent(
-            new ItemAcceptorComponent({
-                slots: [{
-                    pos: new Vector(0, 0),
-                    directions: [enumDirection.bottom],
-                }, ],
-            })
-        );
-
-        entity.addComponent(
-            new ItemEjectorComponent({
-                slots: [{
-                    pos: new Vector(0, 0),
-                    direction: enumDirection.top,
-                }, ],
-            })
-        );
-
-        entity.addComponent(
-            new ItemProcessorComponent({
-                processorType: enumItemProcessorTypes.reader,
-                inputsPerCharge: 1,
-            })
-        );
-
-        entity.addComponent(
-            new BeltUnderlaysComponent({
-                underlays: [{
-                    pos: new Vector(0, 0),
-                    direction: enumDirection.top,
-                }, ],
-            })
-        );
-
-        entity.addComponent(new BeltReaderComponent());
+        MetaReaderBuilding.setupEntityComponents.forEach(func => func(entity));
     }
 
     /**
@@ -271,20 +129,74 @@ export class MetaReaderBuilding extends MetaBuilding {
     }
 }
 
+MetaReaderBuilding.setupEntityComponents = [
+    entity =>
+    entity.addComponent(
+        new WiredPinsComponent({
+            slots: [{
+                    pos: new Vector(0, 0),
+                    direction: enumDirection.right,
+                    type: enumPinSlotType.logicalEjector,
+                },
+                {
+                    pos: new Vector(0, 0),
+                    direction: enumDirection.left,
+                    type: enumPinSlotType.logicalEjector,
+                },
+            ],
+        })
+    ),
+    entity =>
+    entity.addComponent(
+        new ItemAcceptorComponent({
+            slots: [{
+                pos: new Vector(0, 0),
+                directions: [enumDirection.bottom],
+            }, ],
+        })
+    ),
+    entity =>
+    entity.addComponent(
+        new ItemEjectorComponent({
+            slots: [{
+                pos: new Vector(0, 0),
+                direction: enumDirection.top,
+            }, ],
+        })
+    ),
+    entity =>
+    entity.addComponent(
+        new ItemProcessorComponent({
+            processorType: enumItemProcessorTypes.reader,
+            inputsPerCharge: 1,
+        })
+    ),
+    entity =>
+    entity.addComponent(
+        new BeltUnderlaysComponent({
+            underlays: [{
+                pos: new Vector(0, 0),
+                direction: enumDirection.top,
+            }, ],
+        })
+    ),
+    entity => entity.addComponent(new BeltReaderComponent()),
+];
+
 MetaReaderBuilding.dimensions = {
-    [defaultBuildingVariant]: new Vector(1, 1),
+    [defaultBuildingVariant]: () => new Vector(1, 1),
 };
 
 MetaReaderBuilding.silhouetteColors = {
-    [defaultBuildingVariant]: "#25fff2",
+    [defaultBuildingVariant]: () => "#25fff2",
 };
 
 MetaReaderBuilding.isRemovable = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaReaderBuilding.isRotateable = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaReaderBuilding.additionalStatistics = {
@@ -292,23 +204,24 @@ MetaReaderBuilding.additionalStatistics = {
 };
 
 MetaReaderBuilding.overlayMatrices = {
-    [defaultBuildingVariant]: generateMatrixRotations([0, 1, 0, 0, 1, 0, 0, 1, 0]),
+    [defaultBuildingVariant]: (entity, rotationVariant) =>
+        generateMatrixRotations([0, 1, 0, 0, 1, 0, 0, 1, 0]),
 };
 
 MetaReaderBuilding.avaibleVariants = {
-    [defaultBuildingVariant]: enumHubGoalRewards.reward_belt_reader,
+    [defaultBuildingVariant]: root => root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_belt_reader),
 };
 
 MetaReaderBuilding.layerByVariant = {
-    [defaultBuildingVariant]: "regular",
+    [defaultBuildingVariant]: root => "regular",
 };
 
 MetaReaderBuilding.layerPreview = {
-    [defaultBuildingVariant]: "wires",
+    [defaultBuildingVariant]: () => "wires",
 };
 
 MetaReaderBuilding.renderPins = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaReaderBuilding.componentVariations = {

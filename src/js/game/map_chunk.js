@@ -404,22 +404,6 @@ MapChunk.predefined = [
 ];
 
 MapChunk.lowerLayers = [
-    //TODO: what is this
-    // (self, rng, distanceToOriginInChunks) => {
-    //     // Determine how likely it is that there is a color patch
-    //     const liquidPatchChance = 0.9 - clamp(distanceToOriginInChunks / 25, 0, 1) * 0.5;
-
-    //     if (rng.next() < liquidPatchChance / 4) {
-    //         const liquidPatchSize = Math.max(2, Math.round(1 + clamp(distanceToOriginInChunks / 8, 0, 4)));
-    //         // First, determine available colors
-    //         let availableLiquids = ["#0000ff"];
-    //         if (distanceToOriginInChunks > 2) {
-    //             availableLiquids.push("#00ff00");
-    //             availableLiquids.push("#ff0000");
-    //         }
-    //         self.internalGeneratePatch(rng, liquidPatchSize, rng.choice(availableLiquids));
-    //     }
-    // },
     (self, rng, distanceToOriginInChunks) => {
         // Determine how likely it is that there is a color patch
         const colorPatchChance = 0.9 - clamp(distanceToOriginInChunks / 25, 0, 1) * 0.5;

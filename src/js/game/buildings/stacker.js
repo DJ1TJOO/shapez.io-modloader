@@ -18,65 +18,28 @@ export class MetaStackerBuilding extends MetaBuilding {
      * @param {string} variant
      */
     getSilhouetteColor(variant) {
-        let condition = MetaStackerBuilding.silhouetteColors[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : "#ffffff";
+        return MetaStackerBuilding.silhouetteColors[variant]();
     }
 
     /**
      * @param {GameRoot} root
      */
     getIsUnlocked(root) {
-        let reward = MetaStackerBuilding.avaibleVariants[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward(root);
-        }
-
-        if (typeof reward === "boolean") {
-            // @ts-ignore
-            return reward;
-        }
-
-        // @ts-ignore
-        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
+        return this.getAvailableVariants(root).length > 0;
     }
 
     /**
      * @param {string} variant
      */
     getIsRemovable(variant) {
-        let condition = MetaStackerBuilding.isRemovable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaStackerBuilding.isRemovable[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getIsRotateable(variant) {
-        let condition = MetaStackerBuilding.isRotateable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaStackerBuilding.isRotateable[variant]();
     }
 
     /**
@@ -87,19 +50,7 @@ export class MetaStackerBuilding extends MetaBuilding {
 
         let available = [];
         for (const variant in variants) {
-            let reward = variants[variant];
-            if (typeof reward === "function") {
-                // @ts-ignore
-                reward = reward(root);
-            }
-
-            if (typeof reward === "boolean") {
-                available.push(variant);
-                continue;
-            }
-
-            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
-            available.push(variant);
+            if (variants[variant](root)) available.push(variant);
         }
 
         return available;
@@ -112,45 +63,22 @@ export class MetaStackerBuilding extends MetaBuilding {
      * @returns {Layer}
      */
     getLayer(root, variant) {
-        let reward = MetaStackerBuilding.layerByVariant[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward();
-        }
-
         // @ts-ignore
-        return typeof reward === "string" ? reward : "regular";
+        return MetaStackerBuilding.layerByVariant[variant](root);
     }
 
     /**
      * @param {string} variant
      */
     getDimensions(variant) {
-        let condition = MetaStackerBuilding.dimensions[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "object" ? condition : new Vector(1, 1);
+        return MetaStackerBuilding.dimensions[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getShowLayerPreview(variant) {
-        let condition = MetaStackerBuilding.layerPreview[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : null;
+        return MetaStackerBuilding.layerPreview[variant]();
     }
 
     /**
@@ -159,17 +87,7 @@ export class MetaStackerBuilding extends MetaBuilding {
      * @returns {Array<[string, string]>}
      */
     getAdditionalStatistics(root, variant) {
-        let speed = 0;
-        if (typeof MetaStackerBuilding.additionalStatistics[variant] === "function") {
-            // @ts-ignore
-            speed = MetaStackerBuilding.additionalStatistics[variant](root);
-        } else {
-            // @ts-ignore
-            speed = MetaStackerBuilding.additionalStatistics[variant];
-        }
-        return [
-            [T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(speed)]
-        ];
+        return MetaStackerBuilding.additionalStatistics[variant](root);
     }
 
     /**
@@ -180,24 +98,14 @@ export class MetaStackerBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        let condition = MetaStackerBuilding.overlayMatrices[variant];
-        if (condition) {
-            condition = condition[rotation];
-        }
-        return condition ? condition : null;
+        return MetaStackerBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
     }
 
     /**
      * @param {string} variant
      */
     getRenderPins(variant) {
-        let condition = MetaStackerBuilding.renderPins[variant];
-
-        if (typeof condition === "function") {
-            condition = condition();
-        }
-
-        return typeof condition === "boolean" ? condition : true;
+        return MetaStackerBuilding.renderPins[variant]();
     }
 
     /**
@@ -205,33 +113,7 @@ export class MetaStackerBuilding extends MetaBuilding {
      * @param {Entity} entity
      */
     setupEntityComponents(entity) {
-        entity.addComponent(
-            new ItemProcessorComponent({
-                inputsPerCharge: 2,
-                processorType: enumItemProcessorTypes.stacker,
-            })
-        );
-
-        entity.addComponent(
-            new ItemEjectorComponent({
-                slots: [{ pos: new Vector(0, 0), direction: enumDirection.top }],
-            })
-        );
-        entity.addComponent(
-            new ItemAcceptorComponent({
-                slots: [{
-                        pos: new Vector(0, 0),
-                        directions: [enumDirection.bottom],
-                        filter: "shape",
-                    },
-                    {
-                        pos: new Vector(1, 0),
-                        directions: [enumDirection.bottom],
-                        filter: "shape",
-                    },
-                ],
-            })
-        );
+        MetaStackerBuilding.setupEntityComponents.forEach(func => func(entity));
     }
 
     /**
@@ -244,44 +126,85 @@ export class MetaStackerBuilding extends MetaBuilding {
     }
 }
 
+MetaStackerBuilding.setupEntityComponents = [
+    entity =>
+    entity.addComponent(
+        new ItemProcessorComponent({
+            inputsPerCharge: 2,
+            processorType: enumItemProcessorTypes.stacker,
+        })
+    ),
+    entity =>
+    entity.addComponent(
+        new ItemEjectorComponent({
+            slots: [{ pos: new Vector(0, 0), direction: enumDirection.top }],
+        })
+    ),
+    entity =>
+    entity.addComponent(
+        new ItemAcceptorComponent({
+            slots: [{
+                    pos: new Vector(0, 0),
+                    directions: [enumDirection.bottom],
+                    filter: "shape",
+                },
+                {
+                    pos: new Vector(1, 0),
+                    directions: [enumDirection.bottom],
+                    filter: "shape",
+                },
+            ],
+        })
+    ),
+];
+
 MetaStackerBuilding.dimensions = {
-    [defaultBuildingVariant]: new Vector(2, 1),
+    [defaultBuildingVariant]: () => new Vector(2, 1),
 };
 
 MetaStackerBuilding.silhouetteColors = {
-    [defaultBuildingVariant]: "#9fcd7d",
+    [defaultBuildingVariant]: () => "#9fcd7d",
 };
 
 MetaStackerBuilding.overlayMatrices = {
-    [defaultBuildingVariant]: null,
+    [defaultBuildingVariant]: (entity, rotationVariant) => null,
 };
 
 MetaStackerBuilding.avaibleVariants = {
-    [defaultBuildingVariant]: enumHubGoalRewards.reward_stacker,
+    [defaultBuildingVariant]: root => root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_stacker),
 };
 
 MetaStackerBuilding.isRemovable = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaStackerBuilding.isRotateable = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaStackerBuilding.layerByVariant = {
-    [defaultBuildingVariant]: "regular",
+    [defaultBuildingVariant]: root => "regular",
 };
 
 MetaStackerBuilding.layerPreview = {
-    [defaultBuildingVariant]: null,
+    [defaultBuildingVariant]: () => null,
 };
 
 MetaStackerBuilding.renderPins = {
-    [defaultBuildingVariant]: null,
+    [defaultBuildingVariant]: () => null,
 };
 
 MetaStackerBuilding.additionalStatistics = {
-    [defaultBuildingVariant]: root => root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.stacker),
+    /**
+     * @param {*} root
+     * @returns {Array<[string, string]>}
+     */
+    [defaultBuildingVariant]: root => [
+        [
+            T.ingame.buildingPlacement.infoTexts.speed,
+            formatItemsPerSecond(root.hubGoals.getProcessorBaseSpeed(enumItemProcessorTypes.stacker)),
+        ],
+    ],
 };
 
 MetaStackerBuilding.componentVariations = {

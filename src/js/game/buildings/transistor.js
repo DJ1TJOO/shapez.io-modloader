@@ -16,65 +16,28 @@ export class MetaTransistorBuilding extends MetaBuilding {
      * @param {string} variant
      */
     getSilhouetteColor(variant) {
-        let condition = MetaTransistorBuilding.silhouetteColors[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : "#ffffff";
+        return MetaTransistorBuilding.silhouetteColors[variant]();
     }
 
     /**
      * @param {GameRoot} root
      */
     getIsUnlocked(root) {
-        let reward = MetaTransistorBuilding.avaibleVariants[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward(root);
-        }
-
-        if (typeof reward === "boolean") {
-            // @ts-ignore
-            return reward;
-        }
-
-        // @ts-ignore
-        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
+        return this.getAvailableVariants(root).length > 0;
     }
 
     /**
      * @param {string} variant
      */
     getIsRemovable(variant) {
-        let condition = MetaTransistorBuilding.isRemovable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaTransistorBuilding.isRemovable[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getIsRotateable(variant) {
-        let condition = MetaTransistorBuilding.isRotateable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaTransistorBuilding.isRotateable[variant]();
     }
 
     /**
@@ -85,19 +48,7 @@ export class MetaTransistorBuilding extends MetaBuilding {
 
         let available = [];
         for (const variant in variants) {
-            let reward = variants[variant];
-            if (typeof reward === "function") {
-                // @ts-ignore
-                reward = reward(root);
-            }
-
-            if (typeof reward === "boolean") {
-                available.push(variant);
-                continue;
-            }
-
-            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
-            available.push(variant);
+            if (variants[variant](root)) available.push(variant);
         }
 
         return available;
@@ -110,73 +61,40 @@ export class MetaTransistorBuilding extends MetaBuilding {
      * @returns {Layer}
      */
     getLayer(root, variant) {
-        let reward = MetaTransistorBuilding.layerByVariant[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward();
-        }
-
         // @ts-ignore
-        return typeof reward === "string" ? reward : "regular";
+        return MetaTransistorBuilding.layerByVariant[variant](root);
     }
 
     /**
      * @param {string} variant
      */
     getDimensions(variant) {
-        let condition = MetaTransistorBuilding.dimensions[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "object" ? condition : new Vector(1, 1);
+        return MetaTransistorBuilding.dimensions[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getShowLayerPreview(variant) {
-            let condition = MetaTransistorBuilding.layerPreview[variant];
+        return MetaTransistorBuilding.layerPreview[variant]();
+    }
 
-            if (typeof condition === "function") {
-                // @ts-ignore
-                condition = condition();
-            }
-
-            // @ts-ignore
-            return typeof condition === "string" ? condition : null;
-        }
-        /**
-         * @param {number} rotation
-         * @param {number} rotationVariant
-         * @param {string} variant
-         * @param {Entity} entity
-         * @returns {Array<number>|null}
-         */
+    /**
+     * @param {number} rotation
+     * @param {number} rotationVariant
+     * @param {string} variant
+     * @param {Entity} entity
+     * @returns {Array<number>|null}
+     */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        let condition = MetaTransistorBuilding.overlayMatrices[variant];
-        if (condition) {
-            condition = condition[rotation];
-        }
-        return condition ? condition : null;
+        return MetaTransistorBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
     }
 
     /**
      * @param {string} variant
      */
     getRenderPins(variant) {
-        let condition = MetaTransistorBuilding.renderPins[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        return typeof condition === "boolean" ? condition : true;
+        return MetaTransistorBuilding.renderPins[variant]();
     }
 
     /**
@@ -184,32 +102,7 @@ export class MetaTransistorBuilding extends MetaBuilding {
      * @param {Entity} entity
      */
     setupEntityComponents(entity) {
-        entity.addComponent(
-            new WiredPinsComponent({
-                slots: [{
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.top,
-                        type: enumPinSlotType.logicalEjector,
-                    },
-                    {
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.left,
-                        type: enumPinSlotType.logicalAcceptor,
-                    },
-                    {
-                        pos: new Vector(0, 0),
-                        direction: enumDirection.bottom,
-                        type: enumPinSlotType.logicalAcceptor,
-                    },
-                ],
-            })
-        );
-
-        entity.addComponent(
-            new LogicGateComponent({
-                type: enumLogicGateType.transistor,
-            })
-        );
+        MetaTransistorBuilding.setupEntityComponents.forEach(func => func(entity));
     }
 
     /**
@@ -222,53 +115,86 @@ export class MetaTransistorBuilding extends MetaBuilding {
     }
 }
 
+MetaTransistorBuilding.setupEntityComponents = [
+    entity =>
+    entity.addComponent(
+        new WiredPinsComponent({
+            slots: [{
+                    pos: new Vector(0, 0),
+                    direction: enumDirection.top,
+                    type: enumPinSlotType.logicalEjector,
+                },
+                {
+                    pos: new Vector(0, 0),
+                    direction: enumDirection.left,
+                    type: enumPinSlotType.logicalAcceptor,
+                },
+                {
+                    pos: new Vector(0, 0),
+                    direction: enumDirection.bottom,
+                    type: enumPinSlotType.logicalAcceptor,
+                },
+            ],
+        })
+    ),
+    entity =>
+    entity.addComponent(
+        new LogicGateComponent({
+            type: enumLogicGateType.transistor,
+        })
+    ),
+];
+
 MetaTransistorBuilding.variants = {
     mirrored: "mirrored",
 };
 
 MetaTransistorBuilding.overlayMatrices = {
-    [defaultBuildingVariant]: generateMatrixRotations([0, 1, 0, 1, 1, 0, 0, 1, 0]),
-    [MetaTransistorBuilding.variants.mirrored]: generateMatrixRotations([0, 1, 0, 0, 1, 1, 0, 1, 0]),
+    [defaultBuildingVariant]: (entity, rotationVariant) =>
+        generateMatrixRotations([0, 1, 0, 1, 1, 0, 0, 1, 0]),
+    [MetaTransistorBuilding.variants.mirrored]: (entity, rotationVariant) =>
+        generateMatrixRotations([0, 1, 0, 0, 1, 1, 0, 1, 0]),
 };
 
 MetaTransistorBuilding.dimensions = {
-    [defaultBuildingVariant]: new Vector(1, 1),
-    [MetaTransistorBuilding.variants.mirrored]: new Vector(1, 1),
+    [defaultBuildingVariant]: () => new Vector(1, 1),
+    [MetaTransistorBuilding.variants.mirrored]: () => new Vector(1, 1),
 };
 
 MetaTransistorBuilding.silhouetteColors = {
-    [defaultBuildingVariant]: "#823cab",
-    [MetaTransistorBuilding.variants.mirrored]: "#823cab",
+    [defaultBuildingVariant]: () => "#823cab",
+    [MetaTransistorBuilding.variants.mirrored]: () => "#823cab",
 };
 
 MetaTransistorBuilding.isRemovable = {
-    [defaultBuildingVariant]: true,
-    [MetaTransistorBuilding.variants.mirrored]: true,
+    [defaultBuildingVariant]: () => true,
+    [MetaTransistorBuilding.variants.mirrored]: () => true,
 };
 
 MetaTransistorBuilding.isRotateable = {
-    [defaultBuildingVariant]: true,
-    [MetaTransistorBuilding.variants.mirrored]: true,
+    [defaultBuildingVariant]: () => true,
+    [MetaTransistorBuilding.variants.mirrored]: () => true,
 };
 
 MetaTransistorBuilding.renderPins = {
-    [defaultBuildingVariant]: false,
-    [MetaTransistorBuilding.variants.mirrored]: false,
+    [defaultBuildingVariant]: () => false,
+    [MetaTransistorBuilding.variants.mirrored]: () => false,
 };
 
 MetaTransistorBuilding.layerPreview = {
-    [defaultBuildingVariant]: "wires",
-    [MetaTransistorBuilding.variants.mirrored]: "wires",
+    [defaultBuildingVariant]: () => "wires",
+    [MetaTransistorBuilding.variants.mirrored]: () => "wires",
 };
 
 MetaTransistorBuilding.avaibleVariants = {
-    [defaultBuildingVariant]: enumHubGoalRewards.reward_logic_gates,
-    [MetaTransistorBuilding.variants.mirrored]: enumHubGoalRewards.reward_logic_gates,
+    [defaultBuildingVariant]: root => root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_logic_gates),
+    [MetaTransistorBuilding.variants.mirrored]: root =>
+        root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_logic_gates),
 };
 
 MetaTransistorBuilding.layerByVariant = {
-    [defaultBuildingVariant]: "wires",
-    [MetaTransistorBuilding.variants.mirrored]: "wires",
+    [defaultBuildingVariant]: root => "wires",
+    [MetaTransistorBuilding.variants.mirrored]: root => "wires",
 };
 
 MetaTransistorBuilding.componentVariations = {

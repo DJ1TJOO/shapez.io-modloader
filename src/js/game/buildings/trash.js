@@ -18,65 +18,28 @@ export class MetaTrashBuilding extends MetaBuilding {
      * @param {string} variant
      */
     getSilhouetteColor(variant) {
-        let condition = MetaTrashBuilding.silhouetteColors[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : "#ffffff";
+        return MetaTrashBuilding.silhouetteColors[variant]();
     }
 
     /**
      * @param {GameRoot} root
      */
     getIsUnlocked(root) {
-        let reward = MetaTrashBuilding.avaibleVariants[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward(root);
-        }
-
-        if (typeof reward === "boolean") {
-            // @ts-ignore
-            return reward;
-        }
-
-        // @ts-ignore
-        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
+        return this.getAvailableVariants(root).length > 0;
     }
 
     /**
      * @param {string} variant
      */
     getIsRemovable(variant) {
-        let condition = MetaTrashBuilding.isRemovable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaTrashBuilding.isRemovable[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getIsRotateable(variant) {
-        let condition = MetaTrashBuilding.isRotateable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaTrashBuilding.isRotateable[variant]();
     }
 
     /**
@@ -87,19 +50,7 @@ export class MetaTrashBuilding extends MetaBuilding {
 
         let available = [];
         for (const variant in variants) {
-            let reward = variants[variant];
-            if (typeof reward === "function") {
-                // @ts-ignore
-                reward = reward(root);
-            }
-
-            if (typeof reward === "boolean") {
-                available.push(variant);
-                continue;
-            }
-
-            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
-            available.push(variant);
+            if (variants[variant](root)) available.push(variant);
         }
 
         return available;
@@ -112,45 +63,22 @@ export class MetaTrashBuilding extends MetaBuilding {
      * @returns {Layer}
      */
     getLayer(root, variant) {
-        let reward = MetaTrashBuilding.layerByVariant[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward();
-        }
-
         // @ts-ignore
-        return typeof reward === "string" ? reward : "regular";
+        return MetaTrashBuilding.layerByVariant[variant](root);
     }
 
     /**
      * @param {string} variant
      */
     getDimensions(variant) {
-        let condition = MetaTrashBuilding.dimensions[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "object" ? condition : new Vector(1, 1);
+        return MetaTrashBuilding.dimensions[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getShowLayerPreview(variant) {
-        let condition = MetaTrashBuilding.layerPreview[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : null;
+        return MetaTrashBuilding.layerPreview[variant]();
     }
 
     /**
@@ -161,24 +89,14 @@ export class MetaTrashBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        let condition = MetaTrashBuilding.overlayMatrices[variant];
-        if (condition) {
-            condition = condition[rotation];
-        }
-        return condition ? condition : null;
+        return MetaTrashBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
     }
 
     /**
      * @param {string} variant
      */
     getRenderPins(variant) {
-        let condition = MetaTrashBuilding.renderPins[variant];
-
-        if (typeof condition === "function") {
-            condition = condition();
-        }
-
-        return typeof condition === "boolean" ? condition : true;
+        return MetaTrashBuilding.renderPins[variant]();
     }
 
     /**
@@ -186,25 +104,7 @@ export class MetaTrashBuilding extends MetaBuilding {
      * @param {Entity} entity
      */
     setupEntityComponents(entity) {
-        entity.addComponent(
-            new ItemAcceptorComponent({
-                slots: [{
-                    pos: new Vector(0, 0),
-                    directions: [
-                        enumDirection.top,
-                        enumDirection.right,
-                        enumDirection.bottom,
-                        enumDirection.left,
-                    ],
-                }, ],
-            })
-        );
-        entity.addComponent(
-            new ItemProcessorComponent({
-                inputsPerCharge: 1,
-                processorType: enumItemProcessorTypes.trash,
-            })
-        );
+        MetaTrashBuilding.setupEntityComponents.forEach(func => func(entity));
     }
 
     /**
@@ -217,40 +117,66 @@ export class MetaTrashBuilding extends MetaBuilding {
     }
 }
 
+MetaTrashBuilding.setupEntityComponents = [
+    entity =>
+    entity.addComponent(
+        new ItemAcceptorComponent({
+            slots: [{
+                pos: new Vector(0, 0),
+                directions: [
+                    enumDirection.top,
+                    enumDirection.right,
+                    enumDirection.bottom,
+                    enumDirection.left,
+                ],
+            }, ],
+        })
+    ),
+    entity =>
+    entity.addComponent(
+        new ItemProcessorComponent({
+            inputsPerCharge: 1,
+            processorType: enumItemProcessorTypes.trash,
+        })
+    ),
+];
+
 MetaTrashBuilding.overlayMatrices = {
-    [defaultBuildingVariant]: generateMatrixRotations([1, 1, 0, 1, 1, 1, 0, 1, 1]),
+    [defaultBuildingVariant]: (entity, rotationVariant) =>
+        generateMatrixRotations([1, 1, 0, 1, 1, 1, 0, 1, 1]),
 };
 
 MetaTrashBuilding.dimensions = {
-    [defaultBuildingVariant]: new Vector(1, 1),
+    [defaultBuildingVariant]: () => new Vector(1, 1),
 };
 
 MetaTrashBuilding.silhouetteColors = {
-    [defaultBuildingVariant]: "#ed1d5d",
+    [defaultBuildingVariant]: () => "#ed1d5d",
 };
 
 MetaTrashBuilding.isRemovable = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaTrashBuilding.isRotateable = {
-    [defaultBuildingVariant]: true,
+    [defaultBuildingVariant]: () => true,
 };
 
 MetaTrashBuilding.renderPins = {
-    [defaultBuildingVariant]: false,
+    [defaultBuildingVariant]: () => false,
 };
 
 MetaTrashBuilding.layerByVariant = {
-    [defaultBuildingVariant]: "regular",
+    [defaultBuildingVariant]: root => "regular",
 };
 
 MetaTrashBuilding.layerPreview = {
-    [defaultBuildingVariant]: null,
+    [defaultBuildingVariant]: () => null,
 };
 
 MetaTrashBuilding.avaibleVariants = {
-    [defaultBuildingVariant]: enumHubGoalRewards.reward_cutter_and_trash,
+    [defaultBuildingVariant]: root =>
+        root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_cutter_and_trash),
 };
 
 MetaTrashBuilding.componentVariations = {

@@ -19,65 +19,28 @@ export class MetaVirtualProcessorBuilding extends MetaBuilding {
      * @param {string} variant
      */
     getSilhouetteColor(variant) {
-        let condition = MetaVirtualProcessorBuilding.silhouetteColors[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : "#ffffff";
+        return MetaVirtualProcessorBuilding.silhouetteColors[variant]();
     }
 
     /**
      * @param {GameRoot} root
      */
     getIsUnlocked(root) {
-        let reward = MetaVirtualProcessorBuilding.avaibleVariants[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward(root);
-        }
-
-        if (typeof reward === "boolean") {
-            // @ts-ignore
-            return reward;
-        }
-
-        // @ts-ignore
-        return typeof reward === "string" ? root.hubGoals.isRewardUnlocked(reward) : false;
+        return this.getAvailableVariants(root).length > 0;
     }
 
     /**
      * @param {string} variant
      */
     getIsRemovable(variant) {
-        let condition = MetaVirtualProcessorBuilding.isRemovable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaVirtualProcessorBuilding.isRemovable[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getIsRotateable(variant) {
-        let condition = MetaVirtualProcessorBuilding.isRotateable[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "boolean" ? condition : true;
+        return MetaVirtualProcessorBuilding.isRotateable[variant]();
     }
 
     /**
@@ -88,19 +51,7 @@ export class MetaVirtualProcessorBuilding extends MetaBuilding {
 
         let available = [];
         for (const variant in variants) {
-            let reward = variants[variant];
-            if (typeof reward === "function") {
-                // @ts-ignore
-                reward = reward(root);
-            }
-
-            if (typeof reward === "boolean") {
-                available.push(variant);
-                continue;
-            }
-
-            if (!root.hubGoals.isRewardUnlocked(reward)) continue;
-            available.push(variant);
+            if (variants[variant](root)) available.push(variant);
         }
 
         return available;
@@ -113,46 +64,22 @@ export class MetaVirtualProcessorBuilding extends MetaBuilding {
      * @returns {Layer}
      */
     getLayer(root, variant) {
-        let reward = MetaVirtualProcessorBuilding.layerByVariant[defaultBuildingVariant];
-
-        if (typeof reward === "function") {
-            // @ts-ignore
-            reward = reward();
-        }
-
         // @ts-ignore
-        return typeof reward === "string" ? reward : "regular";
+        return MetaVirtualProcessorBuilding.layerByVariant[variant](root);
     }
 
     /**
      * @param {string} variant
      */
     getDimensions(variant) {
-        let condition = MetaVirtualProcessorBuilding.dimensions[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "object" ? condition : new Vector(1, 1);
+        return MetaVirtualProcessorBuilding.dimensions[variant]();
     }
 
     /**
      * @param {string} variant
      */
     getShowLayerPreview(variant) {
-        let condition = MetaVirtualProcessorBuilding.layerPreview[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        // @ts-ignore
-        return typeof condition === "string" ? condition : null;
+        return MetaVirtualProcessorBuilding.layerPreview[variant]();
     }
 
     /**
@@ -163,25 +90,14 @@ export class MetaVirtualProcessorBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        let condition;
-        if (MetaVirtualProcessorBuilding.overlayMatrices[variant]) {
-            condition = MetaVirtualProcessorBuilding.overlayMatrices[variant][rotation];
-        }
-        return condition ? condition : null;
+        return MetaVirtualProcessorBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
     }
 
     /**
      * @param {string} variant
      */
     getRenderPins(variant) {
-        let condition = MetaVirtualProcessorBuilding.renderPins[variant];
-
-        if (typeof condition === "function") {
-            // @ts-ignore
-            condition = condition();
-        }
-
-        return typeof condition === "boolean" ? condition : true;
+        return MetaVirtualProcessorBuilding.renderPins[variant]();
     }
 
     /**
@@ -189,13 +105,7 @@ export class MetaVirtualProcessorBuilding extends MetaBuilding {
      * @param {Entity} entity
      */
     setupEntityComponents(entity) {
-        entity.addComponent(
-            new WiredPinsComponent({
-                slots: [],
-            })
-        );
-
-        entity.addComponent(new LogicGateComponent({}));
+        MetaVirtualProcessorBuilding.setupEntityComponents.forEach(func => func(entity));
     }
 
     /**
@@ -204,19 +114,18 @@ export class MetaVirtualProcessorBuilding extends MetaBuilding {
      * @param {string} variant
      */
     updateVariants(entity, rotationVariant, variant) {
-        // for (let i = 0; i < MetaVirtualProcessorBuilding.updateVariants.length; i++) {
-        //     const ret = MetaVirtualProcessorBuilding.updateVariants[i](entity, rotationVariant, variant);
-        //     if (typeof ret !== "undefined") return ret;
-        // }
         MetaVirtualProcessorBuilding.componentVariations[variant](entity, rotationVariant);
     }
 }
 
-MetaVirtualProcessorBuilding.updateVariants = [
-    // (entity, rotationVariant, variant) => {},
-    // (entity, rotationVariant, variant) => {
-    //     return "dd";
-    // },
+MetaVirtualProcessorBuilding.setupEntityComponents = [
+    entity =>
+    entity.addComponent(
+        new WiredPinsComponent({
+            slots: [],
+        })
+    ),
+    entity => entity.addComponent(new LogicGateComponent({})),
 ];
 
 MetaVirtualProcessorBuilding.variants = {
@@ -227,83 +136,84 @@ MetaVirtualProcessorBuilding.variants = {
 };
 
 MetaVirtualProcessorBuilding.overlayMatrices = {
-    [defaultBuildingVariant]: null,
-    [MetaVirtualProcessorBuilding.variants.rotater]: null,
-    [MetaVirtualProcessorBuilding.variants.unstacker]: null,
-    [MetaVirtualProcessorBuilding.variants.stacker]: null,
-    [MetaVirtualProcessorBuilding.variants.painter]: null,
+    [defaultBuildingVariant]: (entity, rotationVariant) => null,
+    [MetaVirtualProcessorBuilding.variants.rotater]: (entity, rotationVariant) => null,
+    [MetaVirtualProcessorBuilding.variants.unstacker]: (entity, rotationVariant) => null,
+    [MetaVirtualProcessorBuilding.variants.stacker]: (entity, rotationVariant) => null,
+    [MetaVirtualProcessorBuilding.variants.painter]: (entity, rotationVariant) => null,
 };
 
 MetaVirtualProcessorBuilding.avaibleVariants = {
-    [defaultBuildingVariant]: enumHubGoalRewards.reward_virtual_processing,
-    [MetaVirtualProcessorBuilding.variants.rotater]: enumHubGoalRewards.reward_virtual_processing,
-    [MetaVirtualProcessorBuilding.variants.unstacker]: enumHubGoalRewards.reward_virtual_processing,
-    [MetaVirtualProcessorBuilding.variants.stacker]: enumHubGoalRewards.reward_virtual_processing,
-    [MetaVirtualProcessorBuilding.variants.painter]: enumHubGoalRewards.reward_virtual_processing,
+    [defaultBuildingVariant]: root =>
+        root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_virtual_processing),
+    [MetaVirtualProcessorBuilding.variants.rotater]: root =>
+        root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_virtual_processing),
+    [MetaVirtualProcessorBuilding.variants.unstacker]: root =>
+        root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_virtual_processing),
+    [MetaVirtualProcessorBuilding.variants.stacker]: root =>
+        root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_virtual_processing),
+    [MetaVirtualProcessorBuilding.variants.painter]: root =>
+        root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_virtual_processing),
 };
 
 MetaVirtualProcessorBuilding.dimensions = {
-    [defaultBuildingVariant]: new Vector(1, 1),
-    [MetaVirtualProcessorBuilding.variants.rotater]: new Vector(1, 1),
-    [MetaVirtualProcessorBuilding.variants.unstacker]: new Vector(1, 1),
-    [MetaVirtualProcessorBuilding.variants.stacker]: new Vector(1, 1),
-    [MetaVirtualProcessorBuilding.variants.painter]: new Vector(1, 1),
+    [defaultBuildingVariant]: () => new Vector(1, 1),
+    [MetaVirtualProcessorBuilding.variants.rotater]: () => new Vector(1, 1),
+    [MetaVirtualProcessorBuilding.variants.unstacker]: () => new Vector(1, 1),
+    [MetaVirtualProcessorBuilding.variants.stacker]: () => new Vector(1, 1),
+    [MetaVirtualProcessorBuilding.variants.painter]: () => new Vector(1, 1),
 };
 
 MetaVirtualProcessorBuilding.isRemovable = {
-    [defaultBuildingVariant]: true,
-    [MetaVirtualProcessorBuilding.variants.rotater]: true,
-    [MetaVirtualProcessorBuilding.variants.unstacker]: true,
-    [MetaVirtualProcessorBuilding.variants.stacker]: true,
-    [MetaVirtualProcessorBuilding.variants.painter]: true,
+    [defaultBuildingVariant]: () => true,
+    [MetaVirtualProcessorBuilding.variants.rotater]: () => true,
+    [MetaVirtualProcessorBuilding.variants.unstacker]: () => true,
+    [MetaVirtualProcessorBuilding.variants.stacker]: () => true,
+    [MetaVirtualProcessorBuilding.variants.painter]: () => true,
 };
 
 MetaVirtualProcessorBuilding.isRotateable = {
-    [defaultBuildingVariant]: true,
-    [MetaVirtualProcessorBuilding.variants.rotater]: true,
-    [MetaVirtualProcessorBuilding.variants.unstacker]: true,
-    [MetaVirtualProcessorBuilding.variants.stacker]: true,
-    [MetaVirtualProcessorBuilding.variants.painter]: true,
+    [defaultBuildingVariant]: () => true,
+    [MetaVirtualProcessorBuilding.variants.rotater]: () => true,
+    [MetaVirtualProcessorBuilding.variants.unstacker]: () => true,
+    [MetaVirtualProcessorBuilding.variants.stacker]: () => true,
+    [MetaVirtualProcessorBuilding.variants.painter]: () => true,
 };
 
 MetaVirtualProcessorBuilding.renderPins = {
-    [defaultBuildingVariant]: false,
-    [MetaVirtualProcessorBuilding.variants.rotater]: false,
-    [MetaVirtualProcessorBuilding.variants.unstacker]: false,
-    [MetaVirtualProcessorBuilding.variants.stacker]: false,
-    [MetaVirtualProcessorBuilding.variants.painter]: false,
+    [defaultBuildingVariant]: () => false,
+    [MetaVirtualProcessorBuilding.variants.rotater]: () => false,
+    [MetaVirtualProcessorBuilding.variants.unstacker]: () => false,
+    [MetaVirtualProcessorBuilding.variants.stacker]: () => false,
+    [MetaVirtualProcessorBuilding.variants.painter]: () => false,
 };
 
 MetaVirtualProcessorBuilding.layerPreview = {
-    [defaultBuildingVariant]: "wires",
-    [MetaVirtualProcessorBuilding.variants.rotater]: "wires",
-    [MetaVirtualProcessorBuilding.variants.unstacker]: "wires",
-    [MetaVirtualProcessorBuilding.variants.stacker]: "wires",
-    [MetaVirtualProcessorBuilding.variants.painter]: "wires",
+    [defaultBuildingVariant]: () => "wires",
+    [MetaVirtualProcessorBuilding.variants.rotater]: () => "wires",
+    [MetaVirtualProcessorBuilding.variants.unstacker]: () => "wires",
+    [MetaVirtualProcessorBuilding.variants.stacker]: () => "wires",
+    [MetaVirtualProcessorBuilding.variants.painter]: () => "wires",
 };
 
 MetaVirtualProcessorBuilding.layerByVariant = {
-    [defaultBuildingVariant]: "wires",
-    [MetaVirtualProcessorBuilding.variants.rotater]: "wires",
-    [MetaVirtualProcessorBuilding.variants.unstacker]: "wires",
-    [MetaVirtualProcessorBuilding.variants.stacker]: "wires",
-    [MetaVirtualProcessorBuilding.variants.painter]: "wires",
+    [defaultBuildingVariant]: root => "wires",
+    [MetaVirtualProcessorBuilding.variants.rotater]: root => "wires",
+    [MetaVirtualProcessorBuilding.variants.unstacker]: root => "wires",
+    [MetaVirtualProcessorBuilding.variants.stacker]: root => "wires",
+    [MetaVirtualProcessorBuilding.variants.painter]: root => "wires",
 };
 
 MetaVirtualProcessorBuilding.silhouetteColors = {
-    [defaultBuildingVariant]: new MetaCutterBuilding().getSilhouetteColor(defaultBuildingVariant),
-    [MetaVirtualProcessorBuilding.variants.rotater]: new MetaRotaterBuilding().getSilhouetteColor(
-        MetaVirtualProcessorBuilding.variants.rotater
-    ),
-    [MetaVirtualProcessorBuilding.variants.unstacker]: new MetaStackerBuilding().getSilhouetteColor(
-        MetaVirtualProcessorBuilding.variants.unstacker
-    ),
-    [MetaVirtualProcessorBuilding.variants.stacker]: new MetaStackerBuilding().getSilhouetteColor(
-        MetaVirtualProcessorBuilding.variants.stacker
-    ),
-    [MetaVirtualProcessorBuilding.variants.painter]: new MetaPainterBuilding().getSilhouetteColor(
-        MetaVirtualProcessorBuilding.variants.painter
-    ),
+    [defaultBuildingVariant]: () => MetaCutterBuilding.silhouetteColors[defaultBuildingVariant],
+    [MetaVirtualProcessorBuilding.variants.rotater]: () =>
+        MetaRotaterBuilding.silhouetteColors[defaultBuildingVariant],
+    [MetaVirtualProcessorBuilding.variants.unstacker]: () =>
+        MetaStackerBuilding.silhouetteColors[defaultBuildingVariant],
+    [MetaVirtualProcessorBuilding.variants.stacker]: () =>
+        MetaStackerBuilding.silhouetteColors[defaultBuildingVariant],
+    [MetaVirtualProcessorBuilding.variants.painter]: () =>
+        MetaPainterBuilding.silhouetteColors[defaultBuildingVariant],
 };
 
 MetaVirtualProcessorBuilding.componentVariations = {
