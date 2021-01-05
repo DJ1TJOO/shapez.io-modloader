@@ -99,7 +99,8 @@ export class MetaFilterBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        return MetaFilterBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
+        let matrices = MetaFilterBuilding.overlayMatrices[variant](entity, rotationVariant);
+        return matrices ? matrices[rotation] : null;
     }
 
     /**

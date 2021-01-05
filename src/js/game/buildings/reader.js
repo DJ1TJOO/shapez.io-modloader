@@ -101,7 +101,8 @@ export class MetaReaderBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        return MetaReaderBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
+        let matrices = MetaReaderBuilding.overlayMatrices[variant](entity, rotationVariant);
+        return matrices ? matrices[rotation] : null;
     }
 
     /**

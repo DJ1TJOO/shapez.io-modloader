@@ -91,10 +91,11 @@ export class MetaUndergroundBeltBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        return MetaUndergroundBeltBuilding.overlayMatricesByRotation[rotationVariant](
+        let matrices = MetaUndergroundBeltBuilding.overlayMatricesByRotation[rotationVariant](
             entity,
             rotationVariant
-        )[rotation];
+        );
+        return matrices ? matrices[rotation] : null;
     }
 
     /**

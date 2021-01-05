@@ -25,10 +25,9 @@ export function matchOverwriteRecursiveSettings(dest, src) {
         const data = src[key];
         if (typeof data === "object") {
             if (!dest[key]) dest[key] = {};
-            matchOverwriteRecursive(dest[key], src[key]);
+            matchOverwriteRecursiveSettings(dest[key], src[key]);
         } else if (typeof data === "string" || typeof data === "number" || typeof data === "boolean") {
-            // console.log("match string", key);
-            dest[key] = src[key];
+            dest[key] = data;
         } else {
             console.log("Unknown type:", typeof data, "in key", key);
         }
@@ -61,13 +60,13 @@ export class ModManager {
      *
      * @param {ModPack} modPack
      */
-    constructor(modPack = undefined) {
+    constructor(discordId, username, tag, modPack = undefined) {
         /** @type {Map<String, import("./mod").ModInfo>} */
         this.mods = new Map();
 
         this.modPack = modPack;
 
-        window["shapezAPI"] = new ShapezAPI();
+        window["shapezAPI"] = new ShapezAPI(discordId, username, tag);
 
         /**
          * Registers a mod
@@ -246,6 +245,7 @@ export class ModManager {
         if (settings) {
             matchOverwriteRecursiveSettings(mod.settings, settings);
         }
+
         if (this.modPack && this.modPack.mods) mod.main(this.modPack.mods.find(mod => mod.id === id).config);
         else mod.main();
     }

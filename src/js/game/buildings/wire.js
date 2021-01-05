@@ -88,7 +88,10 @@ export class MetaWireBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        return MetaWireBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
+        let matrices = MetaWireBuilding.overlayMatrices[
+            MetaWireBuilding.rotationVariantToType[rotationVariant]
+        ](entity, rotationVariant);
+        return matrices ? matrices[rotation] : null;
     }
 
     /**

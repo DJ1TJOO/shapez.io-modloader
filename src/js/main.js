@@ -86,20 +86,24 @@ const logger = createLogger("main");
             config: {},
             settings: {
                 hasMakeModButton: {
-                    value: false,
+                    value: true,
                 },
-                enum: {
-                    value: "new test",
-                },
-                range: {
-                    value: 10,
-                },
+                // enum: {
+                //     value: "new test",
+                // },
+                // range: {
+                //     value: 10,
+                // },
             },
         }, ],
     };
 
+    let discordId = "324523",
+        username = "username",
+        tag = "3214";
+
     // @ts-ignore
-    var modMgr = new ModManager(modpack);
+    var modMgr = new ModManager(discordId, username, tag, modpack);
     addVanillaBuildingsToAPI();
     addVanillaComponentsToAPI();
     addVanillaSystemsToAPI();

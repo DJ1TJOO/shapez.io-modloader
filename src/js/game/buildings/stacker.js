@@ -98,7 +98,8 @@ export class MetaStackerBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        return MetaStackerBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
+        let matrices = MetaStackerBuilding.overlayMatrices[variant](entity, rotationVariant);
+        return matrices ? matrices[rotation] : null;
     }
 
     /**

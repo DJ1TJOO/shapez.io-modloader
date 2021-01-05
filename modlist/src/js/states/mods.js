@@ -32,10 +32,6 @@ export class ModsState extends shapezAPI.exports.TextualGameState {
                     <div class="category" data-category="installedMods">
                         ${this.getMods()}
                     </div>
-                    <div class="category" data-category="exploreMods">
-                    </div>
-                    <div class="category" data-category="exploreModpacks">
-                    </div>
                 </div>
                 `;
     }
@@ -79,7 +75,8 @@ export class ModsState extends shapezAPI.exports.TextualGameState {
         this.trackClicks(
             exploreMods,
             () => {
-                this.setActiveCategory("exploreMods");
+                var win = window.open("http://thomasbrants.nl/mods", "_blank");
+                win.focus();
             }, { preventDefault: false }
         );
 
@@ -87,7 +84,8 @@ export class ModsState extends shapezAPI.exports.TextualGameState {
         this.trackClicks(
             exploreModpacks,
             () => {
-                this.setActiveCategory("exploreModpacks");
+                var win = window.open("http://thomasbrants.nl/mods", "_blank");
+                win.focus();
             }, { preventDefault: false }
         );
 

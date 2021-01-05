@@ -90,7 +90,8 @@ export class MetaBalancerBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        return MetaBalancerBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
+        let matrices = MetaBalancerBuilding.overlayMatrices[variant](entity, rotationVariant);
+        return matrices ? matrices[rotation] : null;
     }
 
     /**

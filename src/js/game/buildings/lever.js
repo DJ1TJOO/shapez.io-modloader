@@ -86,7 +86,8 @@ export class MetaLeverBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        return MetaLeverBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
+        let matrices = MetaLeverBuilding.overlayMatrices[variant](entity, rotationVariant);
+        return matrices ? matrices[rotation] : null;
     }
 
     getSprite() {

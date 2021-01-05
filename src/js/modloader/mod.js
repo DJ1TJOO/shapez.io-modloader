@@ -128,7 +128,11 @@ import { SettingsState } from "../states/settings";
 import { T } from "../translations";
 
 export class ShapezAPI {
-    constructor() {
+    constructor(discordId, username, tag) {
+        this.discordId = discordId;
+        this.username = username;
+        this.tag = tag;
+
         this.exports = {
             MetaBuilding,
             Vector,

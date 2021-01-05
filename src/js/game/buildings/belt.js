@@ -102,7 +102,11 @@ export class MetaBeltBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        return MetaBeltBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
+        let matrices = MetaBeltBuilding.overlayMatrices[MetaBeltBuilding.variantToRotation[rotationVariant]](
+            entity,
+            rotationVariant
+        );
+        return matrices ? matrices[rotation] : null;
     }
 
     /**

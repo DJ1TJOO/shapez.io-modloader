@@ -76,17 +76,19 @@ export class MetaConstantSignalBuilding extends MetaBuilding {
      * @param {string} variant
      */
     getShowLayerPreview(variant) {
-            return MetaConstantSignalBuilding.layerPreview[variant]();
-        }
-        /**
-         * @param {number} rotation
-         * @param {number} rotationVariant
-         * @param {string} variant
-         * @param {Entity} entity
-         * @returns {Array<number>|null}
-         */
+        return MetaConstantSignalBuilding.layerPreview[variant]();
+    }
+
+    /**
+     * @param {number} rotation
+     * @param {number} rotationVariant
+     * @param {string} variant
+     * @param {Entity} entity
+     * @returns {Array<number>|null}
+     */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        return MetaConstantSignalBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
+        let matrices = MetaConstantSignalBuilding.overlayMatrices[variant](entity, rotationVariant);
+        return matrices ? matrices[rotation] : null;
     }
 
     /**

@@ -87,7 +87,8 @@ export class MetaComparatorBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        return MetaComparatorBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
+        let matrices = MetaComparatorBuilding.overlayMatrices[variant](entity, rotationVariant);
+        return matrices ? matrices[rotation] : null;
     }
 
     /**

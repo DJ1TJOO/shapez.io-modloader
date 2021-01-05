@@ -90,7 +90,8 @@ export class MetaVirtualProcessorBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        return MetaVirtualProcessorBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
+        let matrices = MetaVirtualProcessorBuilding.overlayMatrices[variant](entity, rotationVariant);
+        return matrices ? matrices[rotation] : null;
     }
 
     /**

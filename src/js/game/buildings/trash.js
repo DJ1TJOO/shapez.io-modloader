@@ -89,7 +89,8 @@ export class MetaTrashBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        return MetaTrashBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
+        let matrices = MetaTrashBuilding.overlayMatrices[variant](entity, rotationVariant);
+        return matrices ? matrices[rotation] : null;
     }
 
     /**

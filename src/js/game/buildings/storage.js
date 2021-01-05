@@ -101,7 +101,8 @@ export class MetaStorageBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        return MetaStorageBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
+        let matrices = MetaStorageBuilding.overlayMatrices[variant](entity, rotationVariant);
+        return matrices ? matrices[rotation] : null;
     }
 
     /**
@@ -214,7 +215,7 @@ MetaStorageBuilding.overlayMatrices = {
 };
 
 MetaStorageBuilding.avaibleVariants = {
-    [defaultBuildingVariant]: enumHubGoalRewards.reward_storage,
+    [defaultBuildingVariant]: root => root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_storage),
 };
 
 MetaStorageBuilding.layerByVariant = {

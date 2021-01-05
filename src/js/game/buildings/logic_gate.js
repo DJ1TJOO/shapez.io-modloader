@@ -87,7 +87,8 @@ export class MetaLogicGateBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        return MetaLogicGateBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
+        let matrices = MetaLogicGateBuilding.overlayMatrices[variant](entity, rotationVariant);
+        return matrices ? matrices[rotation] : null;
     }
 
     /**

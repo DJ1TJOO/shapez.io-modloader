@@ -131,7 +131,7 @@ MetaCutterBuilding.avaibleVariants = {
     [defaultBuildingVariant]: root =>
         root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_cutter_and_trash),
     [MetaCutterBuilding.variants.quad]: root =>
-        root.hubGoal.isRewardUnlocked(enumHubGoalRewards.reward_cutter_quad),
+        root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_cutter_quad),
 };
 
 MetaCutterBuilding.layerByVariant = {

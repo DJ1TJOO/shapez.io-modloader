@@ -96,7 +96,8 @@ export class MetaPainterBuilding extends MetaBuilding {
      * @returns {Array<number>|null}
      */
     getSpecialOverlayRenderMatrix(rotation, rotationVariant, variant, entity) {
-        return MetaPainterBuilding.overlayMatrices[variant](entity, rotationVariant)[rotation];
+        let matrices = MetaPainterBuilding.overlayMatrices[variant](entity, rotationVariant);
+        return matrices ? matrices[rotation] : null;
     }
 
     /**
