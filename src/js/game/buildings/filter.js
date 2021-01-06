@@ -215,7 +215,7 @@ MetaFilterBuilding.componentVariations = {
     [defaultBuildingVariant]: (entity, rotationVariant) => {
         entity.components.WiredPins.setSlots([{
             pos: new Vector(0, 0),
-            direction: enumDirection.bottom,
+            direction: enumDirection.left,
             type: enumPinSlotType.logicalAcceptor,
         }, ]);
 

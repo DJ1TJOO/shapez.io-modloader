@@ -74,12 +74,37 @@ export class ColorItem extends BaseItem {
      */
     drawItemCenteredClipped(x, y, parameters, diameter = globalConfig.defaultItemDiameter) {
         const realDiameter = diameter * 0.6;
+        // const func = ColorItem.drawingFunctionByColor[this.color];
+
+        // if (func) {
+        //     func(x, y, parameters, realDiameter, this.color);
+        //     return;
+        // } why :'(
+
         if (!this.cachedSprite) {
             this.cachedSprite = Loader.getSprite("sprites/colors/" + this.color + ".png");
         }
         this.cachedSprite.drawCachedCentered(parameters, x, y, realDiameter);
     }
 }
+
+// ColorItem.drawingFunctionByColor = {
+//     [enumColors.uncolored]: (x, y, parameters, realDiameter, color) => {
+//         const ctx = parameters.context;
+//         ctx.textAlign = "center";
+//         ctx.fillStyle = "black";
+//         ctx.font = "15px sans-serif";
+//         ctx.fillText("Brrrr", x - 5, y + realDiameter / 2, globalConfig.tileSize);
+//     },
+
+//     [enumColors.white]: (x, y, parameters, realDiameter, color) => {
+//         const ctx = parameters.context;
+//         ctx.textAlign = "center";
+//         ctx.fillStyle = "black";
+//         ctx.font = "15px sans-serif";
+//         ctx.fillText("rrrrrr", x, y + realDiameter / 2, globalConfig.tileSize);
+//     },
+// };
 
 ColorItem.resolveSingleton = (root, itemData) => {
     return ColorItem.ITEM_SINGLETONS[itemData];

@@ -81,21 +81,30 @@ const logger = createLogger("main");
 
     var modpack = {
         mods: [{
-            url: "http://localhost:3006/mod",
-            id: "a18121cf-fc7c-4f23-906d-b7ab0512bbc8",
-            config: {},
-            settings: {
-                hasMakeModButton: {
-                    value: true,
+                url: "http://localhost:3006/mod",
+                id: "a18121cf-fc7c-4f23-906d-b7ab0512bbc8",
+                config: {},
+                settings: {
+                    hasMakeModButton: {
+                        value: true,
+                    },
+                    // enum: {
+                    //     value: "new test",
+                    // },
+                    // range: {
+                    //     value: 10,
+                    // },
                 },
-                // enum: {
-                //     value: "new test",
-                // },
-                // range: {
-                //     value: 10,
-                // },
             },
-        }, ],
+            {
+                url: "http://localhost:3010/mod",
+                id: "cbae38a0-7ac5-4a0a-9985-da3110b1a6e8",
+                config: {},
+                settings: {
+                    hasHubPlacement: { value: true },
+                },
+            },
+        ],
     };
 
     let discordId = "324523",

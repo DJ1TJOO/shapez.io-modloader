@@ -117,6 +117,8 @@ export class MetaHubBuilding extends MetaBuilding {
     }
 }
 
+MetaHubBuilding.canPipet = () => false;
+
 MetaHubBuilding.setupEntityComponents = [
     entity => entity.addComponent(new HubComponent()),
     entity =>

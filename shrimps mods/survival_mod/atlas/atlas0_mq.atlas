@@ -1,0 +1,20 @@
+
+atlas0_mq.png
+size: 1024, 512
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+sprites/blueprints/hub
+  rotate: false
+  xy: 1, 1
+  size: 366, 367
+  orig: 384, 384
+  offset: 9, 7
+  index: -1
+sprites/buildings/hub
+  rotate: false
+  xy: 369, 1
+  size: 366, 367
+  orig: 384, 384
+  offset: 9, 7
+  index: -1

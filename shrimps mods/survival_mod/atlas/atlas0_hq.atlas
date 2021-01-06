@@ -1,0 +1,20 @@
+
+atlas0_hq.png
+size: 2048, 1024
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+sprites/blueprints/hub
+  rotate: false
+  xy: 1, 1
+  size: 548, 549
+  orig: 576, 576
+  offset: 14, 11
+  index: -1
+sprites/buildings/hub
+  rotate: false
+  xy: 551, 1
+  size: 548, 549
+  orig: 576, 576
+  offset: 14, 11
+  index: -1

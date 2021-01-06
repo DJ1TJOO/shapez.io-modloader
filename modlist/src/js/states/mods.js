@@ -98,13 +98,14 @@ export class ModsState extends shapezAPI.exports.TextualGameState {
         );
 
         for (const [modId, mod] of shapezAPI.mods) {
-            this.trackClicks(
-                this.htmlElement.querySelector(`.mod-settings-card-${modId}`),
-                () => {
-                    ModSettingsState.modId = modId;
-                    this.moveToStateAddGoBack("ModSettingsState");
-                }, { preventClick: true }
-            );
+            if (Object.keys(mod.settings).length > 0)
+                this.trackClicks(
+                    this.htmlElement.querySelector(`.mod-settings-card-${modId}`),
+                    () => {
+                        ModSettingsState.modId = modId;
+                        this.moveToStateAddGoBack("ModSettingsState");
+                    }, { preventClick: true }
+                );
         }
     }
 

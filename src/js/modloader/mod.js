@@ -18,6 +18,7 @@
  * main: Function,
  * }} ModInfo
  */
+import { STOP_PROPAGATION } from "../core/signal";
 import { Application } from "../application";
 import { cachebust } from "../core/cachebust";
 import { ClickDetector } from "../core/click_detector";
@@ -25,7 +26,14 @@ import { GameState } from "../core/game_state";
 import { Loader } from "../core/loader";
 import { AtlasSprite, RegularSprite } from "../core/sprites";
 import { TextualGameState } from "../core/textual_game_state";
-import { clamp, findNiceIntegerValue, generateFileDownload, generateMatrixRotations } from "../core/utils";
+import {
+    clamp,
+    findNiceIntegerValue,
+    generateFileDownload,
+    generateMatrixRotations,
+    makeDiv,
+    removeAllChildren,
+} from "../core/utils";
 import {
     enumAngleToDirection,
     enumDirection,
@@ -126,13 +134,13 @@ import { MobileWarningState } from "../states/mobile_warning";
 import { PreloadState } from "../states/preload";
 import { SettingsState } from "../states/settings";
 import { T } from "../translations";
+import { matchOverwriteRecursiveSettings } from "./modmanager";
 
 export class ShapezAPI {
     constructor(discordId, username, tag) {
         this.discordId = discordId;
         this.username = username;
         this.tag = tag;
-
         this.exports = {
             MetaBuilding,
             Vector,
@@ -158,10 +166,14 @@ export class ShapezAPI {
             clamp,
             findNiceIntegerValue,
             generateFileDownload,
+            matchOverwriteRecursiveSettings,
+            removeAllChildren,
+            makeDiv,
 
             //Variables
             defaultBuildingVariant,
             types,
+            STOP_PROPAGATION,
 
             //Gamemodes
             RegularGameMode,
@@ -400,7 +412,7 @@ export class ShapezAPI {
         //TODO: update test mod
         var id = new buildingClass().getId();
         this.ingame.buildings[id] = buildingClass;
-        this.registerIcon("building_icon/" + id, iconDataURL);
+        this.registerIcon("building_icons/" + id, iconDataURL);
         this.KEYMAPPINGS.buildings[id] = { keyCode: this.KEYMAPPINGS.key(key), id: id };
     }
 
