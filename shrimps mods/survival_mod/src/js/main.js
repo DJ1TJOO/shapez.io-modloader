@@ -84,18 +84,21 @@ registerMod({
     gameInitializedRootClasses: root => {},
     gameInitializedRootManagers: root => {},
     gameBeforeFirstUpdate: root => {
-        root.signals.prePlacementCheck.add((entity, offset) => {
+        root.signals.prePlacementCheck.add((entity, offset, blueprint) => {
             //To play survival set rect 64 at start
-            if (root.hubGoals.getShapesStoredByKey("RuRuRuRu") === 0) {
+            if (!root.hubGoals.storedShapes["RuRuRuRu"] && root.gameIsFresh) {
                 addShapeByKey(root.hubGoals, "RuRuRuRu", 64);
             }
 
             //Check if enough shapes
             let cost = costs[entity.getId()];
-            if (cost && root.hubGoals.getShapesStoredByKey(cost.shape) < cost.cost)
+            if (
+                (!blueprint && cost && root.hubGoals.getShapesStoredByKey(cost.shape) < cost.cost) ||
+                (blueprint && entity.getId() === new shapezAPI.ingame.buildings.hub().getId())
+            )
                 return shapezAPI.exports.STOP_PROPAGATION;
         });
-        root.signals.entityAdded.add(entity => {
+        root.signals.entityManuallyPlaced.add(entity => {
             //Remove shapes
             let cost = costs[entity.getId()];
             if (cost) root.hubGoals.takeShapeByKey(cost.shape, cost.cost);
@@ -106,8 +109,35 @@ registerMod({
             if (cost) addShapeByKey(root.hubGoals, cost.shape, cost.cost);
         });
         let costLabel;
+        let costDisplayText;
+        let costDisplayParent;
+
+        root.app.ticker.frameEmitted.add(dt => {
+            const metaBuilding = root.hud.parts.buildingPlacer.currentMetaBuilding.get();
+            if (!metaBuilding) return;
+
+            let cost = costs[metaBuilding.id];
+            if (!cost) {
+                return;
+            }
+
+            try {
+                let totalCost = cost.cost;
+                if (root.hud.parts.buildingPlacer.isDirectionLockActive)
+                    totalCost = cost.cost * root.hud.parts.buildingPlacer.computeDirectionLockPath().length;
+
+                costDisplayText.innerText = "" + totalCost;
+
+                costDisplayParent.classList.toggle(
+                    "canAfford",
+                    root.hubGoals.getShapesStoredByKey(cost.shape) >= totalCost
+                );
+            } catch (error) {
+                /*do nothing*/
+            }
+        });
         root.hud.parts.buildingPlacer.signals.variantChanged.add(() => {
-            let costDisplayParent = document.getElementById("ingame_HUD_BuildingCost");
+            costDisplayParent = document.getElementById("ingame_HUD_BuildingCost");
 
             if (!costDisplayParent)
                 costDisplayParent = shapezAPI.exports.makeDiv(
@@ -119,14 +149,11 @@ registerMod({
 
             const metaBuilding = root.hud.parts.buildingPlacer.currentMetaBuilding.get();
 
-            if (!metaBuilding) {
-                return;
-            }
+            if (!metaBuilding) return;
 
             let cost = costs[metaBuilding.id];
-            if (!cost) {
-                return;
-            }
+            if (!cost) return;
+
             const shapeCanvas = root.shapeDefinitionMgr.getShapeFromShortKey(cost.shape).generateAsCanvas(80);
 
             shapezAPI.exports.makeDiv(costDisplayParent, null, ["draw"], "");
@@ -134,7 +161,7 @@ registerMod({
                 costLabel = shapezAPI.exports.makeDiv(costDisplayParent, null, ["label"], "Building Cost");
             }
             let costContainer = shapezAPI.exports.makeDiv(costDisplayParent, null, ["costContainer"], "");
-            let costDisplayText = shapezAPI.exports.makeDiv(costContainer, null, ["costText"], "");
+            costDisplayText = shapezAPI.exports.makeDiv(costContainer, null, ["costText"], "");
             costContainer.appendChild(shapeCanvas);
             costDisplayText.innerText = "" + cost.cost;
 
@@ -172,17 +199,6 @@ registerMod({
         //Add sprites
         delete hub.prototype.getBlueprintSprite;
         delete hub.prototype.getSprite;
-
-        /**
-         * TODO:
-         * Show price on select toolbar
-         *
-         * DONE:
-         * On place check if can build and take costs: on preplacement check
-         * On destroy give back costs: on entity destroy
-         * Unlock hub, pipet and add to toolbar() (make this a setting)
-         *
-         */
     },
 });
 

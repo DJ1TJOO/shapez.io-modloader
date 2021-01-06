@@ -55,7 +55,7 @@ export class GameLogic {
      * @param {Vector=} offset Optional, move the entity by the given offset first
      * @returns {boolean} true if the entity could be placed there
      */
-    checkCanPlaceEntity(entity, offset = null) {
+    checkCanPlaceEntity(entity, offset = null, blueprint = false) {
         // Compute area of the building
         const rect = entity.components.StaticMapEntity.getTileSpaceBounds();
         if (offset) {
@@ -81,7 +81,7 @@ export class GameLogic {
         }
 
         // Perform additional placement checks
-        if (this.root.signals.prePlacementCheck.dispatch(entity, offset) === STOP_PROPAGATION) {
+        if (this.root.signals.prePlacementCheck.dispatch(entity, offset, blueprint) === STOP_PROPAGATION) {
             return false;
         }
 
