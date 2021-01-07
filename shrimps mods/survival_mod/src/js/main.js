@@ -113,15 +113,15 @@ registerMod({
         let costDisplayParent;
 
         root.app.ticker.frameEmitted.add(dt => {
-            const metaBuilding = root.hud.parts.buildingPlacer.currentMetaBuilding.get();
-            if (!metaBuilding) return;
-
-            let cost = costs[metaBuilding.id];
-            if (!cost) {
-                return;
-            }
-
             try {
+                const metaBuilding = root.hud.parts.buildingPlacer.currentMetaBuilding.get();
+                if (!metaBuilding) return;
+
+                let cost = costs[metaBuilding.id];
+                if (!cost) {
+                    return;
+                }
+
                 let totalCost = cost.cost;
                 if (root.hud.parts.buildingPlacer.isDirectionLockActive)
                     totalCost = cost.cost * root.hud.parts.buildingPlacer.computeDirectionLockPath().length;
@@ -133,7 +133,7 @@ registerMod({
                     root.hubGoals.getShapesStoredByKey(cost.shape) >= totalCost
                 );
             } catch (error) {
-                /*do nothing*/
+                /*Not in correct state do nothing*/
             }
         });
         root.hud.parts.buildingPlacer.signals.variantChanged.add(() => {

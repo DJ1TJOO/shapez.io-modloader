@@ -1,4 +1,4 @@
-const modId = "***ADD UUID***";
+const modId = "***ADD UUID***"; // You can get your UUID from here => https://www.uuidgenerator.net/
 registerMod({
     title: "What a title?",
     id: modId,

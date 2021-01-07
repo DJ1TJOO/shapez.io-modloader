@@ -3,6 +3,7 @@ import { createLogger } from "../core/logging";
 import { STOP_PROPAGATION } from "../core/signal";
 import { round2Digits } from "../core/utils";
 import { enumDirection, enumDirectionToVector, enumInvertedDirections, Vector } from "../core/vector";
+import { MetaWireBuilding } from "./buildings/wire";
 import { getBuildingDataFromCode } from "./building_codes";
 import { enumWireVariant } from "./components/wire";
 import { Entity } from "./entity";
@@ -193,7 +194,7 @@ export class GameLogic {
      *
      * Computes the flag for a given tile
      * @param {object} param0
-     * @param {enumWireVariant} param0.wireVariant
+     * @param {MetaWireBuilding.wireVariants} param0.wireVariant
      * @param {Vector} param0.tile The tile to check at
      * @param {enumDirection} param0.edge The edge to check for
      */

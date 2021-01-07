@@ -2,7 +2,7 @@ import { Loader } from "../../core/loader";
 import { generateMatrixRotations } from "../../core/utils";
 import { enumDirection, Vector } from "../../core/vector";
 import { SOUNDS } from "../../platform/sound";
-import { enumWireType, enumWireVariant, WireComponent } from "../components/wire";
+import { enumWireType, WireComponent } from "../components/wire";
 import { Entity } from "../entity";
 import { defaultBuildingVariant, MetaBuilding } from "../meta_building";
 import { GameRoot } from "../root";
@@ -191,9 +191,13 @@ export class MetaWireBuilding extends MetaBuilding {
     computeOptimalDirectionAndRotationVariantAtTile({ root, tile, rotation, variant, layer }) {
         const wireVariant = MetaWireBuilding.wireVariantToVariant[variant];
         const connections = {
+            // @ts-ignore
             top: root.logic.computeWireEdgeStatus({ tile, wireVariant, edge: enumDirection.top }),
+            // @ts-ignore
             right: root.logic.computeWireEdgeStatus({ tile, wireVariant, edge: enumDirection.right }),
+            // @ts-ignore
             bottom: root.logic.computeWireEdgeStatus({ tile, wireVariant, edge: enumDirection.bottom }),
+            // @ts-ignore
             left: root.logic.computeWireEdgeStatus({ tile, wireVariant, edge: enumDirection.left }),
         };
 
@@ -305,6 +309,10 @@ MetaWireBuilding.setupEntityComponents = [entity => entity.addComponent(new Wire
 
 MetaWireBuilding.variants = {
     second: "second",
+};
+MetaWireBuilding.wireVariants = {
+    first: "first",
+    [MetaWireBuilding.variants.second]: "second",
 };
 
 MetaWireBuilding.rotationVariants = [0, 1, 2, 3];

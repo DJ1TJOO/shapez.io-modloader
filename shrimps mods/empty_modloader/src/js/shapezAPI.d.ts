@@ -26,6 +26,7 @@ declare interface ShapezAPI {
         key: Function;
     };
     translations;
+    map;
     ingame: {
         buildings;
         components;

@@ -96,13 +96,25 @@ const logger = createLogger("main");
                     // },
                 },
             },
+            // {
+            //     url: "http://localhost:3010/mod",
+            //     id: "cbae38a0-7ac5-4a0a-9985-da3110b1a6e8",
+            //     config: {},
+            //     settings: {
+            //         hasHubPlacement: { value: true },
+            //     },
+            // },
             {
-                url: "http://localhost:3010/mod",
-                id: "cbae38a0-7ac5-4a0a-9985-da3110b1a6e8",
+                url: "http://localhost:3011/mod",
+                id: "cba4229f-851b-4f01-807f-2a0c86c3aed7",
                 config: {},
-                settings: {
-                    hasHubPlacement: { value: true },
-                },
+                settings: {},
+            },
+            {
+                url: "http://localhost:3012/mod",
+                id: "b6eaf06b-a0f7-48ac-b219-4e97fd275beb",
+                config: {},
+                settings: {},
             },
         ],
     };

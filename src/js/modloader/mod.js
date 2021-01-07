@@ -135,12 +135,14 @@ import { PreloadState } from "../states/preload";
 import { SettingsState } from "../states/settings";
 import { T } from "../translations";
 import { matchOverwriteRecursiveSettings } from "./modmanager";
+import { SOUNDS } from "../platform/sound";
 
 export class ShapezAPI {
     constructor(discordId, username, tag) {
         this.discordId = discordId;
         this.username = username;
         this.tag = tag;
+
         this.exports = {
             MetaBuilding,
             Vector,
@@ -152,7 +154,6 @@ export class ShapezAPI {
             GameState,
             GameMode,
             TextualGameState,
-            MapChunk,
             HUDBaseToolbar,
 
             //Settings
@@ -169,11 +170,13 @@ export class ShapezAPI {
             matchOverwriteRecursiveSettings,
             removeAllChildren,
             makeDiv,
+            generateMatrixRotations,
 
             //Variables
             defaultBuildingVariant,
             types,
             STOP_PROPAGATION,
+            SOUNDS,
 
             //Gamemodes
             RegularGameMode,
@@ -208,7 +211,6 @@ export class ShapezAPI {
             FilterSystem,
             ItemProducerSystem,
             ItemEjectorSystem,
-            MapResourcesSystem,
             HubSystem,
             StaticMapEntitySystem,
             WiredPinsSystem,
@@ -275,6 +277,11 @@ export class ShapezAPI {
         this.modOrder = [];
 
         this.translations = T;
+
+        this.map = {
+            MapChunk,
+            MapResourcesSystem,
+        };
 
         this.ingame = {
             buildings: {},

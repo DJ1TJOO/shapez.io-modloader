@@ -53,8 +53,8 @@ var server = express();
 server.use(cors());
 server.use("/mod", express.static(__dirname + "/build/bundle.js"));
 
-server.listen(3006, () => {
-    console.log("Listening on port 3006");
+server.listen(3012, () => {
+    console.log("Listening on port 3012");
 });
 
 // chokidar.watch(dir).on("all", (event, path) => {

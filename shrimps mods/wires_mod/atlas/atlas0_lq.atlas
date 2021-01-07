@@ -1,0 +1,76 @@
+
+atlas0_lq.png
+size: 64, 256
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+sprites/blueprints/wire_tunnel-double_elbow
+  rotate: false
+  xy: 1, 147
+  size: 48, 47
+  orig: 48, 48
+  offset: 0, 1
+  index: -1
+sprites/blueprints/wire_tunnel-elbow
+  rotate: false
+  xy: 1, 1
+  size: 30, 32
+  orig: 48, 48
+  offset: 18, 16
+  index: -1
+sprites/blueprints/wire_tunnel-straight
+  rotate: false
+  xy: 49, 67
+  size: 13, 47
+  orig: 48, 48
+  offset: 18, 1
+  index: -1
+sprites/buildings/wire_tunnel-double_elbow
+  rotate: false
+  xy: 1, 68
+  size: 46, 46
+  orig: 48, 48
+  offset: 1, 1
+  index: -1
+sprites/buildings/wire_tunnel-elbow
+  rotate: false
+  xy: 1, 35
+  size: 31, 31
+  orig: 48, 48
+  offset: 16, 16
+  index: -1
+sprites/buildings/wire_tunnel-straight
+  rotate: false
+  xy: 51, 198
+  size: 12, 46
+  orig: 48, 48
+  offset: 18, 1
+  index: -1
+sprites/wires/sets/third_cross
+  rotate: false
+  xy: 1, 196
+  size: 48, 48
+  orig: 48, 48
+  offset: 0, 0
+  index: -1
+sprites/wires/sets/third_forward
+  rotate: false
+  xy: 51, 148
+  size: 10, 48
+  orig: 48, 48
+  offset: 19, 0
+  index: -1
+sprites/wires/sets/third_split
+  rotate: false
+  xy: 1, 116
+  size: 48, 29
+  orig: 48, 48
+  offset: 0, 0
+  index: -1
+sprites/wires/sets/third_turn
+  rotate: false
+  xy: 34, 36
+  size: 29, 29
+  orig: 48, 48
+  offset: 19, 0
+  index: -1
