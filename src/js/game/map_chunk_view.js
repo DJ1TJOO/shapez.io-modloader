@@ -41,7 +41,6 @@ export class MapChunkView extends MapChunk {
      */
     drawBackgroundLayer(parameters) {
         const systemUpdateOrder = JSON.parse(JSON.stringify(this.root.systemMgr.systemUpdateOrder));
-        systemUpdateOrder.reverse();
         const systems = this.root.systemMgr.systems;
         for (let i = 0; i < systemUpdateOrder.length; i++) {
             const system = systems[systemUpdateOrder[i]];
@@ -56,7 +55,6 @@ export class MapChunkView extends MapChunk {
      */
     drawForegroundDynamicLayer(parameters) {
         const systemUpdateOrder = JSON.parse(JSON.stringify(this.root.systemMgr.systemUpdateOrder));
-        systemUpdateOrder.reverse();
         const systems = this.root.systemMgr.systems;
         for (let i = 0; i < systemUpdateOrder.length; i++) {
             const system = systems[systemUpdateOrder[i]];
@@ -71,7 +69,6 @@ export class MapChunkView extends MapChunk {
      */
     drawForegroundStaticLayer(parameters) {
         const systemUpdateOrder = JSON.parse(JSON.stringify(this.root.systemMgr.systemUpdateOrder));
-        systemUpdateOrder.reverse();
         const systems = this.root.systemMgr.systems;
         for (let i = 0; i < systemUpdateOrder.length; i++) {
             const system = systems[systemUpdateOrder[i]];
@@ -139,9 +136,9 @@ export class MapChunkView extends MapChunk {
      */
     generateOverlayBuffer(canvas, context, w, h, dpi) {
         context.fillStyle =
-            this.containedEntities.length > 0
-                ? THEME.map.chunkOverview.filled
-                : THEME.map.chunkOverview.empty;
+            this.containedEntities.length > 0 ?
+            THEME.map.chunkOverview.filled :
+            THEME.map.chunkOverview.empty;
         context.fillRect(0, 0, w, h);
 
         if (this.root.app.settings.getAllSettings().displayChunkBorders) {
@@ -321,7 +318,6 @@ export class MapChunkView extends MapChunk {
      */
     drawWiresForegroundLayer(parameters) {
         const systemUpdateOrder = JSON.parse(JSON.stringify(this.root.systemMgr.systemUpdateOrder));
-        //systemUpdateOrder.reverse();
         const systems = this.root.systemMgr.systems;
         for (let i = 0; i < systemUpdateOrder.length; i++) {
             const system = systems[systemUpdateOrder[i]];
@@ -337,7 +333,6 @@ export class MapChunkView extends MapChunk {
      */
     drawForegroundLayer(parameters, layer) {
         const systemUpdateOrder = JSON.parse(JSON.stringify(this.root.systemMgr.systemUpdateOrder));
-        systemUpdateOrder.reverse();
         const systems = this.root.systemMgr.systems;
         for (let i = 0; i < systemUpdateOrder.length; i++) {
             const system = systems[systemUpdateOrder[i]];

@@ -75,11 +75,6 @@ registerMod({
     },
     updateStaticTranslations: id => {
         shapezAPI.mods.get(modId).description = shapezAPI.translations[modId].description;
-        for (const settingsKey in shapezAPI.mods.get(modId).settings) {
-            const settings = shapezAPI.mods.get(modId).settings[settingsKey];
-            settings.title = shapezAPI.translations.settings.labels[settingsKey].title;
-            settings.description = shapezAPI.translations.settings.labels[settingsKey].description;
-        }
     },
     gameInitializedRootClasses: root => {},
     gameInitializedRootManagers: root => {},

@@ -83,8 +83,8 @@ import { GameSystemWithFilter } from "../game/game_system_with_filter";
 import { HubGoals } from "../game/hub_goals";
 import { HUDBaseToolbar } from "../game/hud/parts/base_toolbar";
 import { HUDBuildingsToolbar } from "../game/hud/parts/buildings_toolbar";
-import { enumNotificationType } from "../game/hud/parts/notifications";
-import { enumDisplayMode } from "../game/hud/parts/statistics_handle";
+import { enumNotificationType, HUDNotifications } from "../game/hud/parts/notifications";
+import { enumDisplayMode, HUDShapeStatisticsHandle } from "../game/hud/parts/statistics_handle";
 import { HUDWiresToolbar } from "../game/hud/parts/wires_toolbar";
 import { BooleanItem, BOOL_FALSE_SINGLETON, BOOL_TRUE_SINGLETON } from "../game/items/boolean_item";
 import { ColorItem } from "../game/items/color_item";
@@ -137,12 +137,49 @@ import { SettingsState } from "../states/settings";
 import { T } from "../translations";
 import { matchOverwriteRecursiveSettings } from "./modmanager";
 import { SOUNDS } from "../platform/sound";
+import { HUDSettingsMenu } from "../game/hud/parts/settings_menu";
+import { HUDBetaOverlay } from "../game/hud/parts/beta_overlay";
+import { HUDBlueprintPlacer } from "../game/hud/parts/blueprint_placer";
+import { HUDBuildingPlacer } from "../game/hud/parts/building_placer";
+import { HUDBuildingPlacerLogic } from "../game/hud/parts/building_placer_logic";
+import { HUDCatMemes } from "../game/hud/parts/cat_memes";
+import { HUDChangesDebugger } from "../game/hud/parts/debug_changes";
+import { HUDColorBlindHelper } from "../game/hud/parts/color_blind_helper";
+import { HUDConstantSignalEdit } from "../game/hud/parts/constant_signal_edit";
+import { HUDDebugInfo } from "../game/hud/parts/debug_info";
+import { HUDEntityDebugger } from "../game/hud/parts/entity_debugger";
+import { HUDGameMenu } from "../game/hud/parts/game_menu";
+import { HUDInteractiveTutorial } from "../game/hud/parts/interactive_tutorial";
+import { HUDKeybindingOverlay } from "../game/hud/parts/keybinding_overlay";
+import { HUDLayerPreview } from "../game/hud/parts/layer_preview";
+import { HUDLeverToggle } from "../game/hud/parts/lever_toggle";
+import { HUDMassSelector } from "../game/hud/parts/mass_selector";
+import { HUDMinerHighlight } from "../game/hud/parts/miner_highlight";
+import { HUDModalDialogs } from "../game/hud/parts/modal_dialogs";
+import { HUDPartTutorialHints } from "../game/hud/parts/tutorial_hints";
+import { HUDPinnedShapes } from "../game/hud/parts/pinned_shapes";
+import { HUDSandboxController } from "../game/hud/parts/sandbox_controller";
+import { HUDScreenshotExporter } from "../game/hud/parts/screenshot_exporter";
+import { HUDShapeViewer } from "../game/hud/parts/shape_viewer";
+import { HUDShop } from "../game/hud/parts/shop";
+import { HUDStandaloneAdvantages } from "../game/hud/parts/standalone_advantages";
+import { HUDStatistics } from "../game/hud/parts/statistics";
+import { HUDTutorialVideoOffer } from "../game/hud/parts/tutorial_video_offer";
+import { HUDUnlockNotification } from "../game/hud/parts/unlock_notification";
+import { HUDVignetteOverlay } from "../game/hud/parts/vignette_overlay";
+import { HUDWatermark } from "../game/hud/parts/watermark";
+import { HUDWaypoints } from "../game/hud/parts/waypoints";
+import { HUDWireInfo } from "../game/hud/parts/wire_info";
+import { HUDWiresOverlay } from "../game/hud/parts/wires_overlay";
+import { BaseHUDPart } from "../game/hud/base_hud_part";
+import { GameHUD } from "../game/hud/hud";
 
 export class ShapezAPI {
     constructor(discordId, username, tag) {
         this.discordId = discordId;
         this.username = username;
         this.tag = tag;
+
         this.exports = {
             MetaBuilding,
             Vector,
@@ -155,6 +192,46 @@ export class ShapezAPI {
             GameMode,
             TextualGameState,
             HUDBaseToolbar,
+            BaseHUDPart,
+            GameHUD,
+
+            //HUD
+            HUDSettingsMenu,
+            HUDBetaOverlay,
+            HUDBlueprintPlacer,
+            HUDBuildingPlacer,
+            HUDBuildingPlacerLogic,
+            HUDCatMemes,
+            HUDChangesDebugger,
+            HUDColorBlindHelper,
+            HUDConstantSignalEdit,
+            HUDDebugInfo,
+            HUDEntityDebugger,
+            HUDGameMenu,
+            HUDInteractiveTutorial,
+            HUDKeybindingOverlay,
+            HUDLayerPreview,
+            HUDLeverToggle,
+            HUDMassSelector,
+            HUDMinerHighlight,
+            HUDModalDialogs,
+            HUDNotifications,
+            HUDPartTutorialHints,
+            HUDPinnedShapes,
+            HUDSandboxController,
+            HUDScreenshotExporter,
+            HUDShapeStatisticsHandle,
+            HUDShapeViewer,
+            HUDShop,
+            HUDStandaloneAdvantages,
+            HUDStatistics,
+            HUDTutorialVideoOffer,
+            HUDUnlockNotification,
+            HUDVignetteOverlay,
+            HUDWatermark,
+            HUDWaypoints,
+            HUDWireInfo,
+            HUDWiresOverlay,
 
             //Settings
             EnumSetting,

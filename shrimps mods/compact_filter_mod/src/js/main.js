@@ -46,7 +46,9 @@ registerMod({
         },
     },
     updateStaticSettings: () => {},
-    updateStaticTranslations: id => {},
+    updateStaticTranslations: id => {
+        shapezAPI.mods.get(modId).description = shapezAPI.translations[modId].description;
+    },
     gameInitializedRootClasses: root => {},
     gameInitializedRootManagers: root => {},
     gameBeforeFirstUpdate: root => {},

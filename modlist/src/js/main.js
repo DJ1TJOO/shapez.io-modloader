@@ -65,6 +65,14 @@ registerMod({
             mainMenu: {
                 createMod: "Create a mod",
             },
+            settings: {
+                labels: {
+                    hasMakeModButton: {
+                        title: "Make mod button",
+                        description: "Enable/Disable the make mod button",
+                    },
+                },
+            },
         },
         nl: {
             [modId]: {
@@ -88,6 +96,14 @@ registerMod({
             mainMenu: {
                 createMod: "Maak een mod",
             },
+            settings: {
+                labels: {
+                    hasMakeModButton: {
+                        title: "Maak een mod knop",
+                        description: "Schakel de make mod knop in/uit",
+                    },
+                },
+            },
         },
     },
     updateStaticSettings: () => {
@@ -95,6 +111,14 @@ registerMod({
     },
     updateStaticTranslations: id => {
         shapezAPI.mods.get(modId).description = shapezAPI.translations[modId].description;
+        for (let i = 0; i < shapezAPI.modOrder.length; i++) {
+            const modLocalId = shapezAPI.modOrder[i];
+            for (const settingsKey in shapezAPI.mods.get(modLocalId).settings) {
+                const settings = shapezAPI.mods.get(modLocalId).settings[settingsKey];
+                settings.title = shapezAPI.translations.settings.labels[settingsKey].title;
+                settings.description = shapezAPI.translations.settings.labels[settingsKey].description;
+            }
+        }
         ModsState.updateStaticTranslations(modId, id);
     },
     gameInitializedRootClasses: root => {},
@@ -106,5 +130,19 @@ registerMod({
         shapezAPI.states["ModSettingsState"] = ModSettingsState;
         shapezAPI.states["AboutModsState"] = AboutModsState;
         ModsState.setAPI(modId);
+        shapezAPI.exports.HUDSettingsMenu.buttons.splice(
+            shapezAPI.exports.HUDSettingsMenu.buttons.findIndex(x => x.id === "settings") + 1,
+            0, {
+                id: "mods",
+                action: hudSettingsMenu => () =>
+                    hudSettingsMenu.root.gameState.saveThenGoToState("ModsState", {
+                        backToStateId: hudSettingsMenu.root.gameState.key,
+                        backToStatePayload: hudSettingsMenu.root.gameState.creationPayload,
+                    }),
+                options: {
+                    preventDefault: false,
+                },
+            }
+        );
     },
 });

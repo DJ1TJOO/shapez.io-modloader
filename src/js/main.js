@@ -116,12 +116,18 @@ const logger = createLogger("main");
                 config: {},
                 settings: {},
             },
-            {
-                url: "http://localhost:3013/mod",
-                id: "ca2fb74a-3827-4805-b5fe-8a23bf913c65",
-                config: {},
-                settings: {},
-            },
+            // {
+            //     url: "http://localhost:3013/mod",
+            //     id: "ca2fb74a-3827-4805-b5fe-8a23bf913c65",
+            //     config: {},
+            //     settings: {},
+            // },
+            // {
+            //     url: "http://localhost:3014/mod",
+            //     id: "3ae3751d-6dfb-4504-92dc-99a38a3d8c06",
+            //     config: {},
+            //     settings: {},
+            // },
         ],
     };
 

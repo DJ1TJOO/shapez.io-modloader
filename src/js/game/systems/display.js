@@ -39,7 +39,7 @@ export class DisplaySystem extends GameSystemWithFilter {
             return null;
         }
 
-        return DisplaySystem.displayItem[value.getItemType()](value);
+        return DisplaySystem.displayItemType[value.getItemType()](value);
     }
 
     /**
@@ -66,21 +66,7 @@ export class DisplaySystem extends GameSystemWithFilter {
                 }
 
                 const origin = entity.components.StaticMapEntity.origin;
-                if (value.getItemType() === "color") {
-                    DisplaySystem.displaySprites[ /** @type {ColorItem} */ (value).color].drawCachedCentered(
-                        parameters,
-                        (origin.x + 0.5) * globalConfig.tileSize,
-                        (origin.y + 0.5) * globalConfig.tileSize,
-                        globalConfig.tileSize
-                    );
-                } else if (value.getItemType() === "shape") {
-                    value.drawItemCenteredClipped(
-                        (origin.x + 0.5) * globalConfig.tileSize,
-                        (origin.y + 0.5) * globalConfig.tileSize,
-                        parameters,
-                        30
-                    );
-                }
+                DisplaySystem.displayItem[value.getItemType()](parameters, value, origin, globalConfig);
             }
         }
     }
@@ -88,7 +74,7 @@ export class DisplaySystem extends GameSystemWithFilter {
 
 DisplaySystem.displaySprites = [];
 
-DisplaySystem.displayItem = {
+DisplaySystem.displayItemType = {
     boolean: value => (isTrueItem(value) ? ColorItem.ITEM_SINGLETONS[enumColors.white] : null),
 
     color: value =>
@@ -97,3 +83,25 @@ DisplaySystem.displayItem = {
 
     shape: value => value,
 };
+
+DisplaySystem.displayItem = {
+    color: (parameters, value, origin, globalConfig) =>
+        DisplaySystem.displaySprites[ /** @type {ColorItem} */ (value).color].drawCachedCentered(
+            parameters,
+            (origin.x + 0.5) * globalConfig.tileSize,
+            (origin.y + 0.5) * globalConfig.tileSize,
+            globalConfig.tileSize
+        ),
+
+    shape: (parameters, value, origin, globalConfig) =>
+        value.drawItemCenteredClipped(
+            (origin.x + 0.5) * globalConfig.tileSize,
+            (origin.y + 0.5) * globalConfig.tileSize,
+            parameters,
+            DisplaySystem.shapeRadius(),
+            DisplaySystem.shapeBackground()
+        ),
+};
+
+DisplaySystem.shapeRadius = () => 30;
+DisplaySystem.shapeBackground = () => true;

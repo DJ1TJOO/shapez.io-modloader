@@ -155,6 +155,9 @@ export function updateApplicationLanguage(id) {
             const language = mod.translations[id];
             if (!language) continue;
             matchOverwriteRecursive(shapezAPI.translations, language);
+        }
+        for (let i = 0; i < shapezAPI.modOrder.length; i++) {
+            const mod = shapezAPI.mods.get(shapezAPI.modOrder[i]);
             mod.updateStaticTranslations(id);
         }
     }
