@@ -202,8 +202,7 @@ MetaFilterBuilding.layerPreview = {
 
 MetaFilterBuilding.additionalStatistics = {
     [defaultBuildingVariant]: root => [
-        T.ingame.buildingPlacement.infoTexts.speed,
-        formatItemsPerSecond(root.hubGoals.getBeltBaseSpeed()),
+        [T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(root.hubGoals.getBeltBaseSpeed())],
     ],
 };
 

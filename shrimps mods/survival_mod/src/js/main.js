@@ -1,6 +1,6 @@
 const modId = "cbae38a0-7ac5-4a0a-9985-da3110b1a6e8";
 registerMod({
-    title: "Survival Mod",
+    title: "Survival",
     id: modId,
     description: "Every build now has building cost and there is more hubs available",
     authors: ["Shrimp", "DJ1TJOO"],

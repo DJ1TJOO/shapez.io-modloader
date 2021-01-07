@@ -109,7 +109,7 @@ registerMod({
         addWireTunnelVariant("elbow", [0, 1, 0, 0, 1, 1, 0, 0, 0]);
         addWireTunnelVariant("straight", [0, 1, 0, 0, 1, 0, 0, 1, 0]);
     },
-}); // it didn't updated I still have colored tiles :D
+});
 
 let addWireTunnelVariant = (name, matrix) => {
     let wireTunnel = shapezAPI.ingame.buildings.wire_tunnel;

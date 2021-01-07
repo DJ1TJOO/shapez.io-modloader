@@ -1,0 +1,34 @@
+
+atlas0_hq.png
+size: 1024, 256
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+sprites/blueprints/filter-compactFilter
+  rotate: false
+  xy: 273, 1
+  size: 133, 144
+  orig: 144, 144
+  offset: 11, 0
+  index: -1
+sprites/blueprints/filter-compactFilterInverse
+  rotate: false
+  xy: 408, 1
+  size: 133, 144
+  orig: 144, 144
+  offset: 11, 0
+  index: -1
+sprites/buildings/filter-compactFilter
+  rotate: false
+  xy: 1, 1
+  size: 134, 144
+  orig: 144, 144
+  offset: 10, 0
+  index: -1
+sprites/buildings/filter-compactFilterInverse
+  rotate: false
+  xy: 137, 1
+  size: 134, 144
+  orig: 144, 144
+  offset: 10, 0
+  index: -1

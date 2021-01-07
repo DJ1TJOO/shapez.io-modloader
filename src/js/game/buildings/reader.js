@@ -201,7 +201,9 @@ MetaReaderBuilding.isRotateable = {
 };
 
 MetaReaderBuilding.additionalStatistics = {
-    [defaultBuildingVariant]: root => root.hubGoals.getBeltBaseSpeed(),
+    [defaultBuildingVariant]: root => [
+        [T.ingame.buildingPlacement.infoTexts.speed, formatItemsPerSecond(root.hubGoals.getBeltBaseSpeed())],
+    ],
 };
 
 MetaReaderBuilding.overlayMatrices = {

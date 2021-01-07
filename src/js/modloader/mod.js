@@ -29,6 +29,7 @@ import { TextualGameState } from "../core/textual_game_state";
 import {
     clamp,
     findNiceIntegerValue,
+    formatItemsPerSecond,
     generateFileDownload,
     generateMatrixRotations,
     makeDiv,
@@ -85,7 +86,7 @@ import { HUDBuildingsToolbar } from "../game/hud/parts/buildings_toolbar";
 import { enumNotificationType } from "../game/hud/parts/notifications";
 import { enumDisplayMode } from "../game/hud/parts/statistics_handle";
 import { HUDWiresToolbar } from "../game/hud/parts/wires_toolbar";
-import { BooleanItem } from "../game/items/boolean_item";
+import { BooleanItem, BOOL_FALSE_SINGLETON, BOOL_TRUE_SINGLETON } from "../game/items/boolean_item";
 import { ColorItem } from "../game/items/color_item";
 import { ShapeItem } from "../game/items/shape_item";
 import { KEYMAPPINGS } from "../game/key_action_mapper";
@@ -142,7 +143,6 @@ export class ShapezAPI {
         this.discordId = discordId;
         this.username = username;
         this.tag = tag;
-
         this.exports = {
             MetaBuilding,
             Vector,
@@ -171,12 +171,15 @@ export class ShapezAPI {
             removeAllChildren,
             makeDiv,
             generateMatrixRotations,
+            formatItemsPerSecond,
 
             //Variables
             defaultBuildingVariant,
             types,
             STOP_PROPAGATION,
             SOUNDS,
+            BOOL_TRUE_SINGLETON,
+            BOOL_FALSE_SINGLETON,
 
             //Gamemodes
             RegularGameMode,
