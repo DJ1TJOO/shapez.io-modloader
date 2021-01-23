@@ -131,10 +131,9 @@ const logger = createLogger("main");
     //     ],
     // };
 
-    let user = {};
-
-    // @ts-ignore
-    var modMgr = new ModManager(user, JSON.parse(localStorage.getItem("instance")));
+    let user = JSON.parse(localStorage.getItem("user"));
+    let instance = JSON.parse(localStorage.getItem("instance"));
+    var modMgr = new ModManager(user, instance);
     addVanillaBuildingsToAPI();
     addVanillaComponentsToAPI();
     addVanillaSystemsToAPI();
