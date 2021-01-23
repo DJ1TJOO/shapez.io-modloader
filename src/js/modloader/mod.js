@@ -175,10 +175,8 @@ import { BaseHUDPart } from "../game/hud/base_hud_part";
 import { GameHUD } from "../game/hud/hud";
 
 export class ShapezAPI {
-    constructor(discordId, username, tag) {
-        this.discordId = discordId;
-        this.username = username;
-        this.tag = tag;
+    constructor(user) {
+        this.user = user;
 
         this.exports = {
             MetaBuilding,
@@ -496,7 +494,6 @@ export class ShapezAPI {
     }
 
     registerBuilding(buildingClass, iconDataURL, key) {
-        //TODO: update test mod
         var id = new buildingClass().getId();
         this.ingame.buildings[id] = buildingClass;
         this.registerIcon("building_icons/" + id, iconDataURL);

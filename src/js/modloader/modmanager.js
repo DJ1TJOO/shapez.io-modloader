@@ -60,13 +60,13 @@ export class ModManager {
      *
      * @param {ModPack} modPack
      */
-    constructor(discordId, username, tag, modPack = undefined) {
+    constructor(user, modPack = undefined) {
         /** @type {Map<String, import("./mod").ModInfo>} */
         this.mods = new Map();
 
         this.modPack = modPack;
 
-        window["shapezAPI"] = new ShapezAPI(discordId, username, tag);
+        window["shapezAPI"] = new ShapezAPI(user);
 
         /**
          * Registers a mod
@@ -214,7 +214,12 @@ export class ModManager {
             }
             shapezAPI.modOrder = sorter.sort().reverse();
         } else {
+            /** @typedef {string[]} */
             shapezAPI.modOrder = this.modPack.modOrder;
+            for (const [id, mod] of this.mods.entries()) {
+                if (shapezAPI.modOrder.includes(id)) continue;
+                shapezAPI.modOrder.push(id);
+            }
         }
 
         for (let i = 0; i < shapezAPI.modOrder.length; i++) {
