@@ -294,21 +294,21 @@ export class MainMenuState extends GameState {
                 T.mainMenu.newGame
             );
             this.trackClicks(newGameButton, this.onPlayButtonClicked);
-
-            for (let i = 0; i < MainMenuState.extraSmallButtons.length; i++) {
-                const extraButton = MainMenuState.extraSmallButtons[i];
-                const button = makeButton(
-                    this.htmlElement.querySelector(".mainContainer .outer"),
-                    [extraButton.htmlClass, "styledButton"],
-                    extraButton.text
-                );
-                this.trackClicks(button, extraButton.action(this));
-            }
         } else {
             // New game
             const playBtn = makeButton(buttonContainer, ["playButton", "styledButton"], T.mainMenu.play);
             this.trackClicks(playBtn, this.onPlayButtonClicked);
             buttonContainer.appendChild(importButtonElement);
+        }
+
+        for (let i = 0; i < MainMenuState.extraSmallButtons.length; i++) {
+            const extraButton = MainMenuState.extraSmallButtons[i];
+            const button = makeButton(
+                this.htmlElement.querySelector(".mainContainer .outer"),
+                [extraButton.htmlClass, "styledButton"],
+                extraButton.text
+            );
+            this.trackClicks(button, extraButton.action(this));
         }
     }
 
