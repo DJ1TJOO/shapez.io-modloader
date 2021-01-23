@@ -134,10 +134,7 @@ const logger = createLogger("main");
     let user = {};
 
     // @ts-ignore
-    var modMgr = new ModManager(
-        user,
-        JSON.parse(new URLSearchParams(window.location.search).get("instance"))
-    );
+    var modMgr = new ModManager(user, window.instance);
     addVanillaBuildingsToAPI();
     addVanillaComponentsToAPI();
     addVanillaSystemsToAPI();
