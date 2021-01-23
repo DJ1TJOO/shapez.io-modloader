@@ -285,13 +285,6 @@ export class MainMenuState extends GameState {
                 T.mainMenu.continue
             );
             this.trackClicks(continueButton, this.onContinueButtonClicked);
-
-            const newGameButton = makeButton(
-                this.htmlElement.querySelector(".mainContainer .outer"),
-                ["newGameButton", "styledButton"],
-                T.mainMenu.newGame
-            );
-            this.trackClicks(newGameButton, this.onPlayButtonClicked);
         } else {
             // New game
             const playBtn = makeButton(buttonContainer, ["playButton", "styledButton"], T.mainMenu.play);
@@ -300,6 +293,16 @@ export class MainMenuState extends GameState {
 
         const outerDiv = makeDiv(buttonContainer, null, ["outer"], null);
         outerDiv.appendChild(importButtonElement);
+
+        if (this.savedGames.length > 0) {
+            const newGameButton = makeButton(
+                this.htmlElement.querySelector(".mainContainer .outer"),
+                ["newGameButton", "styledButton"],
+                T.mainMenu.newGame
+            );
+            this.trackClicks(newGameButton, this.onPlayButtonClicked);
+        }
+
         for (let i = 0; i < MainMenuState.extraSmallButtons.length; i++) {
             const extraButton = MainMenuState.extraSmallButtons[i];
             const button = makeButton(
