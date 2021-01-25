@@ -88,7 +88,7 @@ export class ModSettingsState extends shapezAPI.exports.TextualGameState {
         let instance = JSON.parse(localStorage.getItem("instance"));
         let instanceIndex = instance.index;
         let modIndex = instance.mods.find(mod => mod.id === ModSettingsState.modId).index;
-
+        if (!instance.mods[modIndex].settings[setting]) instance.mods[modIndex].settings[setting] = {};
         instance.mods[modIndex].settings[setting].value = value;
         localStorage.setItem("instance", JSON.stringify(instance));
 
@@ -96,7 +96,7 @@ export class ModSettingsState extends shapezAPI.exports.TextualGameState {
         data[`instances.${instanceIndex}.mods.${modIndex}.settings.${setting}.value`] = value;
         let patch = new XMLHttpRequest();
         patch.withCredentials = true;
-        patch.open(`PATCH`, `http://localhost:3007/api/v1/database/users`, true);
+        patch.open(`PATCH`, `http://mods.thomasbrants.nl/api/v1/database/users`, true);
         patch.setRequestHeader(`Content-Type`, `application/json`);
         patch.send(JSON.stringify(data));
     }

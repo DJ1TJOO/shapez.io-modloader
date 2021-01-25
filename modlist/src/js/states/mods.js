@@ -75,7 +75,7 @@ export class ModsState extends shapezAPI.exports.TextualGameState {
         this.trackClicks(
             exploreMods,
             () => {
-                var win = window.open("http://thomasbrants.nl/mods", "_blank");
+                var win = window.open("/mods", "_blank");
                 win.focus();
             }, { preventDefault: false }
         );
@@ -84,7 +84,7 @@ export class ModsState extends shapezAPI.exports.TextualGameState {
         this.trackClicks(
             exploreModpacks,
             () => {
-                var win = window.open("http://thomasbrants.nl/mods", "_blank");
+                var win = window.open("/mods", "_blank");
                 win.focus();
             }, { preventDefault: false }
         );
@@ -134,7 +134,7 @@ const createModButton = text => {
         text: text,
         action: mainMenuState => () => {
             mainMenuState.app.analytics.trackUiClick("create_mod");
-            const data = "http://thomasbrants.nl:3000/mods/"; //change to pull current basic mods file and download
+            const data = "/mods"; //TODO: change to pull current basic mods file and download
             const filename = "Basic_mod_layout.js";
             shapezAPI.exports.generateFileDownload(filename, data);
         },
