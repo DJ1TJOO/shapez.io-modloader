@@ -16,7 +16,7 @@
  * }} SerializedGame
  *
  * @typedef {{
- *   version: number,
+ *   version: any,
  *   dump: SerializedGame,
  *   stats: SavegameStats,
  *   lastUpdate: number,

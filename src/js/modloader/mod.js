@@ -135,7 +135,6 @@ import { MobileWarningState } from "../states/mobile_warning";
 import { PreloadState } from "../states/preload";
 import { SettingsState } from "../states/settings";
 import { T } from "../translations";
-import { matchOverwriteRecursiveSettings } from "./modmanager";
 import { SOUNDS } from "../platform/sound";
 import { HUDSettingsMenu } from "../game/hud/parts/settings_menu";
 import { HUDBetaOverlay } from "../game/hud/parts/beta_overlay";
@@ -173,6 +172,7 @@ import { HUDWireInfo } from "../game/hud/parts/wire_info";
 import { HUDWiresOverlay } from "../game/hud/parts/wires_overlay";
 import { BaseHUDPart } from "../game/hud/base_hud_part";
 import { GameHUD } from "../game/hud/hud";
+import { matchOverwriteRecursiveSettings } from "./overwrite";
 
 export class ShapezAPI {
     constructor(user) {

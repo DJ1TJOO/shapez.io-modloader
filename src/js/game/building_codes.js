@@ -33,7 +33,7 @@ export const gBuildingVariants = {
  */
 export function registerBuildingVariant(
     meta,
-    variant = "default" /* @TODO: Circular dependency, actually its defaultBuildingVariant */,
+    variant = "default" /* @TODO: Circular dependency, actually its defaultBuildingVariant */ ,
     rotationVariant = 0
 ) {
     // @ts-ignore
@@ -65,6 +65,6 @@ export function getBuildingDataFromCode(code) {
  * @param {number} rotationVariant
  * @returns {String}
  */
-export function getCodeFromBuildingData(metaBuilding, variant, rotationVariant) {
+export function getCodeFromBuildingData(metaBuilding, variant, rotationVariant = 0) {
     return metaBuilding.getId() + "/" + variant + "/" + rotationVariant;
 }

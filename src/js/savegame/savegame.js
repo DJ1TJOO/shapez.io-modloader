@@ -12,6 +12,7 @@ import { SavegameInterface_V1004 } from "./schemas/1004";
 import { SavegameInterface_V1005 } from "./schemas/1005";
 import { SavegameInterface_V1006 } from "./schemas/1006";
 import { SavegameInterface_V1007 } from "./schemas/1007";
+import { SavegameInterface_ML01 } from "./schemas/ML01";
 
 const logger = createLogger("savegame");
 
@@ -49,10 +50,10 @@ export class Savegame extends ReadWriteProxy {
     //////// RW Proxy Impl //////////
 
     /**
-     * @returns {number}
+     * @returns {any}
      */
     static getCurrentVersion() {
-        return 1007;
+        return "ML01";
     }
 
     /**
@@ -126,6 +127,11 @@ export class Savegame extends ReadWriteProxy {
             data.version = 1007;
         }
 
+        if (data.version === 1007) {
+            SavegameInterface_ML01.migrate1007toML01(data);
+            data.version = "ML01";
+        }
+
         return ExplainedResult.good();
     }
 
@@ -152,12 +158,12 @@ export class Savegame extends ReadWriteProxy {
      * @returns {boolean}
      */
     isSaveable() {
-        return true;
-    }
-    /**
-     * Returns the statistics of the savegame
-     * @returns {SavegameStats}
-     */
+            return true;
+        }
+        /**
+         * Returns the statistics of the savegame
+         * @returns {SavegameStats}
+         */
     getStatistics() {
         return this.currentData.stats;
     }
