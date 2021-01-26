@@ -53,7 +53,7 @@ export class Savegame extends ReadWriteProxy {
      * @returns {any}
      */
     static getCurrentVersion() {
-        return "ML01";
+        return JSON.parse(localStorage.getItem("instance")).gameversion;
     }
 
     /**
