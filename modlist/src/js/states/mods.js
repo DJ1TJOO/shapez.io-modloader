@@ -157,6 +157,21 @@ ModsState.setAPI = modId => {
         },
     });
 
+    shapezAPI.exports.MainMenuState.extraTopButtons.push({
+        htmlClass: "mods-exit-button",
+        htmlData: "data-icon='main_menu/mods_exit.png'",
+    });
+
+    shapezAPI.exports.MainMenuState.extraTrackClicks.push({
+        htmlElement: ".mods-exit-button",
+        action: mainMenuState => () => {
+            window.location.href = "/dashboard/instance-" + JSON.parse(localStorage.getItem("instance")).name;
+        },
+        options: {
+            preventDefault: false,
+        },
+    });
+
     if (shapezAPI.mods.get(modId).settings.hasMakeModButton.value) {
         shapezAPI.exports.MainMenuState.extraSmallButtons.push(
             createModButton(shapezAPI.translations.mainMenu.createMod)
