@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { BaseItem } from "../base_item";
 import { enumColorMixingResults, enumColors } from "../colors";
 import {
@@ -278,7 +279,7 @@ export class ItemProcessorSystem extends GameSystemWithFilter {
         /** @type {Array<ProducedItem>} */
         const outItems = [];
 
-        /** @type {function(ProcessorImplementationPayload) : void} */
+        /** @type {function(payload: ProcessorImplementationPayload) : void} */
         const handler = this.handlers[processorComp.type];
         assert(handler, "No handler for processor type defined: " + processorComp.type);
 

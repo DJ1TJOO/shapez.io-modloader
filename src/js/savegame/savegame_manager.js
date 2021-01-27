@@ -7,11 +7,6 @@ const logger = createLogger("savegame_manager");
 
 const Rusha = require("rusha");
 
-/**
- * @typedef {import("./savegame_typedefs").SavegamesData} SavegamesData
- * @typedef {import("./savegame_typedefs").SavegameMetadata} SavegameMetadata
- */
-
 /** @enum {string} */
 export const enumLocalSavegameStatus = {
     offline: "offline",
@@ -27,7 +22,7 @@ export class SavegameManager extends ReadWriteProxy {
 
     // RW Proxy Impl
     /**
-     * @returns {SavegamesData}
+     * @returns {import("./savegame_typedefs").SavegamesData}
      */
     getDefaultData() {
         return {
@@ -47,7 +42,7 @@ export class SavegameManager extends ReadWriteProxy {
 
     /**
      *
-     * @param {SavegamesData} data
+     * @param {import("./savegame_typedefs").SavegamesData} data
      */
     migrate(data) {
         if (data.version < 1001) {
@@ -70,7 +65,7 @@ export class SavegameManager extends ReadWriteProxy {
     // End rw proxy
 
     /**
-     * @returns {Array<SavegameMetadata>}
+     * @returns {Array<import("./savegame_typedefs").SavegameMetadata>}
      */
     getSavegamesMetaData() {
         return this.currentData.savegames;
@@ -99,7 +94,7 @@ export class SavegameManager extends ReadWriteProxy {
 
     /**
      * Deletes a savegame
-     * @param {SavegameMetadata} game
+     * @param {import("./savegame_typedefs").SavegameMetadata} game
      */
     deleteSavegame(game) {
         const handle = new Savegame(this.app, {
@@ -123,7 +118,7 @@ export class SavegameManager extends ReadWriteProxy {
     /**
      * Returns a given games metadata by id
      * @param {string} id
-     * @returns {SavegameMetadata}
+     * @returns {import("./savegame_typedefs").SavegameMetadata}
      */
     getGameMetaDataByInternalId(id) {
         for (let i = 0; i < this.currentData.savegames.length; ++i) {
@@ -143,7 +138,7 @@ export class SavegameManager extends ReadWriteProxy {
     createNewSavegame() {
         const id = this.generateInternalId();
 
-        const metaData = /** @type {SavegameMetadata} */ ({
+        const metaData = /** @type {import("./savegame_typedefs").SavegameMetadata} */ ({
             lastUpdate: Date.now(),
             version: Savegame.getCurrentVersion(),
             internalId: id,

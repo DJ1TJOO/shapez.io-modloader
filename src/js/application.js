@@ -1,7 +1,6 @@
 import { AnimationFrame } from "./core/animation_frame";
 import { BackgroundResourcesLoader } from "./core/background_resources_loader";
 import { IS_MOBILE } from "./core/config";
-import { GameState } from "./core/game_state";
 import { GLOBAL_APP, setGlobalApp } from "./core/globals";
 import { InputDistributor } from "./core/input_distributor";
 import { Loader } from "./core/loader";
@@ -30,12 +29,6 @@ import { PreloadState } from "./states/preload";
 import { SettingsState } from "./states/settings";
 import { ShapezGameAnalytics } from "./platform/browser/game_analytics";
 import { RestrictionManager } from "./core/restriction_manager";
-
-/**
- * @typedef {import("./platform/game_analytics").GameAnalyticsInterface} GameAnalyticsInterface
- * @typedef {import("./platform/sound").SoundInterface} SoundInterface
- * @typedef {import("./platform/storage").StorageInterface} StorageInterface
- */
 
 const logger = createLogger("application");
 
@@ -76,10 +69,10 @@ export class Application {
 
         // Platform dependent stuff
 
-        /** @type {StorageInterface} */
+        /** @type {import("./platform/storage").StorageInterface} */
         this.storage = null;
 
-        /** @type {SoundInterface} */
+        /** @type {import("./platform/sound").SoundInterface} */
         this.sound = null;
 
         /** @type {PlatformWrapperInterface} */
@@ -91,7 +84,7 @@ export class Application {
         /** @type {AnalyticsInterface} */
         this.analytics = null;
 
-        /** @type {GameAnalyticsInterface} */
+        /** @type {import("./platform/game_analytics").GameAnalyticsInterface} */
         this.gameAnalytics = null;
 
         this.initPlatformDependentInstances();
