@@ -38,6 +38,8 @@ export function addVanillaSystemsToAPI() {
 
         ItemAcceptorSystem,
 
+        MapResourcesSystem,
+
         BeltSystem,
 
         UndergroundBeltSystem,
@@ -53,8 +55,6 @@ export function addVanillaSystemsToAPI() {
         ItemProducerSystem,
 
         ItemEjectorSystem,
-
-        MapResourcesSystem,
 
         HubSystem,
 
