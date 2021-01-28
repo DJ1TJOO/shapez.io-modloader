@@ -7,7 +7,7 @@ registerMod({
     description: "Adds a new wire variant and adds new tunnel variants",
     authors: ["CEbbinghaus", "DJ1TJOO"],
     version: "0.0.1",
-    gameVersion: 1007,
+    gameVersion: "ML01",
     dependencies: [],
     incompatible: [],
     settings: {},

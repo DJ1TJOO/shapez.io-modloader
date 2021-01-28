@@ -7,7 +7,7 @@ registerMod({
     description: "This mod adds colore tiles to the game",
     authors: ["SHADOW"],
     version: "1.0.0",
-    gameVersion: 1007,
+    gameVersion: "ML01",
     dependencies: [],
     incompatible: [],
     settings: {},

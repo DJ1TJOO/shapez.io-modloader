@@ -4,7 +4,7 @@ declare function registerMod(info: {
     description: string;
     authors: string[];
     version: string;
-    gameVersion: number;
+    gameVersion: string;
     dependencies: string[];
     incompatible: string[];
     translations: {};

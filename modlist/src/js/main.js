@@ -9,7 +9,7 @@ registerMod({
     description: "The mod that adds the mods list",
     authors: ["DJ1TJOO"],
     version: "1.0.0",
-    gameVersion: 1007,
+    gameVersion: "ML01",
     dependencies: [],
     incompatible: [],
     settings: {

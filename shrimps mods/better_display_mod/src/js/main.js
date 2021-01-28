@@ -5,7 +5,7 @@ registerMod({
     description: "Makes display more clear",
     authors: ["Shrimp", "DJ1TJOO"],
     version: "0.0.1",
-    gameVersion: 1007,
+    gameVersion: "ML01",
     dependencies: [],
     incompatible: [],
     settings: {
