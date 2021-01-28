@@ -2626,6 +2626,11 @@ coa@^2.0.2:
     chalk "^2.4.1"
     q "^1.1.2"
 
+codemirror@^5.34.0:
+  version "5.59.2"
+  resolved "https://registry.yarnpkg.com/codemirror/-/codemirror-5.59.2.tgz#ee674d3a4a8d241af38d52afc482625ba7393922"
+  integrity sha512-/D5PcsKyzthtSy2NNKCyJi3b+htRkoKv3idswR/tR6UAvMNKA7SrmyZy6fOONJxSRs1JlUWEDAbxqfdArbK8iA==
+
 collection-visit@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/collection-visit/-/collection-visit-1.0.0.tgz#4bc0373c164bc3291b4d368c829cf1a80a59dca0"
@@ -3690,7 +3695,7 @@ esdoc-accessor-plugin@^1.0.0:
   resolved "https://registry.yarnpkg.com/esdoc-accessor-plugin/-/esdoc-accessor-plugin-1.0.0.tgz#791ba4872e6c403515ce749b1348d6f0293ad9eb"
   integrity sha1-eRukhy5sQDUVznSbE0jW8Ck62es=
 
-esdoc-brand-plugin@^1.0.0:
+esdoc-brand-plugin@^1.0.0, esdoc-brand-plugin@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/esdoc-brand-plugin/-/esdoc-brand-plugin-1.0.1.tgz#7c0e1ae90e84c30b2d3369d3a6449f9dc9f8d511"
   integrity sha512-Yv9j3M7qk5PSLmSeD6MbPsfIsEf8K43EdH8qZpE/GZwnJCRVmDPrZJ1cLDj/fPu6P35YqgcEaJK4E2NL/CKA7g==
@@ -3702,11 +3707,26 @@ esdoc-coverage-plugin@^1.0.0:
   resolved "https://registry.yarnpkg.com/esdoc-coverage-plugin/-/esdoc-coverage-plugin-1.1.0.tgz#3869869cd7f87891f972625787695a299aece45c"
   integrity sha1-OGmGnNf4eJH5cmJXh2laKZrs5Fw=
 
+esdoc-custom-theme@^1.4.2:
+  version "1.4.2"
+  resolved "https://registry.yarnpkg.com/esdoc-custom-theme/-/esdoc-custom-theme-1.4.2.tgz#7b2fc65c84977b75ec8a7c85fcbeacb50aaa27bc"
+  integrity sha512-vlK7upah872gYdO6qIEDgWO2LPmq2iH2995L2YjNu2ULyR75KsFslgWjTJmqn/bHHrFiJsWKuB4NK2lIwwPDKw==
+  dependencies:
+    codemirror "^5.34.0"
+
 esdoc-external-ecmascript-plugin@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/esdoc-external-ecmascript-plugin/-/esdoc-external-ecmascript-plugin-1.0.0.tgz#78f565d4a0c5185ac63152614dce1fe1a86688db"
   integrity sha1-ePVl1KDFGFrGMVJhTc4f4ahmiNs=
   dependencies:
+    fs-extra "1.0.0"
+
+esdoc-inject-style-plugin@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/esdoc-inject-style-plugin/-/esdoc-inject-style-plugin-1.0.0.tgz#a13597368bb9fb89c365e066495caf97a4decbb1"
+  integrity sha1-oTWXNou5+4nDZeBmSVyvl6Tey7E=
+  dependencies:
+    cheerio "0.22.0"
     fs-extra "1.0.0"
 
 esdoc-integrate-manual-plugin@^1.0.0:
