@@ -1,4 +1,26 @@
 const cachebust = shapezAPI.exports.cachebust;
+const isSupportedBrowser = shapezAPI.exports.isSupportedBrowser;
+const startFileChoose = shapezAPI.exports.startFileChoose;
+const waitNextFrame = shapezAPI.exports.waitNextFrame;
+const removeAllChildren = shapezAPI.exports.removeAllChildren;
+const makeButtonElement = shapezAPI.exports.makeButtonElement;
+const makeButton = shapezAPI.exports.makeButton;
+const makeDiv = shapezAPI.exports.makeDiv;
+const getApplicationSettingById = shapezAPI.exports.getApplicationSettingById;
+const formatSecondsToTimeAgo = shapezAPI.exports.formatSecondsToTimeAgo;
+const generateFileDownload = shapezAPI.exports.generateFileDownload;
+
+const ReadWriteProxy = shapezAPI.exports.ReadWriteProxy;
+const HUDModalDialogs = shapezAPI.exports.HUDModalDialogs;
+const THIRDPARTY_URLS = shapezAPI.exports.THIRDPARTY_URLS;
+const A_B_TESTING_LINK_TYPE = shapezAPI.exports.A_B_TESTING_LINK_TYPE;
+const EnumSetting = shapezAPI.exports.EnumSetting;
+const FormElementInput = shapezAPI.exports.FormElementInput;
+const SavegameMetadata = shapezAPI.exports.SavegameMetadata;
+const DialogWithForm = shapezAPI.exports.DialogWithForm;
+
+const globalConfig = shapezAPI.exports.globalConfig;
+const trim = require("trim");
 
 export class MultiplayerState extends shapezAPI.exports.GameState {
         constructor() {
@@ -46,29 +68,8 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
                     ${isSupportedBrowser() ? "" : `<div class="browserWarning">${shapezAPI.translations.mainMenu.browserWarning}</div>`}
                     <div class="buttons"></div>
                 </div>
-            </div>
-
-            <div class="footer">
-                <a class="githubLink boxLink" target="_blank">
-                    ${shapezAPI.translations.mainMenu.openSourceHint}
-                    <span class="thirdpartyLogo githubLogo"></span>
-                </a>
-
-                <a class="discordLink boxLink" target="_blank">
-                    ${shapezAPI.translations.mainMenu.discordLink}
-                    <span class="thirdpartyLogo  discordLogo"></span>
-                </a>
-
-                <div class="sidelinks">
-                    <a class="redditLink">${shapezAPI.translations.mainMenu.subreddit}</a>
-
-                    <a class="changelog">${shapezAPI.translations.changelog.title}</a>
-
-                    <a class="helpTranslate">${shapezAPI.translations.mainMenu.helpTranslate}</a>
-                </div>
-
-                <div class="author">${shapezAPI.translations.mainMenu.madeBy.replace("<author-link>", '<a class="producerLink" target="_blank">Tobias Springer</a>')}</div>
-            </div>
+			</div>
+			<div class="footer"></div>
         `;
 	}
 
@@ -171,10 +172,7 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
 			this.trackClicks(this.htmlElement.querySelector(trackClick.htmlElement), trackClick.action(this), trackClick.options);
 		}
 		this.trackClicks(qs(".settingsButton"), this.onSettingsButtonClicked);
-		this.trackClicks(qs(".changelog"), this.onChangelogClicked);
-		this.trackClicks(qs(".redditLink"), this.onRedditClicked);
 		this.trackClicks(qs(".languageChoose"), this.onLanguageChooseClicked);
-		this.trackClicks(qs(".helpTranslate"), this.onTranslationHelpLinkClicked);
 
 		if (G_IS_STANDALONE) {
 			this.trackClicks(qs(".exitAppButton"), this.onExitAppButtonClicked);
@@ -182,47 +180,19 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
 
 		this.renderMainMenu();
 		this.renderSavegames();
-
-		const steamLink = this.htmlElement.querySelector(".steamLink");
-		if (steamLink) {
-			this.trackClicks(steamLink, () => this.onSteamLinkClicked(), { preventClick: true });
-		}
-
-		const discordLink = this.htmlElement.querySelector(".discordLink");
-		this.trackClicks(discordLink, () => this.app.platformWrapper.openExternalLink(THIRDPARTY_URLS.discord), { preventClick: true });
-
-		const githubLink = this.htmlElement.querySelector(".githubLink");
-		this.trackClicks(githubLink, () => this.app.platformWrapper.openExternalLink(THIRDPARTY_URLS.github), { preventClick: true });
-
-		const producerLink = this.htmlElement.querySelector(".producerLink");
-		this.trackClicks(producerLink, () => this.app.platformWrapper.openExternalLink("https://tobspr.com"), { preventClick: true });
 	}
 
 	renderMainMenu() {
 		const buttonContainer = this.htmlElement.querySelector(".mainContainer .buttons");
 		removeAllChildren(buttonContainer);
 
-		// Import button
-		const importButtonElement = makeButtonElement(["importButton", "styledButton"], shapezAPI.translations.mainMenu.importSavegame);
-		this.trackClicks(importButtonElement, this.requestImportSavegame);
+		// Join game
+		const joinButton = makeButton(buttonContainer, ["joinButton", "styledButton"], shapezAPI.translations.multiplayer.join);
+		this.trackClicks(joinButton, this.onBackButtonClicked); //TODO: join
 
-		if (this.savedGames.length > 0) {
-			// Continue game
-			const continueButton = makeButton(buttonContainer, ["continueButton", "styledButton"], shapezAPI.translations.mainMenu.continue);
-			this.trackClicks(continueButton, this.onContinueButtonClicked);
-		} else {
-			// New game
-			const playBtn = makeButton(buttonContainer, ["playButton", "styledButton"], shapezAPI.translations.mainMenu.play);
-			this.trackClicks(playBtn, this.onPlayButtonClicked);
-		}
-
-		const outerDiv = makeDiv(buttonContainer, null, ["outer"], null);
-		outerDiv.appendChild(importButtonElement);
-
-		if (this.savedGames.length > 0) {
-			const newGameButton = makeButton(this.htmlElement.querySelector(".mainContainer .outer"), ["newGameButton", "styledButton"], shapezAPI.translations.mainMenu.newGame);
-			this.trackClicks(newGameButton, this.onPlayButtonClicked);
-		}
+		// Back game
+		const backButton = makeButton(buttonContainer, ["backButton", "styledButton"], shapezAPI.translations.multiplayer.back);
+		this.trackClicks(backButton, this.onBackButtonClicked);
 
 		for (let i = 0; i < MultiplayerState.extraSmallButtons.length; i++) {
 			const extraButton = MultiplayerState.extraSmallButtons[i];
@@ -456,6 +426,10 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
 		});
 	}
 
+	onBackButtonClicked() {
+		this.moveToState("MainMenuState");
+	}
+
 	onContinueButtonClicked() {
 		let latestLastUpdate = 0;
 		let latestInternalId;
@@ -481,5 +455,14 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
 
 MultiplayerState.extraTopButtons = [];
 MultiplayerState.extraSmallButtons = [];
-
 MultiplayerState.extraTrackClicks = [];
+
+export function addMultiplayerButton(modid) {
+	shapezAPI.states.MainMenuState.extraSmallButtons.push({
+		text: "Multiplayer",
+		htmlClass: "mainMenuMultiplayer",
+		action: (mainMenuState) => () => {
+			mainMenuState.moveToState("MultiplayerState");
+		},
+	});
+}

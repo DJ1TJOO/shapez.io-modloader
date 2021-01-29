@@ -1,3 +1,5 @@
+const { addMultiplayerButton, MultiplayerState } = require("./states/multiplayer");
+
 const modId = "2b57757b-d053-4a2b-b2bb-c7b701374531";
 registerMod({
     title: "Multiplayer",
@@ -14,6 +16,10 @@ registerMod({
             [modId]: {
                 description: "A mod that adds multiplayer to shapez.io",
             },
+            multiplayer: {
+                back: "Back",
+                join: "Join",
+            },
         },
     },
     updateStaticSettings: () => {},
@@ -23,5 +29,7 @@ registerMod({
     gameBeforeFirstUpdate: (root) => {},
     main: (config) => {
         shapezAPI.injectCss("**{css}**", modId);
+        shapezAPI.states.MultiplayerState = MultiplayerState;
+        addMultiplayerButton(modId);
     },
 });

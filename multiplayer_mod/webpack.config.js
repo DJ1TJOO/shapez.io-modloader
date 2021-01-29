@@ -1,41 +1,25 @@
-// @ts-nocheck
-
 const fs = require("fs");
 const path = require("path");
+const webpack = require("webpack");
+const { getRevision, getVersion, getAllResourceImages } = require("./buildutils");
+const lzString = require("lz-string");
 const CircularDependencyPlugin = require("circular-dependency-plugin");
 const StringReplacePlugin = require("string-replace-webpack-plugin");
 const FriendlyErrorsWebpackPlugin = require("friendly-errors-webpack-plugin");
 
-module.exports = ({
-    es6 = false,
-    bundlePath = "./build",
-    bundle = "bundle.js",
-    dir = "./src/js",
-    mainFile = "./src/js/main.js",
-    iconsPath = "./icons",
-    atlasPath = "./atlas",
-    themesPath = "./themes",
-    css = "",
-}) => {
+module.exports = ({ es6 = false, bundlePath = "./build", bundle = "bundle.js", dir = "./src/js", mainFile = "./src/js/main.js", iconsPath = "./icons", atlasPath = "./atlas", themesPath = "./themes", css = "", standalone = false }) => {
     var icons = new Map();
     var iconFiles = fs.readdirSync(iconsPath);
     for (let i = 0; i < iconFiles.length; i++) {
         const filename = iconFiles[i];
-        icons.set(
-            path.basename(filename, path.extname(filename)),
-            "data:image/png;base64," +
-            Buffer.from(fs.readFileSync(path.join(iconsPath, filename))).toString("base64")
-        );
+        icons.set(path.basename(filename, path.extname(filename)), "data:image/png;base64," + Buffer.from(fs.readFileSync(path.join(iconsPath, filename))).toString("base64"));
     }
 
     var themes = new Map();
     var themeFiles = fs.readdirSync(themesPath);
     for (let i = 0; i < themeFiles.length; i++) {
         const filename = themeFiles[i];
-        themes.set(
-            path.basename(filename, path.extname(filename)),
-            fs.readFileSync(path.join(themesPath, filename), "utf8")
-        );
+        themes.set(path.basename(filename, path.extname(filename)), fs.readFileSync(path.join(themesPath, filename), "utf8"));
     }
 
     var atlases = new Map();
@@ -48,10 +32,7 @@ module.exports = ({
         const readPath = path.join(atlasPath, filename);
 
         if (ext === ".png") {
-            atlases.set(
-                name,
-                "data:image/png;base64," + Buffer.from(fs.readFileSync(readPath)).toString("base64")
-            );
+            atlases.set(name, "data:image/png;base64," + Buffer.from(fs.readFileSync(readPath)).toString("base64"));
         } else if (ext === ".json") {
             atlasJsons.set(name, JSON.parse(fs.readFileSync(readPath, "utf8")));
         }
@@ -62,6 +43,23 @@ module.exports = ({
         context: path.resolve(__dirname, dir),
         plugins: [
             new FriendlyErrorsWebpackPlugin(),
+            new webpack.DefinePlugin({
+                assert: "window.assert",
+                assertAlways: "window.assert",
+                abstract: "window.assert(false, 'abstract method called of: ' + (this.name || (this.constructor && this.constructor.name)));",
+                G_HAVE_ASSERT: "true",
+                G_APP_ENVIRONMENT: JSON.stringify("dev"),
+                G_TRACKING_ENDPOINT: JSON.stringify(lzString.compressToEncodedURIComponent("http://localhost:10005/v1")),
+                G_IS_DEV: "true",
+                G_IS_RELEASE: "false",
+                G_IS_MOBILE_APP: "false",
+                G_IS_BROWSER: "true",
+                G_IS_STANDALONE: standalone ? "true" : "false",
+                G_BUILD_TIME: "" + new Date().getTime(),
+                G_BUILD_COMMIT_HASH: JSON.stringify(getRevision()),
+                G_BUILD_VERSION: JSON.stringify(getVersion()),
+                G_ALL_UI_IMAGES: JSON.stringify(getAllResourceImages()),
+            }),
             new StringReplacePlugin(),
             new CircularDependencyPlugin({
                 // exclude detection of files based on a RegExp
@@ -98,9 +96,7 @@ module.exports = ({
                         {
                             loader: "babel-loader?cacheDirectory",
                             options: {
-                                configFile: require.resolve(
-                                    es6 ? "./babel-es6.config.js" : "./babel.config.js"
-                                ),
+                                configFile: require.resolve(es6 ? "./babel-es6.config.js" : "./babel.config.js"),
                             },
                         },
                         "uglify-template-string-loader", // Finally found this plugin
