@@ -1686,8 +1686,15 @@ import {
     uiScales,
 } from &quot;../profile/application_settings&quot;;
 import { EnumSetting, BoolSetting, RangeSetting, BaseSetting } from &quot;../profile/setting_types&quot;;
-import { enumLocalSavegameStatus } from &quot;../savegame/savegame_manager&quot;;
-import { types } from &quot;../savegame/serialization&quot;;
+import { enumLocalSavegameStatus, SavegameManager } from &quot;../savegame/savegame_manager&quot;;
+import {
+    BasicSerializableObject,
+    deserializeSchema,
+    extendSchema,
+    serializeSchema,
+    types,
+    verifySchema,
+} from &quot;../savegame/serialization&quot;;
 import { AboutState } from &quot;../states/about&quot;;
 import { ChangelogState } from &quot;../states/changelog&quot;;
 import { InGameState } from &quot;../states/ingame&quot;;
@@ -1869,6 +1876,46 @@ import { PlatformWrapperImplElectron } from &quot;../platform/electron/wrapper&q
 import { GameAnalyticsInterface } from &quot;../platform/game_analytics&quot;;
 import { StorageInterface } from &quot;../platform/storage&quot;;
 import { PlatformWrapperInterface } from &quot;../platform/wrapper&quot;;
+import { SavegameInterface_ML01 } from &quot;../savegame/schemas/ML01&quot;;
+import { BaseSavegameInterface } from &quot;../savegame/savegame_interface&quot;;
+import { SavegameInterface_V1000 } from &quot;../savegame/schemas/1000&quot;;
+import { SavegameInterface_V1001 } from &quot;../savegame/schemas/1001&quot;;
+import { SavegameInterface_V1002 } from &quot;../savegame/schemas/1002&quot;;
+import { SavegameInterface_V1003 } from &quot;../savegame/schemas/1003&quot;;
+import { SavegameInterface_V1004 } from &quot;../savegame/schemas/1004&quot;;
+import { SavegameInterface_V1005 } from &quot;../savegame/schemas/1005&quot;;
+import { SavegameInterface_V1006 } from &quot;../savegame/schemas/1006&quot;;
+import { SavegameInterface_V1007 } from &quot;../savegame/schemas/1007&quot;;
+import { Savegame } from &quot;../savegame/savegame&quot;;
+import { compressObject, decompressObject } from &quot;../savegame/savegame_compressor&quot;;
+import { savegameInterfaces, getSavegameInterface } from &quot;../savegame/savegame_interface_registry&quot;;
+import { SavegameSerializer } from &quot;../savegame/savegame_serializer&quot;;
+import {
+    schemaToJsonSchema,
+    BaseDataType,
+    TypeInteger,
+    TypeBoolean,
+    TypePositiveInteger,
+    TypeString,
+    TypeVector,
+    TypeTileVector,
+    TypeNumber,
+    TypePositiveNumber,
+    TypeEnum,
+    TypeEntity,
+    TypeEntityWeakref,
+    TypeClass,
+    TypeClassData,
+    TypeClassFromMetaclass,
+    TypeMetaClass,
+    TypeArray,
+    TypeFixedClass,
+    TypeKeyValueMap,
+    TypeClassId,
+    TypePair,
+    TypeNullable,
+    TypeStructuredObject,
+} from &quot;../savegame/serialization_data_types&quot;;
 
 export class ShapezAPI {
     constructor(user) {
@@ -2051,6 +2098,54 @@ export class ShapezAPI {
             scrollWheelSensitivities,
             movementSpeeds,
             autosaveIntervals,
+
+            //Savegame
+            BaseSavegameInterface,
+            SavegameInterface_V1000,
+            SavegameInterface_V1001,
+            SavegameInterface_V1002,
+            SavegameInterface_V1003,
+            SavegameInterface_V1004,
+            SavegameInterface_V1005,
+            SavegameInterface_V1006,
+            SavegameInterface_V1007,
+            SavegameInterface_ML01,
+            SavegameManager,
+            SavegameSerializer,
+            Savegame,
+            BaseDataType,
+            TypeInteger,
+            TypeBoolean,
+            TypePositiveInteger,
+            TypeString,
+            TypeVector,
+            TypeTileVector,
+            TypeNumber,
+            TypePositiveNumber,
+            TypeEnum,
+            TypeEntity,
+            TypeEntityWeakref,
+            TypeClass,
+            TypeClassData,
+            TypeClassFromMetaclass,
+            TypeMetaClass,
+            TypeArray,
+            TypeFixedClass,
+            TypeKeyValueMap,
+            TypeClassId,
+            TypePair,
+            TypeNullable,
+            TypeStructuredObject,
+            BasicSerializableObject,
+            getSavegameInterface,
+            compressObject,
+            decompressObject,
+            schemaToJsonSchema,
+            serializeSchema,
+            deserializeSchema,
+            verifySchema,
+            extendSchema,
+            savegameInterfaces,
 
             //Game
             AutomaticSave,

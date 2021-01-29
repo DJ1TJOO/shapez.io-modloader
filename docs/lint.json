@@ -1215,23 +1215,23 @@
     "filePath": "js/modloader/mod.js",
     "lines": [
       {
-        "lineNumber": 853,
+        "lineNumber": 948,
         "line": "    /**\r"
       },
       {
-        "lineNumber": 854,
+        "lineNumber": 949,
         "line": "     * Adds css to the page\r"
       },
       {
-        "lineNumber": 855,
+        "lineNumber": 950,
         "line": "     * @param {string} css\r"
       },
       {
-        "lineNumber": 856,
+        "lineNumber": 951,
         "line": "     */\r"
       },
       {
-        "lineNumber": 857,
+        "lineNumber": 952,
         "line": "    injectCss(css, id) {\r"
       }
     ],
