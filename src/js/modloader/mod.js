@@ -89,9 +89,15 @@ import {
     mixVector,
     Vector,
 } from "../core/vector";
-import { enumSavePriority } from "../game/automatic_save";
+import { AutomaticSave, enumSavePriority } from "../game/automatic_save";
 import { BaseItem } from "../game/base_item";
-import { enumMouseButton } from "../game/camera";
+import {
+    Camera,
+    enumMouseButton,
+    USER_INTERACT_MOVE,
+    USER_INTERACT_TOUCHEND,
+    USER_INTERACT_ZOOM,
+} from "../game/camera";
 import {
     enumColorMixingResults,
     enumColors,
@@ -135,11 +141,11 @@ import { HUDWiresToolbar } from "../game/hud/parts/wires_toolbar";
 import { BooleanItem, BOOL_FALSE_SINGLETON, BOOL_TRUE_SINGLETON } from "../game/items/boolean_item";
 import { ColorItem } from "../game/items/color_item";
 import { ShapeItem } from "../game/items/shape_item";
-import { KEYMAPPINGS } from "../game/key_action_mapper";
+import { KeyActionMapper, Keybinding, KEYMAPPINGS } from "../game/key_action_mapper";
 import { MapChunk } from "../game/map_chunk";
 import { defaultBuildingVariant, MetaBuilding } from "../game/meta_building";
 import { RegularGameMode } from "../game/modes/regular";
-import { enumAnalyticsDataSource } from "../game/production_analytics";
+import { enumAnalyticsDataSource, ProductionAnalytics } from "../game/production_analytics";
 import { BeltSystem } from "../game/systems/belt";
 import { BeltReaderSystem } from "../game/systems/belt_reader";
 import { BeltUnderlaysSystem } from "../game/systems/belt_underlays";
@@ -161,7 +167,7 @@ import { StorageSystem } from "../game/systems/storage";
 import { UndergroundBeltSystem } from "../game/systems/underground_belt";
 import { WireSystem } from "../game/systems/wire";
 import { WiredPinsSystem } from "../game/systems/wired_pins";
-import { VANILLA_THEMES } from "../game/theme";
+import { applyGameTheme, VANILLA_THEMES } from "../game/theme";
 import { BaseGameSpeed } from "../game/time/base_game_speed";
 import { FastForwardGameSpeed } from "../game/time/fast_forward_game_speed";
 import { PausedGameSpeed } from "../game/time/paused_game_speed";
@@ -300,6 +306,36 @@ import { SingletonFactory } from "../core/singleton_factory";
 import { StaleAreaDetector } from "../core/stale_area_detector";
 import { StateManager } from "../core/state_manager";
 import { TrackedState } from "../core/tracked_state";
+import { BeltPath } from "../game/belt_path";
+import { Blueprint } from "../game/blueprint";
+import {
+    gBuildingVariants,
+    registerBuildingVariant,
+    getBuildingDataFromCode,
+    getCodeFromBuildingData,
+} from "../game/building_codes";
+import { GameCore } from "../game/core";
+import { DynamicTickrate } from "../game/dynamic_tickrate";
+import { Entity } from "../game/entity";
+import { EntityManager } from "../game/entity_manager";
+import { GameLoadingOverlay } from "../game/game_loading_overlay";
+import { GameSystemManager } from "../game/game_system_manager";
+import { getRandomHint } from "../game/hints";
+import { typeItemSingleton, itemResolverSingleton } from "../game/item_resolver";
+import { GameLogic } from "../game/logic";
+import { BaseMap } from "../game/map";
+import { MapChunkView } from "../game/map_chunk_view";
+import { MapView } from "../game/map_view";
+import { GameRoot } from "../game/root";
+import {
+    createSimpleShape,
+    enumShortcodeToSubShape,
+    enumSubShapeToShortcode,
+    enumSubShape,
+    ShapeDefinition,
+} from "../game/shape_definition";
+import { ShapeDefinitionManager } from "../game/shape_definition_manager";
+import { SoundProxy } from "../game/sound_proxy";
 
 export class ShapezAPI {
     constructor(user) {
@@ -450,6 +486,44 @@ export class ShapezAPI {
             gItemRegistry,
             GLOBAL_APP,
             Loader,
+
+            //Game
+            AutomaticSave,
+            BeltPath,
+            Blueprint,
+            Camera,
+            GameCore,
+            DynamicTickrate,
+            EntityManager,
+            Entity,
+            GameLoadingOverlay,
+            GameSystemManager,
+            Keybinding,
+            KeyActionMapper,
+            GameLogic,
+            MapChunkView,
+            MapView,
+            BaseMap,
+            ProductionAnalytics,
+            GameRoot,
+            ShapeDefinitionManager,
+            enumShortcodeToSubShape,
+            enumSubShapeToShortcode,
+            enumSubShape,
+            ShapeDefinition,
+            SoundProxy,
+            itemResolverSingleton,
+            createSimpleShape,
+            applyGameTheme,
+            getRandomHint,
+            registerBuildingVariant,
+            getBuildingDataFromCode,
+            getCodeFromBuildingData,
+            typeItemSingleton,
+            gBuildingVariants,
+            USER_INTERACT_MOVE,
+            USER_INTERACT_ZOOM,
+            USER_INTERACT_TOUCHEND,
 
             MetaBuilding,
             Component,

@@ -1590,9 +1590,15 @@ import {
     mixVector,
     Vector,
 } from &quot;../core/vector&quot;;
-import { enumSavePriority } from &quot;../game/automatic_save&quot;;
+import { AutomaticSave, enumSavePriority } from &quot;../game/automatic_save&quot;;
 import { BaseItem } from &quot;../game/base_item&quot;;
-import { enumMouseButton } from &quot;../game/camera&quot;;
+import {
+    Camera,
+    enumMouseButton,
+    USER_INTERACT_MOVE,
+    USER_INTERACT_TOUCHEND,
+    USER_INTERACT_ZOOM,
+} from &quot;../game/camera&quot;;
 import {
     enumColorMixingResults,
     enumColors,
@@ -1636,11 +1642,11 @@ import { HUDWiresToolbar } from &quot;../game/hud/parts/wires_toolbar&quot;;
 import { BooleanItem, BOOL_FALSE_SINGLETON, BOOL_TRUE_SINGLETON } from &quot;../game/items/boolean_item&quot;;
 import { ColorItem } from &quot;../game/items/color_item&quot;;
 import { ShapeItem } from &quot;../game/items/shape_item&quot;;
-import { KEYMAPPINGS } from &quot;../game/key_action_mapper&quot;;
+import { KeyActionMapper, Keybinding, KEYMAPPINGS } from &quot;../game/key_action_mapper&quot;;
 import { MapChunk } from &quot;../game/map_chunk&quot;;
 import { defaultBuildingVariant, MetaBuilding } from &quot;../game/meta_building&quot;;
 import { RegularGameMode } from &quot;../game/modes/regular&quot;;
-import { enumAnalyticsDataSource } from &quot;../game/production_analytics&quot;;
+import { enumAnalyticsDataSource, ProductionAnalytics } from &quot;../game/production_analytics&quot;;
 import { BeltSystem } from &quot;../game/systems/belt&quot;;
 import { BeltReaderSystem } from &quot;../game/systems/belt_reader&quot;;
 import { BeltUnderlaysSystem } from &quot;../game/systems/belt_underlays&quot;;
@@ -1662,7 +1668,7 @@ import { StorageSystem } from &quot;../game/systems/storage&quot;;
 import { UndergroundBeltSystem } from &quot;../game/systems/underground_belt&quot;;
 import { WireSystem } from &quot;../game/systems/wire&quot;;
 import { WiredPinsSystem } from &quot;../game/systems/wired_pins&quot;;
-import { VANILLA_THEMES } from &quot;../game/theme&quot;;
+import { applyGameTheme, VANILLA_THEMES } from &quot;../game/theme&quot;;
 import { BaseGameSpeed } from &quot;../game/time/base_game_speed&quot;;
 import { FastForwardGameSpeed } from &quot;../game/time/fast_forward_game_speed&quot;;
 import { PausedGameSpeed } from &quot;../game/time/paused_game_speed&quot;;
@@ -1801,6 +1807,36 @@ import { SingletonFactory } from &quot;../core/singleton_factory&quot;;
 import { StaleAreaDetector } from &quot;../core/stale_area_detector&quot;;
 import { StateManager } from &quot;../core/state_manager&quot;;
 import { TrackedState } from &quot;../core/tracked_state&quot;;
+import { BeltPath } from &quot;../game/belt_path&quot;;
+import { Blueprint } from &quot;../game/blueprint&quot;;
+import {
+    gBuildingVariants,
+    registerBuildingVariant,
+    getBuildingDataFromCode,
+    getCodeFromBuildingData,
+} from &quot;../game/building_codes&quot;;
+import { GameCore } from &quot;../game/core&quot;;
+import { DynamicTickrate } from &quot;../game/dynamic_tickrate&quot;;
+import { Entity } from &quot;../game/entity&quot;;
+import { EntityManager } from &quot;../game/entity_manager&quot;;
+import { GameLoadingOverlay } from &quot;../game/game_loading_overlay&quot;;
+import { GameSystemManager } from &quot;../game/game_system_manager&quot;;
+import { getRandomHint } from &quot;../game/hints&quot;;
+import { typeItemSingleton, itemResolverSingleton } from &quot;../game/item_resolver&quot;;
+import { GameLogic } from &quot;../game/logic&quot;;
+import { BaseMap } from &quot;../game/map&quot;;
+import { MapChunkView } from &quot;../game/map_chunk_view&quot;;
+import { MapView } from &quot;../game/map_view&quot;;
+import { GameRoot } from &quot;../game/root&quot;;
+import {
+    createSimpleShape,
+    enumShortcodeToSubShape,
+    enumSubShapeToShortcode,
+    enumSubShape,
+    ShapeDefinition,
+} from &quot;../game/shape_definition&quot;;
+import { ShapeDefinitionManager } from &quot;../game/shape_definition_manager&quot;;
+import { SoundProxy } from &quot;../game/sound_proxy&quot;;
 
 export class ShapezAPI {
     constructor(user) {
@@ -1951,6 +1987,44 @@ export class ShapezAPI {
             gItemRegistry,
             GLOBAL_APP,
             Loader,
+
+            //Game
+            AutomaticSave,
+            BeltPath,
+            Blueprint,
+            Camera,
+            GameCore,
+            DynamicTickrate,
+            EntityManager,
+            Entity,
+            GameLoadingOverlay,
+            GameSystemManager,
+            Keybinding,
+            KeyActionMapper,
+            GameLogic,
+            MapChunkView,
+            MapView,
+            BaseMap,
+            ProductionAnalytics,
+            GameRoot,
+            ShapeDefinitionManager,
+            enumShortcodeToSubShape,
+            enumSubShapeToShortcode,
+            enumSubShape,
+            ShapeDefinition,
+            SoundProxy,
+            itemResolverSingleton,
+            createSimpleShape,
+            applyGameTheme,
+            getRandomHint,
+            registerBuildingVariant,
+            getBuildingDataFromCode,
+            getCodeFromBuildingData,
+            typeItemSingleton,
+            gBuildingVariants,
+            USER_INTERACT_MOVE,
+            USER_INTERACT_ZOOM,
+            USER_INTERACT_TOUCHEND,
 
             MetaBuilding,
             Component,
