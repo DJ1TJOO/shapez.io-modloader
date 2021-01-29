@@ -18,29 +18,75 @@
  * main: Function,
  * }} ModInfo
  */
-import { STOP_PROPAGATION } from "../core/signal";
+import { Signal, STOP_PROPAGATION } from "../core/signal";
 import { Application } from "../application";
 import { cachebust } from "../core/cachebust";
-import { ClickDetector } from "../core/click_detector";
+import { ClickDetector, clickDetectorGlobals, MAX_MOVE_DISTANCE_PX } from "../core/click_detector";
 import { GameState } from "../core/game_state";
 import { Loader } from "../core/loader";
-import { AtlasSprite, RegularSprite } from "../core/sprites";
+import {
+    AtlasSprite,
+    BaseSprite,
+    FULL_CLIP_RECT,
+    ORIGINAL_SPRITE_SCALE,
+    RegularSprite,
+    SpriteAtlasLink,
+} from "../core/sprites";
 import { TextualGameState } from "../core/textual_game_state";
 import {
+    accessNestedPropertyReverse,
+    arrayDelete,
+    arrayDeleteValue,
     clamp,
+    epsilonCompare,
+    fastArrayDelete,
+    fastArrayDeleteValue,
+    fastArrayDeleteValueIfContained,
+    fillInLinkIntoTranslation,
     findNiceIntegerValue,
+    findNiceValue,
+    formatBigNumber,
+    formatBigNumberFull,
     formatItemsPerSecond,
+    formatSeconds,
+    formatSecondsToTimeAgo,
     generateFileDownload,
     generateMatrixRotations,
+    getIPCRenderer,
+    getPlatformName,
+    getRomanNumber,
+    isAndroid,
+    isIos,
+    isSupportedBrowser,
+    lerp,
+    make2DUndefinedArray,
+    makeButton,
+    makeButtonElement,
     makeDiv,
+    newEmptyMap,
+    randomChoice,
+    randomInt,
     removeAllChildren,
+    rotateDirectionalObject,
+    rotateFlatMatrix3x3,
+    round1Digit,
+    round1DigitLocalized,
+    round2Digits,
+    round3Digits,
+    round4Digits,
+    safeModulo,
+    smoothPulse,
+    startFileChoose,
+    waitNextFrame,
 } from "../core/utils";
 import {
+    arrayAllDirections,
     enumAngleToDirection,
     enumDirection,
     enumDirectionToAngle,
     enumDirectionToVector,
     enumInvertedDirections,
+    mixVector,
     Vector,
 } from "../core/vector";
 import { enumSavePriority } from "../game/automatic_save";
@@ -173,22 +219,245 @@ import { HUDWiresOverlay } from "../game/hud/parts/wires_overlay";
 import { BaseHUDPart } from "../game/hud/base_hud_part";
 import { GameHUD } from "../game/hud/hud";
 import { matchOverwriteRecursiveSettings } from "./overwrite";
+import { AtlasDefinition, atlasFiles } from "../core/atlas_definitions";
+import { BackgroundResourcesLoader } from "../core/background_resources_loader";
+import {
+    clearBufferBacklog,
+    disableImageSmoothing,
+    enableImageSmoothing,
+    freeCanvas,
+    getBufferStats,
+    getBufferVramUsageBytes,
+    makeOffscreenBuffer,
+    registerCanvas,
+} from "../core/buffer_utils";
+import {
+    IS_DEBUG,
+    SUPPORT_TOUCH,
+    IS_MAC,
+    THIRDPARTY_URLS,
+    A_B_TESTING_LINK_TYPE,
+    globalConfig,
+    IS_MOBILE,
+} from "../core/config";
+import {
+    getDeviceDPI,
+    smoothenDpi,
+    prepareHighDPIContext,
+    resizeHighDPICanvas,
+    resizeCanvas,
+    resizeCanvasAndClear,
+} from "../core/dpi_manager";
+import { DrawParameters } from "../core/draw_parameters";
+import { initDrawUtils, drawRotatedSprite, drawSpriteClipped } from "../core/draw_utils";
+import { APPLICATION_ERROR_OCCURED } from "../core/error_handler";
+import { ExplainedResult } from "../core/explained_result";
+import { Factory } from "../core/factory";
+import {
+    gMetaBuildingRegistry,
+    gBuildingsByCategory,
+    gComponentRegistry,
+    gGameModeRegistry,
+    gGameSpeedRegistry,
+    gItemRegistry,
+    initBuildingsByCategory,
+} from "../core/global_registries";
+import { GLOBAL_APP, setGlobalApp } from "../core/globals";
+import { InputDistributor } from "../core/input_distributor";
+import { InputReceiver } from "../core/input_receiver";
+import {
+    createLogger,
+    serializeError,
+    stringifyObjectContainingErrors,
+    globalDebug,
+    globalLog,
+    globalWarn,
+    globalError,
+    logSection,
+} from "../core/logging";
+import {
+    compressU8,
+    compressU8WHeader,
+    decompressU8WHeader,
+    compressX64,
+    decompressX64,
+} from "../core/lzstring";
+import { Dialog, DialogOptionChooser, DialogLoading, DialogWithForm } from "../core/modal_dialog_elements";
+import {
+    FormElement,
+    FormElementInput,
+    FormElementCheckbox,
+    FormElementItemChooser,
+} from "../core/modal_dialog_forms";
+import { queryParamOptions } from "../core/query_parameters";
+import { ReadWriteProxy } from "../core/read_write_proxy";
+import { Rectangle } from "../core/rectangle";
+import { PROMISE_ABORTED, RequestChannel } from "../core/request_channel";
+import { RestrictionManager } from "../core/restriction_manager";
+import { RandomNumberGenerator } from "../core/rng";
+import { sha1, getNameOfProvider, CRC_PREFIX, computeCrc } from "../core/sensitive_utils.encrypt";
+import { SingletonFactory } from "../core/singleton_factory";
+import { StaleAreaDetector } from "../core/stale_area_detector";
+import { StateManager } from "../core/state_manager";
+import { TrackedState } from "../core/tracked_state";
 
 export class ShapezAPI {
     constructor(user) {
         this.user = user;
 
         this.exports = {
-            MetaBuilding,
+            //Core
+            AtlasDefinition,
+            BackgroundResourcesLoader,
+            ClickDetector,
+            DrawParameters,
+            ExplainedResult,
+            Factory,
+            InputDistributor,
+            InputReceiver,
+            Dialog,
+            DialogOptionChooser,
+            DialogLoading,
+            DialogWithForm,
+            FormElement,
+            FormElementInput,
+            FormElementCheckbox,
+            FormElementItemChooser,
+            ReadWriteProxy,
+            Rectangle,
+            RequestChannel,
+            RestrictionManager,
+            RandomNumberGenerator,
+            Signal,
+            SingletonFactory,
+            BaseSprite,
+            SpriteAtlasLink,
+            AtlasSprite,
+            RegularSprite,
+            StaleAreaDetector,
+            StateManager,
+            TextualGameState,
+            TrackedState,
             Vector,
+            GameState,
+            enableImageSmoothing,
+            disableImageSmoothing,
+            getBufferVramUsageBytes,
+            getBufferStats,
+            clearBufferBacklog,
+            makeOffscreenBuffer,
+            registerCanvas,
+            freeCanvas,
+            getDeviceDPI,
+            smoothenDpi,
+            prepareHighDPIContext,
+            resizeHighDPICanvas,
+            resizeCanvas,
+            resizeCanvasAndClear,
+            initDrawUtils,
+            drawRotatedSprite,
+            drawSpriteClipped,
+            initBuildingsByCategory,
+            setGlobalApp,
+            createLogger,
+            serializeError,
+            stringifyObjectContainingErrors,
+            globalDebug,
+            globalLog,
+            globalWarn,
+            globalError,
+            logSection,
+            compressU8,
+            compressU8WHeader,
+            decompressU8WHeader,
+            compressX64,
+            decompressX64,
+            sha1,
+            getNameOfProvider,
+            computeCrc,
+            isAndroid,
+            isIos,
+            getPlatformName,
+            getIPCRenderer,
+            make2DUndefinedArray,
+            newEmptyMap,
+            randomInt,
+            accessNestedPropertyReverse,
+            randomChoice,
+            fastArrayDelete,
+            fastArrayDeleteValue,
+            fastArrayDeleteValueIfContained,
+            arrayDelete,
+            arrayDeleteValue,
+            epsilonCompare,
+            lerp,
+            findNiceValue,
+            findNiceIntegerValue,
+            formatBigNumber,
+            formatBigNumberFull,
+            waitNextFrame,
+            round1Digit,
+            round2Digits,
+            round3Digits,
+            round4Digits,
+            clamp,
+            makeDiv,
+            makeButtonElement,
+            makeButton,
+            removeAllChildren,
+            isSupportedBrowser,
+            formatSecondsToTimeAgo,
+            formatSeconds,
+            round1DigitLocalized,
+            formatItemsPerSecond,
+            rotateFlatMatrix3x3,
+            generateMatrixRotations,
+            rotateDirectionalObject,
+            safeModulo,
+            smoothPulse,
+            fillInLinkIntoTranslation,
+            generateFileDownload,
+            startFileChoose,
+            getRomanNumber,
+            mixVector,
+            queryParamOptions,
+            PROMISE_ABORTED,
+            CRC_PREFIX,
+            ORIGINAL_SPRITE_SCALE,
+            FULL_CLIP_RECT,
+            enumDirection,
+            enumInvertedDirections,
+            enumDirectionToAngle,
+            enumAngleToDirection,
+            arrayAllDirections,
+            enumDirectionToVector,
+            atlasFiles,
+            MAX_MOVE_DISTANCE_PX,
+            clickDetectorGlobals,
+            IS_DEBUG,
+            SUPPORT_TOUCH,
+            IS_MAC,
+            THIRDPARTY_URLS,
+            A_B_TESTING_LINK_TYPE,
+            globalConfig,
+            IS_MOBILE,
+            APPLICATION_ERROR_OCCURED,
+            gMetaBuildingRegistry,
+            gBuildingsByCategory,
+            gComponentRegistry,
+            gGameModeRegistry,
+            gGameSpeedRegistry,
+            gItemRegistry,
+            GLOBAL_APP,
+            Loader,
+
+            MetaBuilding,
             Component,
             BaseItem,
             BaseGameSpeed,
             GameSystemWithFilter,
             GameSystem,
-            GameState,
             GameMode,
-            TextualGameState,
             HUDBaseToolbar,
             BaseHUDPart,
             GameHUD,
@@ -239,14 +508,7 @@ export class ShapezAPI {
 
             //Functions,
             cachebust,
-            clamp,
-            findNiceIntegerValue,
-            generateFileDownload,
             matchOverwriteRecursiveSettings,
-            removeAllChildren,
-            makeDiv,
-            generateMatrixRotations,
-            formatItemsPerSecond,
 
             //Variables
             defaultBuildingVariant,
@@ -326,19 +588,14 @@ export class ShapezAPI {
             //Enums
             enumHubGoalRewards,
             enumAnalyticsDataSource,
-            enumAngleToDirection,
             enumCategories,
             enumClippedBeltUnderlayType,
             enumColorMixingResults,
             enumColors,
             enumColorsToHexCode,
             enumColorToShortcode,
-            enumDirection,
-            enumDirectionToAngle,
-            enumDirectionToVector,
             enumDisplayMode,
             enumHubGoalRewardsToContentUnlocked,
-            enumInvertedDirections,
             enumItemProcessorRequirements,
             enumItemProcessorTypes,
             enumLocalSavegameStatus,

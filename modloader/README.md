@@ -133,4 +133,5 @@ All assets will be automatically rebuilt into the atlas once changed (Thanks to 
 
 For generating docs:
 npm run esdoc
-Replace name.replace('\\\\\*', '\\\\\*') with name.replace('\\\\\*', '\\\\\*').replace('[', '\\\\[').replace(']', '\\\\]').replace('(', '\\\\(').replace(')', '\\\\)') in node_modules\esdoc-publish-html-plugin\out\src\Builder\DocBuilder.js:116:20)
+Replace name.replace('\*', '\\\\\*') with name.replace('\*', '\\\\\*').replace('[', '\\\\[').replace(']', '\\\\]').replace('(', '\\\\(').replace(')', '\\\\)') in node_modules\esdoc-publish-html-plugin\out\src\Builder\DocBuilder.js:116:20)
+Replace autoPrivate && doc.name.charAt(0) === '\_' with autoPrivate && doc.name && doc.name.charAt(0) === '\_' in node_modules\esdoc-accessor-plugin\src\Plugin.js:16

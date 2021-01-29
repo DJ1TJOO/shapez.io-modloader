@@ -1600,7 +1600,8 @@ The code within the engine is relatively clean with some code for the actual gam
 <p><img src="https://i.imgur.com/W25Fkl0.png"></p>
 <p>For generating docs:
 npm run esdoc
-Replace name.replace(&apos;\\*&apos;, &apos;\\*&apos;) with name.replace(&apos;\\*&apos;, &apos;\\*&apos;).replace(&apos;[&apos;, &apos;\\[&apos;).replace(&apos;]&apos;, &apos;\\]&apos;).replace(&apos;(&apos;, &apos;\\(&apos;).replace(&apos;)&apos;, &apos;\\)&apos;) in node_modules\esdoc-publish-html-plugin\out\src\Builder\DocBuilder.js:116:20)</p>
+Replace name.replace(&apos;*&apos;, &apos;\\*&apos;) with name.replace(&apos;*&apos;, &apos;\\*&apos;).replace(&apos;[&apos;, &apos;\\[&apos;).replace(&apos;]&apos;, &apos;\\]&apos;).replace(&apos;(&apos;, &apos;\\(&apos;).replace(&apos;)&apos;, &apos;\\)&apos;) in node_modules\esdoc-publish-html-plugin\out\src\Builder\DocBuilder.js:116:20)
+Replace autoPrivate &amp;&amp; doc.name.charAt(0) === &apos;_&apos; with autoPrivate &amp;&amp; doc.name &amp;&amp; doc.name.charAt(0) === &apos;_&apos; in node_modules\esdoc-accessor-plugin\src\Plugin.js:16</p>
 </div>
 </div>
 
