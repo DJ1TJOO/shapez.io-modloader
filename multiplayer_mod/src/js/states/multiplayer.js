@@ -1,14 +1,17 @@
+import { MultiplayerPacketTypes, FlagPacketFlags } from "../multiplayer_packets";
+import { MultiplayerConnection } from "./multiplayer_ingame";
+
 const cachebust = shapezAPI.exports.cachebust;
 const isSupportedBrowser = shapezAPI.exports.isSupportedBrowser;
 const startFileChoose = shapezAPI.exports.startFileChoose;
 const waitNextFrame = shapezAPI.exports.waitNextFrame;
 const removeAllChildren = shapezAPI.exports.removeAllChildren;
-const makeButtonElement = shapezAPI.exports.makeButtonElement;
 const makeButton = shapezAPI.exports.makeButton;
 const makeDiv = shapezAPI.exports.makeDiv;
 const getApplicationSettingById = shapezAPI.exports.getApplicationSettingById;
 const formatSecondsToTimeAgo = shapezAPI.exports.formatSecondsToTimeAgo;
 const generateFileDownload = shapezAPI.exports.generateFileDownload;
+const GameLoadingOverlay = shapezAPI.exports.GameLoadingOverlay;
 
 const ReadWriteProxy = shapezAPI.exports.ReadWriteProxy;
 const HUDModalDialogs = shapezAPI.exports.HUDModalDialogs;
@@ -21,6 +24,9 @@ const DialogWithForm = shapezAPI.exports.DialogWithForm;
 
 const globalConfig = shapezAPI.exports.globalConfig;
 const trim = require("trim");
+import io from "socket.io-client";
+const wrtc = require("wrtc");
+const Peer = require("simple-peer");
 
 export class MultiplayerState extends shapezAPI.exports.GameState {
         constructor() {
@@ -188,7 +194,7 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
 
 		// Join game
 		const joinButton = makeButton(buttonContainer, ["joinButton", "styledButton"], shapezAPI.translations.multiplayer.join);
-		this.trackClicks(joinButton, this.onBackButtonClicked); //TODO: join
+		this.trackClicks(joinButton, this.onJoinButtonClicked);
 
 		// Back game
 		const backButton = makeButton(buttonContainer, ["backButton", "styledButton"], shapezAPI.translations.multiplayer.back);
@@ -335,21 +341,40 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
 	 * @param {SavegameMetadata} game
 	 */
 	resumeGame(game) {
-		this.app.analytics.trackUiClick("resume_game");
+		const hostInput = new FormElementInput({
+			id: "hostInput",
+			label: null,
+			placeholder: "",
+			defaultValue: "",
+			validator: (val) => trim(val).length > 0,
+		});
+		const hostDialog = new DialogWithForm({
+			app: this.app,
+			title: shapezAPI.translations.multiplayer.createMultiplayerGameHost.title,
+			desc: shapezAPI.translations.multiplayer.createMultiplayerGameHost.desc,
+			formElements: [hostInput],
+			buttons: ["cancel:bad:escape", "ok:good:enter"],
+		});
+		this.dialogs.internalShowDialog(hostDialog);
+		hostDialog.buttonSignals.ok.add(() => {
+			this.app.analytics.trackUiClick("resume_game");
 
-		this.app.adProvider.showVideoAd().then(() => {
-			this.app.analytics.trackUiClick("resume_game_adcomplete");
-			const savegame = this.app.savegameMgr.getSavegameById(game.internalId);
-			savegame
-				.readAsync()
-				.then(() => {
-					this.moveToState("InGameState", {
-						savegame,
+			this.app.adProvider.showVideoAd().then(() => {
+				this.app.analytics.trackUiClick("resume_game_adcomplete");
+				const host = trim(hostInput.getValue());
+				const savegame = this.app.savegameMgr.getSavegameById(game.internalId);
+				savegame
+					.readAsync()
+					.then(() => {
+						this.moveToState("InMultiplayerGameState", {
+							savegame,
+							host: host,
+						});
+					})
+					.catch((err) => {
+						this.dialogs.showWarning(shapezAPI.translations.dialogs.gameLoadFailure.title, shapezAPI.translations.dialogs.gameLoadFailure.text + "<br><br>" + err);
 					});
-				})
-				.catch((err) => {
-					this.dialogs.showWarning(shapezAPI.translations.dialogs.gameLoadFailure.title, shapezAPI.translations.dialogs.gameLoadFailure.text + "<br><br>" + err);
-				});
+			});
 		});
 	}
 
@@ -408,6 +433,145 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
 		this.app.platformWrapper.openExternalLink("https://github.com/tobspr/shapez.io/blob/master/translations");
 	}
 
+	onJoinButtonClicked() {
+		//host regex
+		const host = /wss:\/\/[a-z]{2,}\.[a-z]{2,}?:[0-9]{4,5}\/?/i;
+
+		const hostInput = new FormElementInput({
+			id: "hostInput",
+			label: null,
+			placeholder: "",
+			defaultValue: "",
+			validator: (val) => trim(val).length > 0,
+		});
+		const hostDialog = new DialogWithForm({
+			app: this.app,
+			title: shapezAPI.translations.multiplayer.joinMultiplayerGameHost.title,
+			desc: shapezAPI.translations.multiplayer.joinMultiplayerGameHost.desc,
+			formElements: [hostInput],
+			buttons: ["cancel:bad:escape", "ok:good:enter"],
+		});
+		this.dialogs.internalShowDialog(hostDialog);
+
+		// When confirmed, create connection
+		hostDialog.buttonSignals.ok.add(() => {
+			var host = trim(hostInput.getValue());
+
+			//UUID v4 regex
+			const uuid = /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
+
+			const connectIdInput = new FormElementInput({
+				id: "connectIdInput",
+				label: null,
+				placeholder: "",
+				defaultValue: "",
+				validator: (val) => val.match(uuid) && trim(val).length > 0,
+			});
+			const dialog = new DialogWithForm({
+				app: this.app,
+				title: shapezAPI.translations.multiplayer.joinMultiplayerGame.title,
+				desc: shapezAPI.translations.multiplayer.joinMultiplayerGame.desc,
+				formElements: [connectIdInput],
+				buttons: ["cancel:bad:escape", "ok:good:enter"],
+			});
+			this.dialogs.internalShowDialog(dialog);
+
+			// When confirmed, create connection
+			dialog.buttonSignals.ok.add(() => {
+				let connectionId = trim(connectIdInput.getValue());
+
+				// @ts-ignore
+				var socket = io(host, { transport: ["websocket"] });
+				var socketId = undefined;
+				var socketConnectionId = undefined;
+				var peerId = undefined;
+
+				socket.on("connect", () => {
+					console.log("Connected to the signalling server");
+					socket.on("id", (id) => {
+						socketId = id;
+						console.log("Got id: " + id);
+						socket.emit("joinRoom", connectionId, socketId);
+					});
+					socket.on("error", () => {
+						this.dialogs.showWarning(shapezAPI.translations.multiplayer.multiplayerGameError.title, shapezAPI.translations.multiplayer.multiplayerGameError.desc + "<br><br>");
+					});
+
+					const config = {
+						iceServers: [
+							{
+								urls: "stun:stun.1.google.com:19302",
+							},
+							{
+								url: "turn:numb.viagenie.ca",
+								credential: "muazkh",
+								username: "webrtc@live.com",
+							},
+						],
+					};
+					const pc = new Peer({ initiator: false, wrtc: wrtc, config: config });
+					socket.on("signal", (signalData) => {
+						if (socketId !== signalData.receiverId) return;
+						console.log("Received signal");
+						console.log(signalData);
+
+						peerId = signalData.peerId;
+						socketConnectionId = signalData.senderId;
+						pc.signal(signalData.signal);
+					});
+					pc.on("signal", (signalData) => {
+						console.log("Send signal");
+						console.log({
+							receiverId: socketConnectionId,
+							peerId: peerId,
+							signal: signalData,
+							senderId: socketId,
+						});
+						socket.emit("signal", {
+							receiverId: socketConnectionId,
+							peerId: peerId,
+							signal: signalData,
+							senderId: socketId,
+						});
+					});
+
+					var gameDataState = -1;
+					var gameData = "";
+
+					var onMessage = (data) => {
+						var packet = JSON.parse(data);
+						console.log("Message received");
+						console.log(packet);
+
+						//When data ends
+						if (packet.type === MultiplayerPacketTypes.FLAG && packet.flag === FlagPacketFlags.ENDDATA) {
+							gameDataState = 1;
+							console.log(gameData);
+							gameData = JSON.parse(gameData);
+							var connection = new MultiplayerConnection(pc, gameData);
+							this.moveToState("MultiplayerState", {
+								connection,
+								connectionId,
+							});
+						}
+
+						//When data recieved
+						if (packet.type === MultiplayerPacketTypes.DATA && gameDataState === 0) gameData = gameData + packet.data;
+
+						//When start data
+						if (packet.type === MultiplayerPacketTypes.FLAG && packet.flag === FlagPacketFlags.STARTDATA) {
+							gameDataState = 0;
+							this.loadingOverlay = new GameLoadingOverlay(this.app, this.getDivElement());
+							this.loadingOverlay.showBasic();
+						}
+					};
+
+					pc.on("data", onMessage);
+				});
+			});
+		});
+	}
+
 	onPlayButtonClicked() {
 		if (this.app.savegameMgr.getSavegamesMetaData().length > 0 && !this.app.restrictionMgr.getHasUnlimitedSavegames()) {
 			this.app.analytics.trackUiClick("startgame_slot_limit_show");
@@ -419,7 +583,7 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
 		this.app.adProvider.showVideoAd().then(() => {
 			const savegame = this.app.savegameMgr.createNewSavegame();
 
-			this.moveToState("InGameState", {
+			this.moveToState("InMultiplayerGameState", {
 				savegame,
 			});
 			this.app.analytics.trackUiClick("startgame_adcomplete");
@@ -442,7 +606,7 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
 
 		const savegame = this.app.savegameMgr.getSavegameById(latestInternalId);
 		savegame.readAsync().then(() => {
-			this.moveToState("InGameState", {
+			this.moveToState("InMultiplayerGameState", {
 				savegame,
 			});
 		});
