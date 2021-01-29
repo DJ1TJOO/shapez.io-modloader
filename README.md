@@ -10,6 +10,8 @@
 -   cd empty_mod
 -   yarn
 -   add atlas folder to the empty_mod
+-   add themes folder to the empty_mod
+-   add icons folder to the empty_mod
 
 rename empty_mod folder to your mods name
 in ./empty_mod/src/js/main.js add uuid and change other info,
