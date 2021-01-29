@@ -174,7 +174,16 @@ import { PausedGameSpeed } from "../game/time/paused_game_speed";
 import { RegularGameSpeed } from "../game/time/regular_game_speed";
 import { enumHubGoalRewards } from "../game/tutorial_goals";
 import { enumHubGoalRewardsToContentUnlocked } from "../game/tutorial_goals_mappings";
-import { enumCategories } from "../profile/application_settings";
+import {
+    allApplicationSettings,
+    ApplicationSettings,
+    autosaveIntervals,
+    enumCategories,
+    getApplicationSettingById,
+    movementSpeeds,
+    scrollWheelSensitivities,
+    uiScales,
+} from "../profile/application_settings";
 import { EnumSetting, BoolSetting, RangeSetting, BaseSetting } from "../profile/setting_types";
 import { enumLocalSavegameStatus } from "../savegame/savegame_manager";
 import { types } from "../savegame/serialization";
@@ -187,7 +196,13 @@ import { MobileWarningState } from "../states/mobile_warning";
 import { PreloadState } from "../states/preload";
 import { SettingsState } from "../states/settings";
 import { T } from "../translations";
-import { SOUNDS } from "../platform/sound";
+import {
+    MUSIC,
+    MusicInstanceInterface,
+    SoundInstanceInterface,
+    SoundInterface,
+    SOUNDS,
+} from "../platform/sound";
 import { HUDSettingsMenu } from "../game/hud/parts/settings_menu";
 import { HUDBetaOverlay } from "../game/hud/parts/beta_overlay";
 import { HUDBlueprintPlacer } from "../game/hud/parts/blueprint_placer";
@@ -336,6 +351,23 @@ import {
 } from "../game/shape_definition";
 import { ShapeDefinitionManager } from "../game/shape_definition_manager";
 import { SoundProxy } from "../game/sound_proxy";
+import { AdProviderInterface } from "../platform/ad_provider";
+import { AdinplayAdProvider } from "../platform/ad_providers/adinplay";
+import { GamedistributionAdProvider } from "../platform/ad_providers/gamedistribution";
+import { NoAdProvider } from "../platform/ad_providers/no_ad_provider";
+import { AnalyticsInterface } from "../platform/analytics";
+import { ShapezGameAnalytics } from "../platform/browser/game_analytics";
+import { GoogleAnalyticsImpl } from "../platform/browser/google_analytics";
+import { NoGameAnalytics } from "../platform/browser/no_game_analytics";
+import { SoundImplBrowser } from "../platform/browser/sound";
+import { StorageImplBrowser } from "../platform/browser/storage";
+import { StorageImplBrowserIndexedDB } from "../platform/browser/storage_indexed_db";
+import { PlatformWrapperImplBrowser } from "../platform/browser/wrapper";
+import { StorageImplElectron } from "../platform/electron/storage";
+import { PlatformWrapperImplElectron } from "../platform/electron/wrapper";
+import { GameAnalyticsInterface } from "../platform/game_analytics";
+import { StorageInterface } from "../platform/storage";
+import { PlatformWrapperInterface } from "../platform/wrapper";
 
 export class ShapezAPI {
     constructor(user) {
@@ -486,6 +518,38 @@ export class ShapezAPI {
             gItemRegistry,
             GLOBAL_APP,
             Loader,
+
+            //Platform
+            AdinplayAdProvider,
+            GamedistributionAdProvider,
+            NoAdProvider,
+            AdProviderInterface,
+            ShapezGameAnalytics,
+            GoogleAnalyticsImpl,
+            NoGameAnalytics,
+            SoundImplBrowser,
+            StorageImplBrowserIndexedDB,
+            StorageImplBrowser,
+            PlatformWrapperImplBrowser,
+            StorageImplElectron,
+            PlatformWrapperImplElectron,
+            AnalyticsInterface,
+            GameAnalyticsInterface,
+            SoundInstanceInterface,
+            MusicInstanceInterface,
+            SoundInterface,
+            StorageInterface,
+            PlatformWrapperInterface,
+            MUSIC,
+
+            //Profiles
+            ApplicationSettings,
+            allApplicationSettings,
+            getApplicationSettingById,
+            uiScales,
+            scrollWheelSensitivities,
+            movementSpeeds,
+            autosaveIntervals,
 
             //Game
             AutomaticSave,
