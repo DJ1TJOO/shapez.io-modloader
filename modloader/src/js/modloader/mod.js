@@ -89,9 +89,15 @@ import {
     mixVector,
     Vector,
 } from "../core/vector";
-import { enumSavePriority } from "../game/automatic_save";
+import { AutomaticSave, enumSavePriority } from "../game/automatic_save";
 import { BaseItem } from "../game/base_item";
-import { enumMouseButton } from "../game/camera";
+import {
+    Camera,
+    enumMouseButton,
+    USER_INTERACT_MOVE,
+    USER_INTERACT_TOUCHEND,
+    USER_INTERACT_ZOOM,
+} from "../game/camera";
 import {
     enumColorMixingResults,
     enumColors,
@@ -135,11 +141,11 @@ import { HUDWiresToolbar } from "../game/hud/parts/wires_toolbar";
 import { BooleanItem, BOOL_FALSE_SINGLETON, BOOL_TRUE_SINGLETON } from "../game/items/boolean_item";
 import { ColorItem } from "../game/items/color_item";
 import { ShapeItem } from "../game/items/shape_item";
-import { KEYMAPPINGS } from "../game/key_action_mapper";
+import { KeyActionMapper, Keybinding, KEYMAPPINGS } from "../game/key_action_mapper";
 import { MapChunk } from "../game/map_chunk";
 import { defaultBuildingVariant, MetaBuilding } from "../game/meta_building";
 import { RegularGameMode } from "../game/modes/regular";
-import { enumAnalyticsDataSource } from "../game/production_analytics";
+import { enumAnalyticsDataSource, ProductionAnalytics } from "../game/production_analytics";
 import { BeltSystem } from "../game/systems/belt";
 import { BeltReaderSystem } from "../game/systems/belt_reader";
 import { BeltUnderlaysSystem } from "../game/systems/belt_underlays";
@@ -161,14 +167,23 @@ import { StorageSystem } from "../game/systems/storage";
 import { UndergroundBeltSystem } from "../game/systems/underground_belt";
 import { WireSystem } from "../game/systems/wire";
 import { WiredPinsSystem } from "../game/systems/wired_pins";
-import { VANILLA_THEMES } from "../game/theme";
+import { applyGameTheme, VANILLA_THEMES } from "../game/theme";
 import { BaseGameSpeed } from "../game/time/base_game_speed";
 import { FastForwardGameSpeed } from "../game/time/fast_forward_game_speed";
 import { PausedGameSpeed } from "../game/time/paused_game_speed";
 import { RegularGameSpeed } from "../game/time/regular_game_speed";
 import { enumHubGoalRewards } from "../game/tutorial_goals";
 import { enumHubGoalRewardsToContentUnlocked } from "../game/tutorial_goals_mappings";
-import { enumCategories } from "../profile/application_settings";
+import {
+    allApplicationSettings,
+    ApplicationSettings,
+    autosaveIntervals,
+    enumCategories,
+    getApplicationSettingById,
+    movementSpeeds,
+    scrollWheelSensitivities,
+    uiScales,
+} from "../profile/application_settings";
 import { EnumSetting, BoolSetting, RangeSetting, BaseSetting } from "../profile/setting_types";
 import { enumLocalSavegameStatus } from "../savegame/savegame_manager";
 import { types } from "../savegame/serialization";
@@ -181,7 +196,13 @@ import { MobileWarningState } from "../states/mobile_warning";
 import { PreloadState } from "../states/preload";
 import { SettingsState } from "../states/settings";
 import { T } from "../translations";
-import { SOUNDS } from "../platform/sound";
+import {
+    MUSIC,
+    MusicInstanceInterface,
+    SoundInstanceInterface,
+    SoundInterface,
+    SOUNDS,
+} from "../platform/sound";
 import { HUDSettingsMenu } from "../game/hud/parts/settings_menu";
 import { HUDBetaOverlay } from "../game/hud/parts/beta_overlay";
 import { HUDBlueprintPlacer } from "../game/hud/parts/blueprint_placer";
@@ -300,6 +321,53 @@ import { SingletonFactory } from "../core/singleton_factory";
 import { StaleAreaDetector } from "../core/stale_area_detector";
 import { StateManager } from "../core/state_manager";
 import { TrackedState } from "../core/tracked_state";
+import { BeltPath } from "../game/belt_path";
+import { Blueprint } from "../game/blueprint";
+import {
+    gBuildingVariants,
+    registerBuildingVariant,
+    getBuildingDataFromCode,
+    getCodeFromBuildingData,
+} from "../game/building_codes";
+import { GameCore } from "../game/core";
+import { DynamicTickrate } from "../game/dynamic_tickrate";
+import { Entity } from "../game/entity";
+import { EntityManager } from "../game/entity_manager";
+import { GameLoadingOverlay } from "../game/game_loading_overlay";
+import { GameSystemManager } from "../game/game_system_manager";
+import { getRandomHint } from "../game/hints";
+import { typeItemSingleton, itemResolverSingleton } from "../game/item_resolver";
+import { GameLogic } from "../game/logic";
+import { BaseMap } from "../game/map";
+import { MapChunkView } from "../game/map_chunk_view";
+import { MapView } from "../game/map_view";
+import { GameRoot } from "../game/root";
+import {
+    createSimpleShape,
+    enumShortcodeToSubShape,
+    enumSubShapeToShortcode,
+    enumSubShape,
+    ShapeDefinition,
+} from "../game/shape_definition";
+import { ShapeDefinitionManager } from "../game/shape_definition_manager";
+import { SoundProxy } from "../game/sound_proxy";
+import { AdProviderInterface } from "../platform/ad_provider";
+import { AdinplayAdProvider } from "../platform/ad_providers/adinplay";
+import { GamedistributionAdProvider } from "../platform/ad_providers/gamedistribution";
+import { NoAdProvider } from "../platform/ad_providers/no_ad_provider";
+import { AnalyticsInterface } from "../platform/analytics";
+import { ShapezGameAnalytics } from "../platform/browser/game_analytics";
+import { GoogleAnalyticsImpl } from "../platform/browser/google_analytics";
+import { NoGameAnalytics } from "../platform/browser/no_game_analytics";
+import { SoundImplBrowser } from "../platform/browser/sound";
+import { StorageImplBrowser } from "../platform/browser/storage";
+import { StorageImplBrowserIndexedDB } from "../platform/browser/storage_indexed_db";
+import { PlatformWrapperImplBrowser } from "../platform/browser/wrapper";
+import { StorageImplElectron } from "../platform/electron/storage";
+import { PlatformWrapperImplElectron } from "../platform/electron/wrapper";
+import { GameAnalyticsInterface } from "../platform/game_analytics";
+import { StorageInterface } from "../platform/storage";
+import { PlatformWrapperInterface } from "../platform/wrapper";
 
 export class ShapezAPI {
     constructor(user) {
@@ -450,6 +518,76 @@ export class ShapezAPI {
             gItemRegistry,
             GLOBAL_APP,
             Loader,
+
+            //Platform
+            AdinplayAdProvider,
+            GamedistributionAdProvider,
+            NoAdProvider,
+            AdProviderInterface,
+            ShapezGameAnalytics,
+            GoogleAnalyticsImpl,
+            NoGameAnalytics,
+            SoundImplBrowser,
+            StorageImplBrowserIndexedDB,
+            StorageImplBrowser,
+            PlatformWrapperImplBrowser,
+            StorageImplElectron,
+            PlatformWrapperImplElectron,
+            AnalyticsInterface,
+            GameAnalyticsInterface,
+            SoundInstanceInterface,
+            MusicInstanceInterface,
+            SoundInterface,
+            StorageInterface,
+            PlatformWrapperInterface,
+            MUSIC,
+
+            //Profiles
+            ApplicationSettings,
+            allApplicationSettings,
+            getApplicationSettingById,
+            uiScales,
+            scrollWheelSensitivities,
+            movementSpeeds,
+            autosaveIntervals,
+
+            //Game
+            AutomaticSave,
+            BeltPath,
+            Blueprint,
+            Camera,
+            GameCore,
+            DynamicTickrate,
+            EntityManager,
+            Entity,
+            GameLoadingOverlay,
+            GameSystemManager,
+            Keybinding,
+            KeyActionMapper,
+            GameLogic,
+            MapChunkView,
+            MapView,
+            BaseMap,
+            ProductionAnalytics,
+            GameRoot,
+            ShapeDefinitionManager,
+            enumShortcodeToSubShape,
+            enumSubShapeToShortcode,
+            enumSubShape,
+            ShapeDefinition,
+            SoundProxy,
+            itemResolverSingleton,
+            createSimpleShape,
+            applyGameTheme,
+            getRandomHint,
+            registerBuildingVariant,
+            getBuildingDataFromCode,
+            getCodeFromBuildingData,
+            typeItemSingleton,
+            gBuildingVariants,
+            USER_INTERACT_MOVE,
+            USER_INTERACT_ZOOM,
+            USER_INTERACT_TOUCHEND,
 
             MetaBuilding,
             Component,
@@ -743,10 +881,10 @@ export class ShapezAPI {
             head.appendChild(style);
         }
         css = `
-            [data-icon="${id}.png"] {
-                background-image: url(${iconDataURL}) !important;
-            }
-        `;
+                  [data-icon="${id}.png"] {
+                      background-image: url(${iconDataURL}) !important;
+                  }
+              `;
         style.appendChild(document.createTextNode(css));
     }
 
