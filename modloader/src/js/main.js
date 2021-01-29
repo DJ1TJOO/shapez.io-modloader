@@ -81,14 +81,12 @@ const logger = createLogger("main");
 
     //Empty user
     var modMgr = new ModManager({}, {
-        mods: [
-            //     {
-            //     url: "http://localhost:3010/mod",
-            //     id: "**PUT ID**",
-            //     config: {},
-            //     settings: {},
-            // },
-        ],
+        mods: [{
+            url: "http://localhost:3010/mod",
+            id: "2b57757b-d053-4a2b-b2bb-c7b701374531",
+            config: {},
+            settings: {},
+        }, ],
     });
     addVanillaBuildingsToAPI();
     addVanillaComponentsToAPI();

@@ -1,10 +1,10 @@
-const modId = "***ADD UUID***"; // You can get your UUID from here => https://www.uuidgenerator.net/
+const modId = "2b57757b-d053-4a2b-b2bb-c7b701374531";
 registerMod({
-    title: "What a title?",
+    title: "Multiplayer",
     id: modId,
-    description: "A miniscule description",
-    authors: ["No authors here"],
-    version: "1.0.0",
+    description: "A mod that adds multiplayer to shapez.io",
+    authors: ["DJ1TJOO"],
+    version: "0.0.1",
     gameVersion: "ML01",
     dependencies: [],
     incompatible: [],
@@ -12,16 +12,16 @@ registerMod({
     translations: {
         en: {
             [modId]: {
-                description: "A miniscule description",
+                description: "A mod that adds multiplayer to shapez.io",
             },
         },
     },
     updateStaticSettings: () => {},
-    updateStaticTranslations: id => {},
-    gameInitializedRootClasses: root => {},
-    gameInitializedRootManagers: root => {},
-    gameBeforeFirstUpdate: root => {},
-    main: config => {
+    updateStaticTranslations: (id) => {},
+    gameInitializedRootClasses: (root) => {},
+    gameInitializedRootManagers: (root) => {},
+    gameBeforeFirstUpdate: (root) => {},
+    main: (config) => {
         shapezAPI.injectCss("**{css}**", modId);
     },
 });
