@@ -3564,12 +3564,6 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
-    "js/core/config.local.js",
-    "file/js/core/config.local.js.html",
-    "js/core/config.local.js",
-    "file"
-  ],
-  [
     "js/core/dpi_manager.js",
     "file/js/core/dpi_manager.js.html",
     "js/core/dpi_manager.js",
