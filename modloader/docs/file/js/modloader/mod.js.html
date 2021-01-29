@@ -1675,7 +1675,16 @@ import { PausedGameSpeed } from &quot;../game/time/paused_game_speed&quot;;
 import { RegularGameSpeed } from &quot;../game/time/regular_game_speed&quot;;
 import { enumHubGoalRewards } from &quot;../game/tutorial_goals&quot;;
 import { enumHubGoalRewardsToContentUnlocked } from &quot;../game/tutorial_goals_mappings&quot;;
-import { enumCategories } from &quot;../profile/application_settings&quot;;
+import {
+    allApplicationSettings,
+    ApplicationSettings,
+    autosaveIntervals,
+    enumCategories,
+    getApplicationSettingById,
+    movementSpeeds,
+    scrollWheelSensitivities,
+    uiScales,
+} from &quot;../profile/application_settings&quot;;
 import { EnumSetting, BoolSetting, RangeSetting, BaseSetting } from &quot;../profile/setting_types&quot;;
 import { enumLocalSavegameStatus } from &quot;../savegame/savegame_manager&quot;;
 import { types } from &quot;../savegame/serialization&quot;;
@@ -1688,7 +1697,13 @@ import { MobileWarningState } from &quot;../states/mobile_warning&quot;;
 import { PreloadState } from &quot;../states/preload&quot;;
 import { SettingsState } from &quot;../states/settings&quot;;
 import { T } from &quot;../translations&quot;;
-import { SOUNDS } from &quot;../platform/sound&quot;;
+import {
+    MUSIC,
+    MusicInstanceInterface,
+    SoundInstanceInterface,
+    SoundInterface,
+    SOUNDS,
+} from &quot;../platform/sound&quot;;
 import { HUDSettingsMenu } from &quot;../game/hud/parts/settings_menu&quot;;
 import { HUDBetaOverlay } from &quot;../game/hud/parts/beta_overlay&quot;;
 import { HUDBlueprintPlacer } from &quot;../game/hud/parts/blueprint_placer&quot;;
@@ -1837,6 +1852,23 @@ import {
 } from &quot;../game/shape_definition&quot;;
 import { ShapeDefinitionManager } from &quot;../game/shape_definition_manager&quot;;
 import { SoundProxy } from &quot;../game/sound_proxy&quot;;
+import { AdProviderInterface } from &quot;../platform/ad_provider&quot;;
+import { AdinplayAdProvider } from &quot;../platform/ad_providers/adinplay&quot;;
+import { GamedistributionAdProvider } from &quot;../platform/ad_providers/gamedistribution&quot;;
+import { NoAdProvider } from &quot;../platform/ad_providers/no_ad_provider&quot;;
+import { AnalyticsInterface } from &quot;../platform/analytics&quot;;
+import { ShapezGameAnalytics } from &quot;../platform/browser/game_analytics&quot;;
+import { GoogleAnalyticsImpl } from &quot;../platform/browser/google_analytics&quot;;
+import { NoGameAnalytics } from &quot;../platform/browser/no_game_analytics&quot;;
+import { SoundImplBrowser } from &quot;../platform/browser/sound&quot;;
+import { StorageImplBrowser } from &quot;../platform/browser/storage&quot;;
+import { StorageImplBrowserIndexedDB } from &quot;../platform/browser/storage_indexed_db&quot;;
+import { PlatformWrapperImplBrowser } from &quot;../platform/browser/wrapper&quot;;
+import { StorageImplElectron } from &quot;../platform/electron/storage&quot;;
+import { PlatformWrapperImplElectron } from &quot;../platform/electron/wrapper&quot;;
+import { GameAnalyticsInterface } from &quot;../platform/game_analytics&quot;;
+import { StorageInterface } from &quot;../platform/storage&quot;;
+import { PlatformWrapperInterface } from &quot;../platform/wrapper&quot;;
 
 export class ShapezAPI {
     constructor(user) {
@@ -1987,6 +2019,38 @@ export class ShapezAPI {
             gItemRegistry,
             GLOBAL_APP,
             Loader,
+
+            //Platform
+            AdinplayAdProvider,
+            GamedistributionAdProvider,
+            NoAdProvider,
+            AdProviderInterface,
+            ShapezGameAnalytics,
+            GoogleAnalyticsImpl,
+            NoGameAnalytics,
+            SoundImplBrowser,
+            StorageImplBrowserIndexedDB,
+            StorageImplBrowser,
+            PlatformWrapperImplBrowser,
+            StorageImplElectron,
+            PlatformWrapperImplElectron,
+            AnalyticsInterface,
+            GameAnalyticsInterface,
+            SoundInstanceInterface,
+            MusicInstanceInterface,
+            SoundInterface,
+            StorageInterface,
+            PlatformWrapperInterface,
+            MUSIC,
+
+            //Profiles
+            ApplicationSettings,
+            allApplicationSettings,
+            getApplicationSettingById,
+            uiScales,
+            scrollWheelSensitivities,
+            movementSpeeds,
+            autosaveIntervals,
 
             //Game
             AutomaticSave,

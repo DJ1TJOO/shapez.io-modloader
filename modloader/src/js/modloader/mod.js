@@ -174,7 +174,16 @@ import { PausedGameSpeed } from "../game/time/paused_game_speed";
 import { RegularGameSpeed } from "../game/time/regular_game_speed";
 import { enumHubGoalRewards } from "../game/tutorial_goals";
 import { enumHubGoalRewardsToContentUnlocked } from "../game/tutorial_goals_mappings";
-import { enumCategories } from "../profile/application_settings";
+import {
+    allApplicationSettings,
+    ApplicationSettings,
+    autosaveIntervals,
+    enumCategories,
+    getApplicationSettingById,
+    movementSpeeds,
+    scrollWheelSensitivities,
+    uiScales,
+} from "../profile/application_settings";
 import { EnumSetting, BoolSetting, RangeSetting, BaseSetting } from "../profile/setting_types";
 import { enumLocalSavegameStatus } from "../savegame/savegame_manager";
 import { types } from "../savegame/serialization";
@@ -187,7 +196,13 @@ import { MobileWarningState } from "../states/mobile_warning";
 import { PreloadState } from "../states/preload";
 import { SettingsState } from "../states/settings";
 import { T } from "../translations";
-import { SOUNDS } from "../platform/sound";
+import {
+    MUSIC,
+    MusicInstanceInterface,
+    SoundInstanceInterface,
+    SoundInterface,
+    SOUNDS,
+} from "../platform/sound";
 import { HUDSettingsMenu } from "../game/hud/parts/settings_menu";
 import { HUDBetaOverlay } from "../game/hud/parts/beta_overlay";
 import { HUDBlueprintPlacer } from "../game/hud/parts/blueprint_placer";
@@ -309,10 +324,10 @@ import { TrackedState } from "../core/tracked_state";
 import { BeltPath } from "../game/belt_path";
 import { Blueprint } from "../game/blueprint";
 import {
+    gBuildingVariants,
     registerBuildingVariant,
     getBuildingDataFromCode,
     getCodeFromBuildingData,
-    gBuildingVariants,
 } from "../game/building_codes";
 import { GameCore } from "../game/core";
 import { DynamicTickrate } from "../game/dynamic_tickrate";
@@ -321,21 +336,38 @@ import { EntityManager } from "../game/entity_manager";
 import { GameLoadingOverlay } from "../game/game_loading_overlay";
 import { GameSystemManager } from "../game/game_system_manager";
 import { getRandomHint } from "../game/hints";
-import { itemResolverSingleton, typeItemSingleton } from "../game/item_resolver";
+import { typeItemSingleton, itemResolverSingleton } from "../game/item_resolver";
 import { GameLogic } from "../game/logic";
 import { BaseMap } from "../game/map";
 import { MapChunkView } from "../game/map_chunk_view";
 import { MapView } from "../game/map_view";
 import { GameRoot } from "../game/root";
 import {
+    createSimpleShape,
     enumShortcodeToSubShape,
     enumSubShapeToShortcode,
     enumSubShape,
     ShapeDefinition,
-    createSimpleShape,
 } from "../game/shape_definition";
 import { ShapeDefinitionManager } from "../game/shape_definition_manager";
 import { SoundProxy } from "../game/sound_proxy";
+import { AdProviderInterface } from "../platform/ad_provider";
+import { AdinplayAdProvider } from "../platform/ad_providers/adinplay";
+import { GamedistributionAdProvider } from "../platform/ad_providers/gamedistribution";
+import { NoAdProvider } from "../platform/ad_providers/no_ad_provider";
+import { AnalyticsInterface } from "../platform/analytics";
+import { ShapezGameAnalytics } from "../platform/browser/game_analytics";
+import { GoogleAnalyticsImpl } from "../platform/browser/google_analytics";
+import { NoGameAnalytics } from "../platform/browser/no_game_analytics";
+import { SoundImplBrowser } from "../platform/browser/sound";
+import { StorageImplBrowser } from "../platform/browser/storage";
+import { StorageImplBrowserIndexedDB } from "../platform/browser/storage_indexed_db";
+import { PlatformWrapperImplBrowser } from "../platform/browser/wrapper";
+import { StorageImplElectron } from "../platform/electron/storage";
+import { PlatformWrapperImplElectron } from "../platform/electron/wrapper";
+import { GameAnalyticsInterface } from "../platform/game_analytics";
+import { StorageInterface } from "../platform/storage";
+import { PlatformWrapperInterface } from "../platform/wrapper";
 
 export class ShapezAPI {
     constructor(user) {
@@ -487,7 +519,37 @@ export class ShapezAPI {
             GLOBAL_APP,
             Loader,
 
-            //Game
+            //Platform
+            AdinplayAdProvider,
+            GamedistributionAdProvider,
+            NoAdProvider,
+            AdProviderInterface,
+            ShapezGameAnalytics,
+            GoogleAnalyticsImpl,
+            NoGameAnalytics,
+            SoundImplBrowser,
+            StorageImplBrowserIndexedDB,
+            StorageImplBrowser,
+            PlatformWrapperImplBrowser,
+            StorageImplElectron,
+            PlatformWrapperImplElectron,
+            AnalyticsInterface,
+            GameAnalyticsInterface,
+            SoundInstanceInterface,
+            MusicInstanceInterface,
+            SoundInterface,
+            StorageInterface,
+            PlatformWrapperInterface,
+            MUSIC,
+
+            //Profiles
+            ApplicationSettings,
+            allApplicationSettings,
+            getApplicationSettingById,
+            uiScales,
+            scrollWheelSensitivities,
+            movementSpeeds,
+            autosaveIntervals,
 
             //Game
             AutomaticSave,
@@ -819,10 +881,10 @@ export class ShapezAPI {
             head.appendChild(style);
         }
         css = `
-            [data-icon="${id}.png"] {
-                background-image: url(${iconDataURL}) !important;
-            }
-        `;
+               [data-icon="${id}.png"] {
+                   background-image: url(${iconDataURL}) !important;
+               }
+           `;
         style.appendChild(document.createTextNode(css));
     }
 
