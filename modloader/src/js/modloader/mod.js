@@ -415,6 +415,7 @@ import {
     TypeNullable,
     TypeStructuredObject,
 } from "../savegame/serialization_data_types";
+import { SerializerInternal } from "../savegame/serializer_internal";
 
 export class ShapezAPI {
     constructor(user) {
@@ -609,6 +610,7 @@ export class ShapezAPI {
             SavegameInterface_V1006,
             SavegameInterface_V1007,
             SavegameInterface_ML01,
+            SerializerInternal,
             SavegameManager,
             SavegameSerializer,
             Savegame,
