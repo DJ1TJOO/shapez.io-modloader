@@ -2,10 +2,8 @@ import { DataPacket, FlagPacket, FlagPacketFlags, MultiplayerPacket, Multiplayer
 import { MultiplayerSavegame } from "../multiplayer_savegame";
 
 const APPLICATION_ERROR_OCCURED = shapezAPI.exports.APPLICATION_ERROR_OCCURED;
-const HUDModalDialogs = shapezAPI.exports.HUDModalDialogs;
-const ConstantSignalComponent = shapezAPI.exports.ConstantSignalComponent;
+const Signal = shapezAPI.exports.Signal;
 const getBuildingDataFromCode = shapezAPI.exports.getBuildingDataFromCode;
-const GameState = shapezAPI.exports.GameState;
 const logSection = shapezAPI.exports.logSection;
 const createLogger = shapezAPI.exports.createLogger;
 const waitNextFrame = shapezAPI.exports.waitNextFrame;
@@ -15,13 +13,15 @@ const KeyActionMapper = shapezAPI.exports.KeyActionMapper;
 const Savegame = shapezAPI.exports.Savegame;
 const GameCore = shapezAPI.exports.GameCore;
 const Dialog = shapezAPI.exports.Dialog;
+const Vector = shapezAPI.exports.Vector;
 const MUSIC = shapezAPI.exports.MUSIC;
+const KEYMAPPINGS = shapezAPI.KEYMAPPINGS;
 
 const logger = createLogger("state/ingame");
 const { v4: uuidv4 } = require("uuid");
 const wrtc = require("wrtc");
 const Peer = require("simple-peer");
-import io from "socket.io-client";
+const io = require("socket.io-client");
 
 // Different sub-states
 const stages = {
@@ -75,7 +75,7 @@ export class GameCreationPayload {
     }
 }
 
-export class InMultiplayerGameState extends GameState {
+export class InMultiplayerGameState extends shapezAPI.exports.GameState {
     constructor() {
         super("InMultiplayerGameState");
 
@@ -249,7 +249,7 @@ export class InMultiplayerGameState extends GameState {
 
             if (this.connection) {
                 this.multiplayerSavegame = new MultiplayerSavegame(this.app, this.connection.gameData);
-                this.core.initializeRootMultiplayer(this, this.multiplayerSavegame);
+                this.core.initializeRoot(this, this.multiplayerSavegame);
 
                 console.log(this.multiplayerSavegame);
                 if (this.multiplayerSavegame.hasGameDump()) {
@@ -302,6 +302,7 @@ export class InMultiplayerGameState extends GameState {
                 return;
             }
             this.app.gameAnalytics.handleGameResumed();
+            this.core.root.signals.constantSignalChange = new Signal();
             this.stage5FirstUpdate();
         }
     }
@@ -350,6 +351,104 @@ export class InMultiplayerGameState extends GameState {
     }
 
     /**
+     * Tries to delete the given building
+     */
+    tryDeleteBuilding(building) {
+        if (!this.core.root.logic.canDeleteBuilding(building)) {
+            return false;
+        }
+        this.multiplayerDestroy.push(building.uid);
+        this.core.root.map.removeStaticEntity(building);
+        this.core.root.entityMgr.destroyEntity(building);
+        this.core.root.entityMgr.processDestroyList();
+        return true;
+    }
+
+    /**
+     * Removes all entities with a RemovableMapEntityComponent which need to get
+     * removed before placing this entity
+     */
+    freeEntityAreaBeforeBuild(entity) {
+        const staticComp = entity.components.StaticMapEntity;
+        const rect = staticComp.getTileSpaceBounds();
+        // Remove any removeable colliding entities on the same layer
+        for (let x = rect.x; x < rect.x + rect.w; ++x) {
+            for (let y = rect.y; y < rect.y + rect.h; ++y) {
+                const contents = this.core.root.map.getLayerContentXY(x, y, entity.layer);
+                if (contents) {
+                    assertAlways(contents.components.StaticMapEntity.getMetaBuilding().getIsReplaceable(), "Tried to replace non-repleaceable entity");
+                    if (!this.tryDeleteBuilding(contents)) {
+                        assertAlways(false, "Tried to replace non-repleaceable entity #2");
+                    }
+                }
+            }
+        }
+
+        // Perform other callbacks
+        this.core.root.signals.freeEntityAreaBeforeBuild.dispatch(entity);
+    }
+
+    /**
+     * Attempts to place the given building
+     */
+    tryPlaceBuilding({ origin, rotation, rotationVariant, originalRotation, variant, building }, uid) {
+        const entity = building.createEntity({
+            root: this.core.root,
+            origin,
+            rotation,
+            originalRotation,
+            rotationVariant,
+            variant,
+        });
+        if (entity.components.ConstantSignal) {
+            const constantSignalChange = this.core.root.signals.constantSignalChange;
+            Object.defineProperty(entity.components.ConstantSignal, "signal", {
+                set: (x) => {
+                    constantSignalChange.dispatch(entity, this);
+                    this.signal = x;
+                },
+            });
+        }
+        if (this.core.root.logic.checkCanPlaceEntity(entity)) {
+            this.freeEntityAreaBeforeBuild(entity);
+            this.core.root.map.placeStaticEntity(entity);
+            this.core.root.entityMgr.registerEntity(entity, uid);
+            this.core.root.entityMgr.nextUid = uid + 1;
+            return entity;
+        }
+        return null;
+    }
+
+    /**
+     * Tries to place the current building at the given tile
+     * @param {Vector} tile
+     */
+    tryPlaceCurrentBuildingAt(tile, entityPayload, uid) {
+        if (this.core.root.camera.zoomLevel < globalConfig.mapChunkOverviewMinZoom) {
+            // Dont allow placing in overview mode
+            return;
+        }
+
+        const metaBuilding = entityPayload.building;
+        const entity = this.tryPlaceBuilding({
+                origin: tile,
+                rotation: entityPayload.rotation,
+                rotationVariant: entityPayload.rotationVariant,
+                originalRotation: entityPayload.originalRotation,
+                building: metaBuilding,
+                variant: entityPayload.variant,
+            },
+            uid
+        );
+
+        if (entity) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * The final stage where this game is running and updating regulary.
      */
     stage10GameRunning() {
@@ -366,18 +465,26 @@ export class InMultiplayerGameState extends GameState {
                 var onOpen = (event) => {
                     this.core.root.signals.entityAdded.add((entity) => {
                         if (this.multiplayerPlace.includes(entity.uid)) return this.multiplayerPlace.splice(this.multiplayerPlace.indexOf(entity.uid), 1);
-
                         MultiplayerPacket.sendPacket(this.connection.peer, new SignalPacket(SignalPacketSignals.entityAdded, [entity]));
+
+                        if (entity.components.ConstantSignal) {
+                            const constantSignalChange = this.core.root.signals.constantSignalChange;
+                            Object.defineProperty(entity.components.ConstantSignal, "signal", {
+                                set: (x) => {
+                                    constantSignalChange.dispatch(entity, this);
+                                    this.signal = x;
+                                },
+                            });
+                        }
                     });
                     this.core.root.signals.entityDestroyed.add((entity) => {
                         if (this.multiplayerDestroy.includes(entity.uid)) return this.multiplayerDestroy.splice(this.multiplayerDestroy.indexOf(entity.uid), 1);
 
                         MultiplayerPacket.sendPacket(this.connection.peer, new SignalPacket(SignalPacketSignals.entityDestroyed, [entity]));
                     });
-                    this.core.root.signals.entityComponentChanged.add((entity, component) => {
-                        if (!(component instanceof ConstantSignalComponent)) return;
-
-                        MultiplayerPacket.sendPacket(this.connection.peer, new SignalPacket(SignalPacketSignals.entityComponentChanged, [entity, component]));
+                    //TODO: only constantSignal for now
+                    this.core.root.signals.constantSignalChange.add((entity, constantSignalComponent) => {
+                        MultiplayerPacket.sendPacket(this.connection.peer, new SignalPacket(SignalPacketSignals.entityComponentChanged, [entity, constantSignalComponent]));
                     });
                     this.core.root.signals.entityGotNewComponent.add((entity) => {
                         if (this.multipalyerComponentAdd.includes(entity.uid)) return this.multipalyerComponentAdd.splice(this.multipalyerComponentAdd.indexOf(entity.uid), 1);
@@ -404,7 +511,8 @@ export class InMultiplayerGameState extends GameState {
                             var entity = packet.args[0];
 
                             this.multiplayerPlace.push(entity.uid);
-                            this.core.root.hud.parts.buildingPlacer.tryPlaceCurrentBuildingAt(
+
+                            this.tryPlaceCurrentBuildingAt(
                                 entity.components.StaticMapEntity.origin, {
                                     origin: entity.components.StaticMapEntity.origin,
                                     originalRotation: entity.components.StaticMapEntity.originalRotation,
@@ -498,18 +606,25 @@ export class InMultiplayerGameState extends GameState {
                         var onOpen = (event) => {
                             this.core.root.signals.entityAdded.add((entity) => {
                                 if (this.multiplayerPlace.includes(entity.uid)) return this.multiplayerPlace.splice(this.multiplayerPlace.indexOf(entity.uid), 1);
-
                                 MultiplayerPacket.sendPacket(peer, new SignalPacket(SignalPacketSignals.entityAdded, [entity]), connections);
+                                if (entity.components.ConstantSignal) {
+                                    const constantSignalChange = this.core.root.signals.constantSignalChange;
+                                    Object.defineProperty(entity.components.ConstantSignal, "signal", {
+                                        set: (x) => {
+                                            constantSignalChange.dispatch(entity, this);
+                                            this.signal = x;
+                                        },
+                                    });
+                                }
                             });
                             this.core.root.signals.entityDestroyed.add((entity) => {
                                 if (this.multiplayerDestroy.includes(entity.uid)) return this.multiplayerDestroy.splice(this.multiplayerDestroy.indexOf(entity.uid), 1);
 
                                 MultiplayerPacket.sendPacket(peer, new SignalPacket(SignalPacketSignals.entityDestroyed, [entity]), connections);
                             });
-                            this.core.root.signals.entityComponentChanged.add((entity, component) => {
-                                if (!(component instanceof ConstantSignalComponent)) return;
-
-                                MultiplayerPacket.sendPacket(peer, new SignalPacket(SignalPacketSignals.entityComponentChanged, [entity, component]), connections);
+                            //TODO: only constantSignal for now
+                            this.core.root.signals.constantSignalChange.add((entity, constantSignalComponent) => {
+                                MultiplayerPacket.sendPacket(peer, new SignalPacket(SignalPacketSignals.entityComponentChanged, [entity, constantSignalComponent]));
                             });
                             this.core.root.signals.entityGotNewComponent.add((entity) => {
                                 if (this.multipalyerComponentAdd.includes(entity.uid)) return this.multipalyerComponentAdd.splice(this.multipalyerComponentAdd.indexOf(entity.uid), 1);
@@ -558,7 +673,7 @@ export class InMultiplayerGameState extends GameState {
                                     var entity = packet.args[0];
 
                                     this.multiplayerPlace.push(entity.uid);
-                                    this.core.root.hud.parts.buildingPlacer.tryPlaceCurrentBuildingAt(
+                                    this.tryPlaceCurrentBuildingAt(
                                         entity.components.StaticMapEntity.origin, {
                                             origin: entity.components.StaticMapEntity.origin,
                                             originalRotation: entity.components.StaticMapEntity.originalRotation,

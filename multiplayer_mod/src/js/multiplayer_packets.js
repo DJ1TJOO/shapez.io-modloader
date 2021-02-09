@@ -40,7 +40,10 @@ const PausedGameSpeed = shapezAPI.exports.PausedGameSpeed;
 const RegularGameSpeed = shapezAPI.exports.RegularGameSpeed;
 const BasicSerializableObject = shapezAPI.exports.BasicSerializableObject;
 const types = shapezAPI.exports.types;
-const SerializerInternal = shapezAPI.exports.SerializerInternal;
+const Vector = shapezAPI.exports.Vector;
+const getBuildingDataFromCode = shapezAPI.exports.getBuildingDataFromCode;
+const globalConfig = shapezAPI.exports.globalConfig;
+const createLogger = shapezAPI.exports.createLogger;
 
 const Peer = require("simple-peer");
 /**
@@ -154,6 +157,72 @@ export const MultiplayerPacketSerializableObject = {
     WireTunnelComponent: WireTunnelComponent,
 };
 
+const logger = createLogger("multiplayer_serializer_internal");
+
+// Internal serializer methods
+export class MultiplayerSerializerInternal {
+    serializeEntityArray(array) {
+        const serialized = [];
+        for (let i = 0; i < array.length; ++i) {
+            const entity = array[i];
+            if (!entity.queuedForDestroy && !entity.destroyed) {
+                serialized.push(entity.serialize());
+            }
+        }
+        return serialized;
+    }
+
+    deserializeEntityArray(root, array) {
+        for (let i = 0; i < array.length; ++i) {
+            this.deserializeEntity(root, array[i]);
+        }
+    }
+
+    deserializeEntity(root, payload) {
+        const staticData = payload.components.StaticMapEntity;
+        assert(staticData, "entity has no static data");
+
+        const code = staticData.code;
+        const data = getBuildingDataFromCode(code);
+
+        const metaBuilding = data.metaInstance;
+
+        const entity = metaBuilding.createEntity({
+            root,
+            origin: Vector.fromSerializedObject(staticData.origin),
+            rotation: staticData.rotation,
+            originalRotation: staticData.originalRotation,
+            rotationVariant: data.rotationVariant,
+            variant: data.variant,
+        });
+
+        entity.uid = payload.uid;
+        this.deserializeComponents(root, entity, payload.components);
+        return entity;
+    }
+
+    /////// COMPONENTS ////
+
+    deserializeComponents(root, entity, data) {
+        for (const componentId in data) {
+            if (!entity.components[componentId]) {
+                if (G_IS_DEV && !globalConfig.debug.disableSlowAsserts) {
+                    // @ts-ignore
+                    if (++window.componentWarningsShown < 100) {
+                        logger.warn("Entity no longer has component:", componentId);
+                    }
+                }
+                continue;
+            }
+
+            const errorStatus = entity.components[componentId].deserialize(data[componentId], root);
+            if (errorStatus) {
+                return errorStatus;
+            }
+        }
+    }
+}
+
 export class MultiplayerPacket {
     constructor(type) {
         this.type = type;
@@ -199,7 +268,7 @@ export class MultiplayerPacket {
         for (let i = 0; i < args.length; i++) {
             const element = args[i];
             var object = new MultiplayerPacketSerializableObject[element.class]({});
-            if (object instanceof Entity) object = new SerializerInternal().deserializeEntity(root, element.serialized, false);
+            if (object instanceof Entity) object = new MultiplayerSerializerInternal().deserializeEntity(root, element.serialized);
             else object.deserialize(element.serialized, root);
             argsNew.push(object);
         }

@@ -43,6 +43,9 @@ module.exports = ({ es6 = false, bundlePath = "./build", bundle = "bundle.js", d
         context: path.resolve(__dirname, dir),
         plugins: [
             new FriendlyErrorsWebpackPlugin(),
+            new webpack.ProvidePlugin({
+                process: "process/browser",
+            }),
             new webpack.DefinePlugin({
                 assert: "window.assert",
                 assertAlways: "window.assert",
@@ -76,6 +79,12 @@ module.exports = ({ es6 = false, bundlePath = "./build", bundle = "bundle.js", d
                 cwd: path.join(__dirname, dir),
             }),
         ],
+        resolve: {
+            alias: {
+                // Ensure compatibility to original bootstrap
+                debug$: path.join(__dirname, "node_modules", "debug", "src", "browser.js"),
+            },
+        },
         module: {
             rules: [{
                     test: /\.js$/,

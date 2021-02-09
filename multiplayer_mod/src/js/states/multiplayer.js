@@ -24,7 +24,7 @@ const DialogWithForm = shapezAPI.exports.DialogWithForm;
 
 const globalConfig = shapezAPI.exports.globalConfig;
 const trim = require("trim");
-import io from "socket.io-client";
+const io = require("socket.io-client");
 const wrtc = require("wrtc");
 const Peer = require("simple-peer");
 
@@ -549,7 +549,7 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
 							console.log(gameData);
 							gameData = JSON.parse(gameData);
 							var connection = new MultiplayerConnection(pc, gameData);
-							this.moveToState("MultiplayerState", {
+							this.moveToState("InMultiplayerGameState", {
 								connection,
 								connectionId,
 							});

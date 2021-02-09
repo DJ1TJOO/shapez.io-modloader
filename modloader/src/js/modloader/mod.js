@@ -415,11 +415,11 @@ import {
     TypeNullable,
     TypeStructuredObject,
 } from "../savegame/serialization_data_types";
+import { SerializerInternal } from "../savegame/serializer_internal";
 
 export class ShapezAPI {
     constructor(user) {
         this.user = user;
-
         this.exports = {
             //Core
             AtlasDefinition,
@@ -609,6 +609,7 @@ export class ShapezAPI {
             SavegameInterface_V1006,
             SavegameInterface_V1007,
             SavegameInterface_ML01,
+            SerializerInternal,
             SavegameManager,
             SavegameSerializer,
             Savegame,
@@ -926,7 +927,8 @@ export class ShapezAPI {
         sourceImage.crossOrigin = "anonymous";
         sourceImage.onload = () => {
             // @ts-ignore
-            Loader.internalParseAtlas({
+            Loader.internalParseAtlas(
+                {
                     meta: atlasData.atlasData.meta,
                     sourceData: atlasData.atlasData.frames,
                 },

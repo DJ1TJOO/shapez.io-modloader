@@ -19,7 +19,7 @@ const themes = "./themes";
 const bundle = "bundle.js";
 const bundlePath = "./build/";
 
-var make = cb => {
+var make = (cb) => {
     atlasLoader.create(atlasConfig, atlasRaw, atlas);
 
     var restult = sass.renderSync({

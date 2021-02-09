@@ -1,5 +1,5 @@
-const { addMultiplayerButton, MultiplayerState } = require("./states/multiplayer");
-const { InMultiplayerGameState } = require("./states/multiplayer_ingame");
+import { addMultiplayerButton, MultiplayerState } from "./states/multiplayer";
+import { InMultiplayerGameState } from "./states/multiplayer_ingame";
 
 const modId = "2b57757b-d053-4a2b-b2bb-c7b701374531";
 registerMod({
