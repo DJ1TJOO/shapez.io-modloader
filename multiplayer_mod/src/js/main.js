@@ -49,6 +49,30 @@ registerMod({
         shapezAPI.injectCss("**{css}**", modId);
         shapezAPI.states.MultiplayerState = MultiplayerState;
         shapezAPI.states.InMultiplayerGameState = InMultiplayerGameState;
+
+        shapezAPI.exports.SerializerInternal.prototype.deserializeComponents = (root, entity, data) => {
+            for (const componentId in data) {
+                if (!entity.components[componentId]) {
+                    continue;
+                }
+
+                const errorStatus = entity.components[componentId].deserialize(data[componentId], root);
+                if (errorStatus) {
+                    return errorStatus;
+                }
+                if (componentId === "ConstantSignal") {
+                    let component = new Proxy(entity.components[componentId], {
+                        set: (target, key, value) => {
+                            target[key] = value;
+                            root.signals.constantSignalChange.dispatch(entity, target);
+                            return true;
+                        },
+                    });
+                    entity.components[componentId] = component;
+                }
+            }
+        };
+
         addMultiplayerButton(modId);
     },
 });

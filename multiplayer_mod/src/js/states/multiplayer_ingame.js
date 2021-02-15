@@ -1,4 +1,4 @@
-import { DataPacket, FlagPacket, FlagPacketFlags, MultiplayerPacket, MultiplayerPacketTypes, SignalPacket, SignalPacketSignals, StringSerializable } from "../multiplayer_packets";
+import { DataPacket, FlagPacket, FlagPacketFlags, MultiplayerPacket, MultiplayerPacketTypes, SignalPacket, SignalPacketSignals, StringSerializable, TextPacket, TextPacketTypes } from "../multiplayer_packets";
 import { MultiplayerSavegame } from "../multiplayer_savegame";
 
 const APPLICATION_ERROR_OCCURED = shapezAPI.exports.APPLICATION_ERROR_OCCURED;
@@ -376,7 +376,7 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
             for (let y = rect.y; y < rect.y + rect.h; ++y) {
                 const contents = this.core.root.map.getLayerContentXY(x, y, entity.layer);
                 if (contents) {
-                    assertAlways(contents.components.StaticMapEntity.getMetaBuilding().getIsReplaceable(), "Tried to replace non-repleaceable entity");
+                    assertAlways(contents.components.StaticMapEntity.getMetaBuilding().getIsReplaceable(getBuildingDataFromCode(contents.components.StaticMapEntity.code).variant), "Tried to replace non-repleaceable entity");
                     if (!this.tryDeleteBuilding(contents)) {
                         assertAlways(false, "Tried to replace non-repleaceable entity #2");
                     }
@@ -401,13 +401,17 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
             variant,
         });
         if (entity.components.ConstantSignal) {
+            const constantSignalComponent = entity.components.ConstantSignal;
             const constantSignalChange = this.core.root.signals.constantSignalChange;
-            Object.defineProperty(entity.components.ConstantSignal, "signal", {
-                set: (x) => {
-                    constantSignalChange.dispatch(entity, this);
-                    this.signal = x;
+
+            let component = new Proxy(constantSignalComponent, {
+                set: (target, key, value) => {
+                    target[key] = value;
+                    constantSignalChange.dispatch(entity, target);
+                    return true;
                 },
             });
+            entity.components.ConstantSignal = component;
         }
         if (this.core.root.logic.checkCanPlaceEntity(entity)) {
             this.freeEntityAreaBeforeBuild(entity);
@@ -429,6 +433,8 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
             return;
         }
 
+        if (this.core.root.entityMgr.findByUid(uid)) return false;
+
         const metaBuilding = entityPayload.building;
         const entity = this.tryPlaceBuilding({
                 origin: tile,
@@ -445,6 +451,244 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
             return true;
         } else {
             return false;
+        }
+    }
+
+    //TODO:
+    drawRegularPlacement(parameters, metaBuilding, currentVariant, currentBaseRotation, fakeEntity) {
+        const mousePosition = this.core.root.app.mousePosition;
+        if (!mousePosition) {
+            // Not on screen
+            return;
+        }
+
+        const worldPos = this.core.root.camera.screenToWorld(mousePosition);
+        const mouseTile = worldPos.toTileSpace();
+
+        // Compute best rotation variant
+        const { rotation, rotationVariant, connectedEntities } = metaBuilding.computeOptimalDirectionAndRotationVariantAtTile({
+            root: this.core.root,
+            tile: mouseTile,
+            rotation: currentBaseRotation,
+            variant: currentVariant,
+            layer: metaBuilding.getLayer(this.core.root, currentVariant),
+        });
+
+        // Check if there are connected entities
+        if (connectedEntities) {
+            for (let i = 0; i < connectedEntities.length; ++i) {
+                const connectedEntity = connectedEntities[i];
+                const connectedWsPoint = connectedEntity.components.StaticMapEntity.getTileSpaceBounds().getCenter().toWorldSpace();
+
+                const startWsPoint = mouseTile.toWorldSpaceCenterOfTile();
+
+                const startOffset = connectedWsPoint
+                    .sub(startWsPoint)
+                    .normalize()
+                    .multiplyScalar(globalConfig.tileSize * 0.3);
+                const effectiveStartPoint = startWsPoint.add(startOffset);
+                const effectiveEndPoint = connectedWsPoint.sub(startOffset);
+
+                parameters.context.globalAlpha = 0.6;
+
+                // parameters.context.lineCap = "round";
+                parameters.context.strokeStyle = "#7f7";
+                parameters.context.lineWidth = 10;
+                parameters.context.beginPath();
+                parameters.context.moveTo(effectiveStartPoint.x, effectiveStartPoint.y);
+                parameters.context.lineTo(effectiveEndPoint.x, effectiveEndPoint.y);
+                parameters.context.stroke();
+                parameters.context.globalAlpha = 1;
+                // parameters.context.lineCap = "square";
+            }
+        }
+
+        // Synchronize rotation and origin
+        fakeEntity.layer = metaBuilding.getLayer(this.core.root, currentVariant);
+        const staticComp = fakeEntity.components.StaticMapEntity;
+        staticComp.origin = mouseTile;
+        staticComp.rotation = rotation;
+        metaBuilding.updateVariants(fakeEntity, rotationVariant, currentVariant);
+        staticComp.code = shapezAPI.exports.getCodeFromBuildingData(metaBuilding, currentVariant, rotationVariant);
+
+        const canBuild = this.core.root.logic.checkCanPlaceEntity(fakeEntity);
+
+        // Fade in / out
+        parameters.context.lineWidth = 1;
+
+        // Determine the bounds and visualize them
+        const entityBounds = staticComp.getTileSpaceBounds();
+        const drawBorder = -3;
+        if (canBuild) {
+            parameters.context.strokeStyle = "rgba(56, 235, 111, 0.5)";
+            parameters.context.fillStyle = "rgba(56, 235, 111, 0.2)";
+        } else {
+            parameters.context.strokeStyle = "rgba(255, 0, 0, 0.2)";
+            parameters.context.fillStyle = "rgba(255, 0, 0, 0.2)";
+        }
+
+        parameters.context.beginRoundedRect(entityBounds.x * globalConfig.tileSize - drawBorder, entityBounds.y * globalConfig.tileSize - drawBorder, entityBounds.w * globalConfig.tileSize + 2 * drawBorder, entityBounds.h * globalConfig.tileSize + 2 * drawBorder, 4);
+        parameters.context.stroke();
+        // parameters.context.fill();
+        parameters.context.globalAlpha = 1;
+
+        // HACK to draw the entity sprite
+        const previewSprite = metaBuilding.getBlueprintSprite(rotationVariant, currentVariant);
+        staticComp.origin = worldPos.divideScalar(globalConfig.tileSize).subScalars(0.5, 0.5);
+        staticComp.drawSpriteOnBoundsClipped(parameters, previewSprite);
+        staticComp.origin = mouseTile;
+
+        // Draw ejectors
+        if (canBuild) {
+            this.drawMatchingAcceptorsAndEjectors(parameters, fakeEntity);
+        }
+    }
+
+    drawMatchingAcceptorsAndEjectors(parameters, fakeEntity) {
+        const acceptorComp = fakeEntity.components.ItemAcceptor;
+        const ejectorComp = fakeEntity.components.ItemEjector;
+        const staticComp = fakeEntity.components.StaticMapEntity;
+        const beltComp = fakeEntity.components.Belt;
+        const minerComp = fakeEntity.components.Miner;
+
+        const goodArrowSprite = shapezAPI.exports.Loader.getSprite("sprites/misc/slot_good_arrow.png");
+        const badArrowSprite = shapezAPI.exports.Loader.getSprite("sprites/misc/slot_bad_arrow.png");
+
+        // Just ignore the following code please ... thanks!
+
+        const offsetShift = 10;
+
+        let acceptorSlots = [];
+        let ejectorSlots = [];
+
+        if (ejectorComp) {
+            ejectorSlots = ejectorComp.slots.slice();
+        }
+
+        if (acceptorComp) {
+            acceptorSlots = acceptorComp.slots.slice();
+        }
+
+        if (beltComp) {
+            const fakeEjectorSlot = beltComp.getFakeEjectorSlot();
+            const fakeAcceptorSlot = beltComp.getFakeAcceptorSlot();
+            ejectorSlots.push(fakeEjectorSlot);
+            acceptorSlots.push(fakeAcceptorSlot);
+        }
+
+        for (let acceptorSlotIndex = 0; acceptorSlotIndex < acceptorSlots.length; ++acceptorSlotIndex) {
+            const slot = acceptorSlots[acceptorSlotIndex];
+
+            const acceptorSlotWsTile = staticComp.localTileToWorld(slot.pos);
+            const acceptorSlotWsPos = acceptorSlotWsTile.toWorldSpaceCenterOfTile();
+
+            // Go over all slots
+            for (let acceptorDirectionIndex = 0; acceptorDirectionIndex < slot.directions.length; ++acceptorDirectionIndex) {
+                const direction = slot.directions[acceptorDirectionIndex];
+                const worldDirection = staticComp.localDirectionToWorld(direction);
+
+                // Figure out which tile ejects to this slot
+                const sourceTile = acceptorSlotWsTile.add(shapezAPI.exports.enumDirectionToVector[worldDirection]);
+
+                let isBlocked = false;
+                let isConnected = false;
+
+                // Find all entities which are on that tile
+                const sourceEntities = this.root.map.getLayersContentsMultipleXY(sourceTile.x, sourceTile.y);
+
+                // Check for every entity:
+                for (let i = 0; i < sourceEntities.length; ++i) {
+                    const sourceEntity = sourceEntities[i];
+                    const sourceEjector = sourceEntity.components.ItemEjector;
+                    const sourceBeltComp = sourceEntity.components.Belt;
+                    const sourceStaticComp = sourceEntity.components.StaticMapEntity;
+                    const ejectorAcceptLocalTile = sourceStaticComp.worldToLocalTile(acceptorSlotWsTile);
+
+                    // If this entity is on the same layer as the slot - if so, it can either be
+                    // connected, or it can not be connected and thus block the input
+                    if (sourceEjector && sourceEjector.anySlotEjectsToLocalTile(ejectorAcceptLocalTile)) {
+                        // This one is connected, all good
+                        isConnected = true;
+                    } else if (sourceBeltComp && sourceStaticComp.localDirectionToWorld(sourceBeltComp.direction) === shapezAPI.exports.enumInvertedDirections[worldDirection]) {
+                        // Belt connected
+                        isConnected = true;
+                    } else {
+                        // This one is blocked
+                        isBlocked = true;
+                    }
+                }
+
+                const alpha = isConnected || isBlocked ? 1.0 : 0.3;
+                const sprite = isBlocked ? badArrowSprite : goodArrowSprite;
+
+                parameters.context.globalAlpha = alpha;
+                shapezAPI.exports.drawRotatedSprite({
+                    parameters,
+                    sprite,
+                    x: acceptorSlotWsPos.x,
+                    y: acceptorSlotWsPos.y,
+                    angle: Math.radians(shapezAPI.exports.enumDirectionToAngle[shapezAPI.exports.enumInvertedDirections[worldDirection]]),
+                    size: 13,
+                    offsetY: offsetShift + 13,
+                });
+                parameters.context.globalAlpha = 1;
+            }
+        }
+
+        // Go over all slots
+        for (let ejectorSlotIndex = 0; ejectorSlotIndex < ejectorSlots.length; ++ejectorSlotIndex) {
+            const slot = ejectorSlots[ejectorSlotIndex];
+
+            const ejectorSlotLocalTile = slot.pos.add(shapezAPI.exports.enumDirectionToVector[slot.direction]);
+            const ejectorSlotWsTile = staticComp.localTileToWorld(ejectorSlotLocalTile);
+
+            const ejectorSLotWsPos = ejectorSlotWsTile.toWorldSpaceCenterOfTile();
+            const ejectorSlotWsDirection = staticComp.localDirectionToWorld(slot.direction);
+
+            let isBlocked = false;
+            let isConnected = false;
+
+            // Find all entities which are on that tile
+            const destEntities = this.root.map.getLayersContentsMultipleXY(ejectorSlotWsTile.x, ejectorSlotWsTile.y);
+
+            // Check for every entity:
+            for (let i = 0; i < destEntities.length; ++i) {
+                const destEntity = destEntities[i];
+                const destAcceptor = destEntity.components.ItemAcceptor;
+                const destStaticComp = destEntity.components.StaticMapEntity;
+                const destMiner = destEntity.components.Miner;
+
+                const destLocalTile = destStaticComp.worldToLocalTile(ejectorSlotWsTile);
+                const destLocalDir = destStaticComp.worldDirectionToLocal(ejectorSlotWsDirection);
+                if (destAcceptor && destAcceptor.findMatchingSlot(destLocalTile, destLocalDir)) {
+                    // This one is connected, all good
+                    isConnected = true;
+                } else if (destEntity.components.Belt && destLocalDir === shapezAPI.exports.enumDirection.top) {
+                    // Connected to a belt
+                    isConnected = true;
+                } else if (minerComp && minerComp.chainable && destMiner && destMiner.chainable) {
+                    // Chainable miners connected to eachother
+                    isConnected = true;
+                } else {
+                    // This one is blocked
+                    isBlocked = true;
+                }
+            }
+
+            const alpha = isConnected || isBlocked ? 1.0 : 0.3;
+            const sprite = isBlocked ? badArrowSprite : goodArrowSprite;
+
+            parameters.context.globalAlpha = alpha;
+            shapezAPI.exports.drawRotatedSprite({
+                parameters,
+                sprite,
+                x: ejectorSLotWsPos.x,
+                y: ejectorSLotWsPos.y,
+                angle: Math.radians(shapezAPI.exports.enumDirectionToAngle[ejectorSlotWsDirection]),
+                size: 13,
+                offsetY: offsetShift,
+            });
+            parameters.context.globalAlpha = 1;
         }
     }
 
@@ -468,13 +712,17 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
                         MultiplayerPacket.sendPacket(this.connection.peer, new SignalPacket(SignalPacketSignals.entityAdded, [entity]));
 
                         if (entity.components.ConstantSignal) {
+                            const constantSignalComponent = entity.components.ConstantSignal;
                             const constantSignalChange = this.core.root.signals.constantSignalChange;
-                            Object.defineProperty(entity.components.ConstantSignal, "signal", {
-                                set: (x) => {
-                                    constantSignalChange.dispatch(entity, this);
-                                    this.signal = x;
+
+                            let component = new Proxy(constantSignalComponent, {
+                                set: (target, key, value) => {
+                                    target[key] = value;
+                                    constantSignalChange.dispatch(entity, target);
+                                    return true;
                                 },
                             });
+                            entity.components.ConstantSignal = component;
                         }
                     });
                     this.core.root.signals.entityDestroyed.add((entity) => {
@@ -484,6 +732,7 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
                     });
                     //TODO: only constantSignal for now
                     this.core.root.signals.constantSignalChange.add((entity, constantSignalComponent) => {
+                        if (this.multiplayerConstantSignalChange.includes(entity.uid)) return this.multiplayerConstantSignalChange.splice(this.multiplayerConstantSignalChange.indexOf(entity.uid), 1);
                         MultiplayerPacket.sendPacket(this.connection.peer, new SignalPacket(SignalPacketSignals.entityComponentChanged, [entity, constantSignalComponent]));
                     });
                     this.core.root.signals.entityGotNewComponent.add((entity) => {
@@ -501,6 +750,8 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
 
                         MultiplayerPacket.sendPacket(this.connection.peer, new SignalPacket(SignalPacketSignals.upgradePurchased, [new StringSerializable(upgradeId)]));
                     });
+
+                    MultiplayerPacket.sendPacket(this.connection.peer, new TextPacket(TextPacketTypes.JOINED_USER, shapezAPI.user.username));
                 };
 
                 var onMessage = (data) => {
@@ -535,14 +786,19 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
                             let entity = this.core.root.entityMgr.findByUid(packet.args[0].uid);
                             let component = packet.args[1];
                             if (entity === null) return;
-                            this.multipalyerComponentAdd.push(entity.uid);
-                            this.multipalyerComponentRemove.push(entity.uid);
-                            entity.removeComponent(component.constructor, false);
-                            entity.addComponent(component, false);
+                            this.multiplayerConstantSignalChange.push(entity.uid);
+                            for (const key in component) {
+                                if (!component.hasOwnProperty(key)) continue;
+                                entity.components[component.constructor.getId()][key] = component[key];
+                            }
                         }
                         if (packet.signal === SignalPacketSignals.upgradePurchased) {
                             this.multipalyerUnlockUpgrade.push(packet.args[0].value);
                             this.core.root.hubGoals.tryUnlockUpgrade(packet.args[0].value);
+                        }
+                    } else if (packet.type === MultiplayerPacketTypes.TEXT) {
+                        if (packet.textType === TextPacketTypes.MESSAGE) {
+                            this.core.root.hud.parts.notifications.onNotification(packet.text, shapezAPI.exports.enumNotificationType.success);
                         }
                     }
                 };
@@ -551,13 +807,20 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
                 onOpen();
 
                 this.connection.peer.on("data", onMessage);
+                this.connection.peer.on("close", () => {
+                    console.log(this.connectionId + " closed");
+                    this.goBackToMenu();
+                });
+                this.connection.peer.on("error", (err) => {
+                    console.error(err);
+                });
             } else {
                 this.connectionId = uuidv4();
                 // @ts-ignore
                 var socket = io(this.host, { transport: ["websocket"] });
                 var socketId = undefined;
 
-                var connections = [];
+                this.connections = [];
                 socket.on("connect", () => {
                     socket.on("id", (id) => {
                         socketId = id;
@@ -603,44 +866,52 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
                             peer.signal(signalData.signal);
                         });
 
-                        var onOpen = (event) => {
+                        var onOpen = async(event) => {
                             this.core.root.signals.entityAdded.add((entity) => {
                                 if (this.multiplayerPlace.includes(entity.uid)) return this.multiplayerPlace.splice(this.multiplayerPlace.indexOf(entity.uid), 1);
-                                MultiplayerPacket.sendPacket(peer, new SignalPacket(SignalPacketSignals.entityAdded, [entity]), connections);
+                                MultiplayerPacket.sendPacket(peer, new SignalPacket(SignalPacketSignals.entityAdded, [entity]), this.connections);
+
                                 if (entity.components.ConstantSignal) {
+                                    const constantSignalComponent = entity.components.ConstantSignal;
                                     const constantSignalChange = this.core.root.signals.constantSignalChange;
-                                    Object.defineProperty(entity.components.ConstantSignal, "signal", {
-                                        set: (x) => {
-                                            constantSignalChange.dispatch(entity, this);
-                                            this.signal = x;
+
+                                    let component = new Proxy(constantSignalComponent, {
+                                        set: (target, key, value) => {
+                                            target[key] = value;
+                                            constantSignalChange.dispatch(entity, target);
+                                            return true;
                                         },
                                     });
+                                    entity.components.ConstantSignal = component;
                                 }
                             });
                             this.core.root.signals.entityDestroyed.add((entity) => {
                                 if (this.multiplayerDestroy.includes(entity.uid)) return this.multiplayerDestroy.splice(this.multiplayerDestroy.indexOf(entity.uid), 1);
 
-                                MultiplayerPacket.sendPacket(peer, new SignalPacket(SignalPacketSignals.entityDestroyed, [entity]), connections);
+                                MultiplayerPacket.sendPacket(peer, new SignalPacket(SignalPacketSignals.entityDestroyed, [entity]), this.connections);
                             });
                             //TODO: only constantSignal for now
                             this.core.root.signals.constantSignalChange.add((entity, constantSignalComponent) => {
+                                if (this.multiplayerConstantSignalChange.includes(entity.uid)) return this.multiplayerConstantSignalChange.splice(this.multiplayerConstantSignalChange.indexOf(entity.uid), 1);
                                 MultiplayerPacket.sendPacket(peer, new SignalPacket(SignalPacketSignals.entityComponentChanged, [entity, constantSignalComponent]));
                             });
                             this.core.root.signals.entityGotNewComponent.add((entity) => {
                                 if (this.multipalyerComponentAdd.includes(entity.uid)) return this.multipalyerComponentAdd.splice(this.multipalyerComponentAdd.indexOf(entity.uid), 1);
 
-                                MultiplayerPacket.sendPacket(peer, new SignalPacket(SignalPacketSignals.entityComponentRemoved, [entity]), connections);
+                                MultiplayerPacket.sendPacket(peer, new SignalPacket(SignalPacketSignals.entityComponentRemoved, [entity]), this.connections);
                             });
                             this.core.root.signals.entityComponentRemoved.add((entity) => {
                                 if (this.multipalyerComponentRemove.includes(entity.uid)) return this.multipalyerComponentRemove.splice(this.multipalyerComponentRemove.indexOf(entity.uid), 1);
 
-                                MultiplayerPacket.sendPacket(peer, new SignalPacket(SignalPacketSignals.entityComponentRemoved, [entity]), connections);
+                                MultiplayerPacket.sendPacket(peer, new SignalPacket(SignalPacketSignals.entityComponentRemoved, [entity]), this.connections);
                             });
                             this.core.root.signals.upgradePurchased.add((upgradeId) => {
                                 if (this.multipalyerUnlockUpgrade.includes(upgradeId)) return this.multipalyerUnlockUpgrade.splice(this.multipalyerUnlockUpgrade.indexOf(upgradeId), 1);
 
-                                MultiplayerPacket.sendPacket(peer, new SignalPacket(SignalPacketSignals.upgradePurchased, [new StringSerializable(upgradeId)]), connections);
+                                MultiplayerPacket.sendPacket(peer, new SignalPacket(SignalPacketSignals.upgradePurchased, [new StringSerializable(upgradeId)]), this.connections);
                             });
+
+                            await this.doSave();
 
                             var dataPackets = DataPacket.createFromData({
                                     version: this.savegame.getCurrentVersion(),
@@ -663,10 +934,10 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
                             if (packet.type === MultiplayerPacketTypes.SIGNAL) {
                                 packet.args = MultiplayerPacket.deserialize(packet.args, this.core.root);
 
-                                for (let i = 0; i < connections.length; i++) {
-                                    if (connections[i].peerId === peerId) continue;
+                                for (let i = 0; i < this.connections.length; i++) {
+                                    if (this.connections[i].peerId === peerId) continue;
 
-                                    MultiplayerPacket.sendPacket(connections[i].peer, new SignalPacket(packet.signal, packet.args), connections);
+                                    MultiplayerPacket.sendPacket(this.connections[i].peer, new SignalPacket(packet.signal, packet.args), this.connections);
                                 }
 
                                 if (packet.signal === SignalPacketSignals.entityAdded) {
@@ -696,22 +967,47 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
                                     let entity = this.core.root.entityMgr.findByUid(packet.args[0].uid);
                                     let component = packet.args[1];
                                     if (entity === null) return;
-                                    this.multipalyerComponentAdd.push(entity.uid);
-                                    this.multipalyerComponentRemove.push(entity.uid);
-                                    entity.removeComponent(component.constructor, false);
-                                    entity.addComponent(component, false);
+                                    this.multiplayerConstantSignalChange.push(entity.uid);
+                                    for (const key in component) {
+                                        if (!component.hasOwnProperty(key)) continue;
+                                        entity.components[component.constructor.getId()][key] = component[key];
+                                    }
                                 }
                                 if (packet.signal === SignalPacketSignals.upgradePurchased) {
                                     this.multipalyerUnlockUpgrade.push(packet.args[0].value);
                                     this.core.root.hubGoals.tryUnlockUpgrade(packet.args[0].value);
+                                }
+                            } else if (packet.type === MultiplayerPacketTypes.TEXT) {
+                                if (packet.textType === TextPacketTypes.JOINED_USER) {
+                                    for (let i = 0; i < this.connections.length; i++) {
+                                        if (this.connections[i].peerId === peerId) continue;
+                                        MultiplayerPacket.sendPacket(this.connections[i].peer, new TextPacket(TextPacketTypes.MESSAGE, packet.text + " has joined the game."), this.connections);
+                                    }
+                                    this.connections.find((x) => x.peerId === peerId).username = packet.text;
+                                    this.core.root.hud.parts.notifications.onNotification(packet.text + " has joined the game.", shapezAPI.exports.enumNotificationType.success);
+                                } else if (packet.textType === TextPacketTypes.MESSAGE) {
+                                    this.core.root.hud.parts.notifications.onNotification(packet.text, shapezAPI.exports.enumNotificationType.success);
                                 }
                             }
                         };
 
                         peer.on("connect", onOpen);
                         peer.on("data", onMessage);
+                        peer.on("close", () => {
+                            console.log(peerId + " closed");
+                            const connection = this.connections.find((x) => x.peerId === peerId);
+                            for (let i = 0; i < this.connections.length; i++) {
+                                if (this.connections[i].peerId === peerId) continue;
+                                MultiplayerPacket.sendPacket(this.connections[i].peer, new TextPacket(TextPacketTypes.MESSAGE, connection.username + " has disconnected."), this.connections);
+                            }
+                            this.core.root.hud.parts.notifications.onNotification(connection.username + " has disconnected.", shapezAPI.exports.enumNotificationType.success);
+                            this.connections.splice(this.connections.indexOf(connection), 1);
+                        });
+                        peer.on("error", (err) => {
+                            console.error(err);
+                        });
 
-                        connections.push({ peer: peer, peerId: peerId });
+                        this.connections.push({ peer: peer, peerId: peerId });
                     });
                 });
 
@@ -745,6 +1041,15 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
             if (this.core) {
                 this.core.destruct();
                 this.core = null;
+            }
+
+            //Disconnect peers
+            if (this.connectionId) {
+                this.connection.peer.destroy();
+            } else {
+                for (let i = 0; i < this.connections.length; i++) {
+                    this.connections[i].peer.destroy();
+                }
             }
         }
     }
@@ -783,6 +1088,7 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
         this.multipalyerComponentAdd = [];
         this.multipalyerComponentRemove = [];
         this.multipalyerUnlockUpgrade = [];
+        this.multiplayerConstantSignalChange = [];
 
         this.loadingOverlay = new GameLoadingOverlay(this.app, this.getDivElement());
         this.loadingOverlay.showBasic();

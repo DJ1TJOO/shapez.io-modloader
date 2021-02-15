@@ -44,6 +44,7 @@ const Vector = shapezAPI.exports.Vector;
 const getBuildingDataFromCode = shapezAPI.exports.getBuildingDataFromCode;
 const globalConfig = shapezAPI.exports.globalConfig;
 const createLogger = shapezAPI.exports.createLogger;
+const SerializerInternal = shapezAPI.exports.SerializerInternal;
 
 const Peer = require("simple-peer");
 /**
@@ -58,6 +59,7 @@ export const MultiplayerPacketTypes = {
     DATA: 0,
     FLAG: 1,
     SIGNAL: 2,
+    TEXT: 3,
 };
 
 export class StringSerializable extends BasicSerializableObject {
@@ -219,6 +221,16 @@ export class MultiplayerSerializerInternal {
             if (errorStatus) {
                 return errorStatus;
             }
+            if (componentId === "ConstantSignal") {
+                let component = new Proxy(entity.components[componentId], {
+                    set: (target, key, value) => {
+                        target[key] = value;
+                        root.signals.constantSignalChange.dispatch(entity, target);
+                        return true;
+                    },
+                });
+                entity.components[componentId] = component;
+            }
         }
     }
 }
@@ -238,9 +250,8 @@ export class MultiplayerPacket {
         try {
             peer.send(JSON.stringify(packet));
         } catch (error) {
-            if (G_IS_DEV) console.log(error);
-
             if (connections) connections.splice(connections.indexOf(connections.find((x) => x.peer === peer)), 1);
+            console.log(error);
         }
     }
 
@@ -360,5 +371,27 @@ export class SignalPacket extends MultiplayerPacket {
 
         /** @type {Array<SerializedObject>} */
         this.args = MultiplayerPacket.serialize(args);
+    }
+}
+
+export const TextPacketTypes = {
+    JOINED_USER: 0,
+    MESSAGE: 1,
+};
+
+export class TextPacket extends MultiplayerPacket {
+    /**
+     * Constructor of TextPacket
+     * @param {number} textType
+     * @param {string} text
+     */
+    constructor(textType, text) {
+        super(MultiplayerPacketTypes.TEXT);
+
+        /** @type {number} */
+        this.textType = textType;
+
+        /** @type {string} */
+        this.text = text;
     }
 }

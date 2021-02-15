@@ -1,4 +1,4 @@
-import { MultiplayerPacketTypes, FlagPacketFlags } from "../multiplayer_packets";
+import { MultiplayerPacketTypes, FlagPacketFlags, MultiplayerPacket, TextPacket, TextPacketTypes } from "../multiplayer_packets";
 import { MultiplayerConnection } from "./multiplayer_ingame";
 
 const cachebust = shapezAPI.exports.cachebust;

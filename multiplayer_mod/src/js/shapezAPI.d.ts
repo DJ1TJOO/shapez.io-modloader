@@ -21,6 +21,7 @@ declare function assert(condition: boolean | object | string, ...errorMessage: s
 declare function assertAlways(condition: boolean | object | string, ...errorMessage: string[]): void;
 
 declare interface ShapezAPI {
+	user;
 	exports;
 	KEYMAPPINGS: {
 		key: Function;
