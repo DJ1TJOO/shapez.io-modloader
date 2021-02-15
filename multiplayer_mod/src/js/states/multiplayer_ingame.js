@@ -1127,6 +1127,7 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
             // Only draw if page visible
             if (this.app.pageVisible) {
                 this.core.draw();
+                //TODO: draw other players
             }
 
             this.loadingOverlay.removeIfAttached();
