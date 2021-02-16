@@ -1,3 +1,4 @@
+import { MultiplayerCommandsHandler } from "./multiplayer/multiplayer_commands";
 import { addMultiplayerButton, MultiplayerState } from "./states/multiplayer";
 import { InMultiplayerGameState } from "./states/multiplayer_ingame";
 
@@ -7,7 +8,7 @@ registerMod({
     id: modId,
     description: "A mod that adds multiplayer to shapez.io",
     authors: ["DJ1TJOO"],
-    version: "0.0.1",
+    version: "0.0.2",
     gameVersion: "ML01",
     dependencies: [],
     incompatible: [],
@@ -73,6 +74,35 @@ registerMod({
             }
         };
 
+        shapezAPI.exports.GameHUD.prototype.draw = function(parameters) {
+            const partsOrder = ["massSelector", "buildingPlacer", "blueprintPlacer", "colorBlindHelper", "changesDebugger", "minerHighlight"];
+
+            for (let i = 0; i < partsOrder.length; ++i) {
+                if (this.parts[partsOrder[i]]) {
+                    this.parts[partsOrder[i]].draw(parameters);
+                }
+            }
+
+            if (this.root.gameState.multiplayerHUD) this.root.gameState.multiplayerHUD.draw(parameters);
+        };
+
+        shapezAPI.exports.GameHUD.prototype.update = function() {
+            if (!this.root.gameInitialized) {
+                return;
+            }
+            for (const key in this.parts) {
+                if (Array.isArray(this.parts[key])) {
+                    for (let i = 0; i < this.parts[key].length; i++) {
+                        this.parts[key][i].update();
+                    }
+                } else {
+                    this.parts[key].update();
+                }
+            }
+
+            if (this.root.gameState.multiplayerHUD) this.root.gameState.multiplayerHUD.update();
+        };
         addMultiplayerButton(modId);
+        shapezAPI.exports.MultiplayerCommandsHandler = MultiplayerCommandsHandler;
     },
 });

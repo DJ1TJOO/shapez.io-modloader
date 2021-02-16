@@ -1,0 +1,102 @@
+#ingame_HUD_Notifications {
+    position: absolute;
+    display: flex;
+    flex-direction: column-reverse;
+    @include S(bottom, 60px);
+    @include S(right, 10px);
+    @include S(width, 196px);
+    @include S(padding, 3px);
+    overflow-y: visible;
+    @include S(border-radius, $globalBorderRadius);
+    pointer-events: all;
+    transition: 0.3s;
+    @include S(max-height, 200px);
+    &:hover {
+        overflow-y: scroll;
+        overflow-x: hidden;
+        background-color: rgba(#333438, 0.5);
+        &::-webkit-scrollbar {
+            width: 3px;
+        }
+        &::-webkit-scrollbar-thumb {
+            background: rgba(#333438, 0.8);
+        }
+        &::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .notificationInput {
+            opacity: 1;
+            visibility: visible;
+        }
+        .notification {
+            opacity: 1;
+            visibility: visible !important;
+            -webkit-animation-play-state: paused !important;
+            -moz-animation-play-state: paused !important;
+            -o-animation-play-state: paused !important;
+            animation-play-state: paused !important;
+        }
+    }
+    .notificationInput {
+        opacity: 0;
+        visibility: hidden;
+        background: rgba(#333438, 0.8);
+        @include S(border-radius, $globalBorderRadius);
+        @include S(margin, 3px, 0px, 0px, 0px);
+        @include SuperSmallText;
+        @include S(padding, 7px, 10px);
+        @include S(width, 175px);
+        color: #fff;
+        @include DarkThemeOverride {
+            background-color: rgba(#55595d, 0.8);
+        }
+        transform-origin: 100% 50%;
+        box-sizing: content-box;
+        transition: opacity 0.3s;
+    }
+    .notification {
+        background: rgba(#333438, 0.8);
+        @include S(border-radius, $globalBorderRadius);
+        @include S(margin-top, 3px);
+        color: #fff;
+        @include SuperSmallText;
+        @include S(padding, 7px, 10px);
+        @include S(width, 150px);
+        @include DarkThemeOverride {
+            background-color: rgba(#55595d, 0.8);
+        }
+        &[data-icon] {
+            @include S(background-position-x, 8px);
+            background-position-y: center;
+            @include S(padding-left, 35px);
+            background-repeat: no-repeat;
+            @include S(background-size, 15px);
+        }
+        transform-origin: 100% 50%;
+        opacity: 0;
+        @include InlineAnimation(3s ease-in-out) {
+            0% {
+                opacity: 1;
+            }
+            87% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            95% {
+                transform: scale(1.05);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+        }
+    }
+    [data-icon="icons/notification_message.png"] {
+        /* @load-async */
+        background-image: url("**{icons_notification_message}**") !important;
+    }
+    [data-icon="icons/notification_error.png"] {
+        /* @load-async */
+        background-image: url("**{icons_notification_error}**") !important;
+    }
+}

@@ -78,9 +78,11 @@ const logger = createLogger("main");
     /* dev:end */
 
     logSection("Boot Process", "#f9a825");
-
+    let user = {
+        username: "Thomas (DJ1TJOO) " + Math.floor(Math.random() * 501),
+    };
     //Empty user
-    var modMgr = new ModManager({}, {
+    var modMgr = new ModManager(user, {
         mods: [{
                 url: "http://localhost:3010/mod",
                 id: "2b57757b-d053-4a2b-b2bb-c7b701374531",

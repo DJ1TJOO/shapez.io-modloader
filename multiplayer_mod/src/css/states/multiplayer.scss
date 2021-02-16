@@ -259,7 +259,7 @@
             @include S(width,
             300px);
         }
-        .playButton,
+        .playButton, // .backButton 
         .joinButton {
             @include SuperHeading;
             @include S(min-width,

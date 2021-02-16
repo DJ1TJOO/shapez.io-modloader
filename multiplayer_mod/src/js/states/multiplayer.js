@@ -1,4 +1,4 @@
-import { MultiplayerPacketTypes, FlagPacketFlags, MultiplayerPacket, TextPacket, TextPacketTypes } from "../multiplayer_packets";
+import { MultiplayerPacketTypes, FlagPacketFlags } from "../multiplayer/multiplayer_packets";
 import { MultiplayerConnection } from "./multiplayer_ingame";
 
 const cachebust = shapezAPI.exports.cachebust;
@@ -191,7 +191,7 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
 	renderMainMenu() {
 		const buttonContainer = this.htmlElement.querySelector(".mainContainer .buttons");
 		removeAllChildren(buttonContainer);
-
+		//TODO: redo hole multiplayer menu, add public and private rooms, create room
 		// Join game
 		const joinButton = makeButton(buttonContainer, ["joinButton", "styledButton"], shapezAPI.translations.multiplayer.join);
 		this.trackClicks(joinButton, this.onJoinButtonClicked);
@@ -540,8 +540,6 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
 
 					var onMessage = (data) => {
 						var packet = JSON.parse(data);
-						console.log("Message received");
-						console.log(packet);
 
 						//When data ends
 						if (packet.type === MultiplayerPacketTypes.FLAG && packet.flag === FlagPacketFlags.ENDDATA) {

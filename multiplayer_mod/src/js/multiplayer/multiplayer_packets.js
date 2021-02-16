@@ -24,7 +24,7 @@ const WiredPinsComponent = shapezAPI.exports.WiredPinsComponent;
 const WireTunnelComponent = shapezAPI.exports.WireTunnelComponent;
 const Entity = shapezAPI.exports.Entity;
 const EntityManager = shapezAPI.exports.EntityManager;
-const HubGoals = shapezAPI.exports.HubGoals;
+const HubGoals = shapezAPI.ingame.hub_goals;
 const BooleanItem = shapezAPI.exports.BooleanItem;
 const ColorItem = shapezAPI.exports.ColorItem;
 const ShapeItem = shapezAPI.exports.ShapeItem;
@@ -35,7 +35,6 @@ const ShapeDefinition = shapezAPI.exports.ShapeDefinition;
 const ShapeDefinitionManager = shapezAPI.exports.ShapeDefinitionManager;
 const BaseGameSpeed = shapezAPI.exports.BaseGameSpeed;
 const FastForwardGameSpeed = shapezAPI.exports.FastForwardGameSpeed;
-const GameTime = shapezAPI.exports.GameTime;
 const PausedGameSpeed = shapezAPI.exports.PausedGameSpeed;
 const RegularGameSpeed = shapezAPI.exports.RegularGameSpeed;
 const BasicSerializableObject = shapezAPI.exports.BasicSerializableObject;
@@ -44,7 +43,6 @@ const Vector = shapezAPI.exports.Vector;
 const getBuildingDataFromCode = shapezAPI.exports.getBuildingDataFromCode;
 const globalConfig = shapezAPI.exports.globalConfig;
 const createLogger = shapezAPI.exports.createLogger;
-const SerializerInternal = shapezAPI.exports.SerializerInternal;
 
 const Peer = require("simple-peer");
 /**
@@ -115,48 +113,47 @@ export class NumberSerializable extends BasicSerializableObject {
 }
 
 export const MultiplayerPacketSerializableObject = {
-    BaseGameSpeed: BaseGameSpeed,
-    BaseItem: BaseItem,
-    BaseMap: BaseMap,
-    BeltComponent: BeltComponent,
-    BeltPath: BeltPath,
-    BeltReaderComponent: BeltReaderComponent,
-    BeltUnderlaysComponent: BeltUnderlaysComponent,
-    BooleanItem: BooleanItem,
-    Camera: Camera,
-    ColorItem: ColorItem,
-    Component: Component,
-    ConstantSignalComponent: ConstantSignalComponent,
-    DisplayComponent: DisplayComponent,
-    Entity: Entity,
-    EntityManager: EntityManager,
-    FastForwardGameSpeed: FastForwardGameSpeed,
-    FilterComponent: FilterComponent,
-    GameTime: GameTime,
-    HubComponent: HubComponent,
-    HubGoals: HubGoals,
-    ItemAcceptorComponent: ItemAcceptorComponent,
-    ItemEjectorComponent: ItemEjectorComponent,
-    ItemProcessorComponent: ItemProcessorComponent,
-    ItemProducerComponent: ItemProducerComponent,
-    LeverComponent: LeverComponent,
-    LogicGateComponent: LogicGateComponent,
-    MapView: MapView,
-    MinerComponent: MinerComponent,
-    NumberSerializable: NumberSerializable,
-    PausedGameSpeed: PausedGameSpeed,
-    ProductionAnalytics: ProductionAnalytics,
-    RegularGameSpeed: RegularGameSpeed,
-    ShapeDefinition: ShapeDefinition,
-    ShapeDefinitionManager: ShapeDefinitionManager,
-    ShapeItem: ShapeItem,
-    StaticMapEntityComponent: StaticMapEntityComponent,
-    StorageComponent: StorageComponent,
-    StringSerializable: StringSerializable,
-    UndergroundBeltComponent: UndergroundBeltComponent,
-    WireComponent: WireComponent,
-    WiredPinsComponent: WiredPinsComponent,
-    WireTunnelComponent: WireTunnelComponent,
+    [BaseGameSpeed.name]: BaseGameSpeed,
+    [BaseItem.name]: BaseItem,
+    [BaseMap.name]: BaseMap,
+    [BeltComponent.name]: BeltComponent,
+    [BeltPath.name]: BeltPath,
+    [BeltReaderComponent.name]: BeltReaderComponent,
+    [BeltUnderlaysComponent.name]: BeltUnderlaysComponent,
+    [BooleanItem.name]: BooleanItem,
+    [Camera.name]: Camera,
+    [ColorItem.name]: ColorItem,
+    [Component.name]: Component,
+    [ConstantSignalComponent.name]: ConstantSignalComponent,
+    [DisplayComponent.name]: DisplayComponent,
+    [Entity.name]: Entity,
+    [EntityManager.name]: EntityManager,
+    [FastForwardGameSpeed.name]: FastForwardGameSpeed,
+    [FilterComponent.name]: FilterComponent,
+    [HubComponent.name]: HubComponent,
+    [HubGoals.name]: HubGoals,
+    [ItemAcceptorComponent.name]: ItemAcceptorComponent,
+    [ItemEjectorComponent.name]: ItemEjectorComponent,
+    [ItemProcessorComponent.name]: ItemProcessorComponent,
+    [ItemProducerComponent.name]: ItemProducerComponent,
+    [LeverComponent.name]: LeverComponent,
+    [LogicGateComponent.name]: LogicGateComponent,
+    [MapView.name]: MapView,
+    [MinerComponent.name]: MinerComponent,
+    [NumberSerializable.name]: NumberSerializable,
+    [PausedGameSpeed.name]: PausedGameSpeed,
+    [ProductionAnalytics.name]: ProductionAnalytics,
+    [RegularGameSpeed.name]: RegularGameSpeed,
+    [ShapeDefinition.name]: ShapeDefinition,
+    [ShapeDefinitionManager.name]: ShapeDefinitionManager,
+    [ShapeItem.name]: ShapeItem,
+    [StaticMapEntityComponent.name]: StaticMapEntityComponent,
+    [StorageComponent.name]: StorageComponent,
+    [StringSerializable.name]: StringSerializable,
+    [UndergroundBeltComponent.name]: UndergroundBeltComponent,
+    [WireComponent.name]: WireComponent,
+    [WiredPinsComponent.name]: WiredPinsComponent,
+    [WireTunnelComponent.name]: WireTunnelComponent,
 };
 
 const logger = createLogger("multiplayer_serializer_internal");
@@ -247,6 +244,7 @@ export class MultiplayerPacket {
      * @param {Array} packet
      */
     static sendPacket(peer, packet, connections = undefined) {
+        if (!peer.connected) return;
         try {
             peer.send(JSON.stringify(packet));
         } catch (error) {
@@ -375,8 +373,11 @@ export class SignalPacket extends MultiplayerPacket {
 }
 
 export const TextPacketTypes = {
-    JOINED_USER: 0,
-    MESSAGE: 1,
+    USER_JOINED: 0,
+    USER_DISCONNECTED: 1,
+    USER_UPDATE: 2,
+    HOST_USER: 3,
+    MESSAGE: 4,
 };
 
 export class TextPacket extends MultiplayerPacket {
