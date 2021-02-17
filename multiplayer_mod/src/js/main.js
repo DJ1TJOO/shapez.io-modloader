@@ -8,7 +8,7 @@ registerMod({
     id: modId,
     description: "A mod that adds multiplayer to shapez.io",
     authors: ["DJ1TJOO"],
-    version: "0.0.2",
+    version: "0.0.3",
     gameVersion: "ML01",
     dependencies: [],
     incompatible: [],
