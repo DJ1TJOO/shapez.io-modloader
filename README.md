@@ -1,5 +1,7 @@
 # Setup modloader
 
+-   ./setup_modloader
+    or
 -   cd ./modloader
 -   yarn
 -   cd gulp
@@ -7,24 +9,31 @@
 
 # Setup mod
 
--   cd empty_mod
+-   ./setup_mod
+    or
+-   cd mod
 -   yarn
--   add atlas folder to the empty_mod
--   add themes folder to the empty_mod
--   add icons folder to the empty_mod
+-   add atlas folder to the mod
+-   add themes folder to the mod
+-   add icons folder to the mod
 
-rename empty_mod folder to your mods name
-in ./empty_mod/src/js/main.js add uuid and change other info,
-in ./modloader/src/js/main.js uncomment the empty_mod and change the uuid
+optional: rename mod folder to your mods name, then also change the mod.bat
+
+in ./mod/src/js/main.js add uuid and change other info,
+in ./modloader/src/js/main.js change the uuid
 
 # Run mod
 
-## Terminal 1:
+### Terminal 1:
 
--   cd ./empty_mod
+-   ./modloader
+    or
+-   cd ./modloader/gulp
 -   gulp
 
-## Terminal 2:
+### Terminal 2:
 
--   cd ./modloader/gulp
+-   ./mod
+    or
+-   cd ./mod
 -   gulp

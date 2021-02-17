@@ -1,0 +1,2 @@
+cd ./modloader/gulp
+gulp
