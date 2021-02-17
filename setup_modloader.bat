@@ -1,4 +1,4 @@
 cd ./modloader
-yarn
+call yarn
 cd gulp
-yarn
+call yarn
