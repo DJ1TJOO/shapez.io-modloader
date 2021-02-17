@@ -1,7 +1,7 @@
 # Setup modloader
 
 -   ./setup_modloader
-    or
+or
 -   cd ./modloader
 -   yarn
 -   cd gulp
@@ -10,7 +10,7 @@
 # Setup mod
 
 -   ./setup_mod
-    or
+or
 -   cd mod
 -   yarn
 -   add atlas folder to the mod
@@ -27,13 +27,13 @@ in ./modloader/src/js/main.js change the uuid
 ### Terminal 1:
 
 -   ./modloader
-    or
+or
 -   cd ./modloader/gulp
 -   gulp
 
 ### Terminal 2:
 
 -   ./mod
-    or
+or
 -   cd ./mod
 -   gulp
