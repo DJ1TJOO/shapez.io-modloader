@@ -137,8 +137,7 @@ export class MultiplayerHUDNotifications extends shapezAPI.exports.BaseHUDPart {
         const now = this.root.time.realtimeNow();
         for (let i = 0; i < this.visibleNotificationElements.length; ++i) {
             const handle = this.notificationElements[this.visibleNotificationElements[i]];
-            if (handle.expireAt <= now && (!handle.element.style.visibility || handle.element.style.visibility !== "hidden")) {
-                handle.element.style.visibility = "hidden";
+            if (handle.expireAt <= now) {
                 this.visibleNotificationElements.splice(i, 1);
             }
         }

@@ -1,3 +1,4 @@
+import { modId } from "../modid";
 import { MultiplayerPacket, TextPacket, TextPacketTypes } from "./multiplayer_packets";
 
 const globalConfig = shapezAPI.exports.globalConfig;
@@ -38,7 +39,7 @@ export class MultiplayerHUD {
     }
 
     draw(parameters) {
-        if (!this.ingameState || !this.ingameState.peer || !this.ingameState.peer.users) return;
+        if (!this.ingameState || !this.ingameState.peer || !this.ingameState.peer.users || !shapezAPI.mods.get(modId).settings.showOtherPlayers.value) return;
         for (let i = 0; i < this.ingameState.peer.users.length; i++) {
             const user = this.ingameState.peer.users[i];
             if (typeof user.currentMetaBuilding === "undefined" || typeof user.currentVariant === "undefined" || typeof user.currentBaseRotation === "undefined" || typeof user.mouseTile === "undefined" || typeof user.worldPos === "undefined") continue;

@@ -410,6 +410,28 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
                     this.peer.connections[i].peer.destroy();
                 }
             }
+
+            //Add buttons back
+            shapezAPI.exports.HUDSettingsMenu.buttons.splice(shapezAPI.exports.HUDSettingsMenu.buttons.findIndex((x) => x.id === "continue") + 1, 0, {
+                id: "settings",
+                action: (hudSettingsMenu) => () => hudSettingsMenu.goToSettings(),
+                options: {
+                    preventDefault: false,
+                },
+            });
+
+            if (this.modlist)
+                shapezAPI.exports.HUDSettingsMenu.buttons.splice(shapezAPI.exports.HUDSettingsMenu.buttons.findIndex((x) => x.id === "settings") + 1, 0, {
+                    id: "mods",
+                    action: (hudSettingsMenu) => () =>
+                        hudSettingsMenu.root.gameState.saveThenGoToState("ModsState", {
+                            backToStateId: hudSettingsMenu.root.gameState.key,
+                            backToStatePayload: hudSettingsMenu.root.gameState.creationPayload,
+                        }),
+                    options: {
+                        preventDefault: false,
+                    },
+                });
         }
     }
 
@@ -452,6 +474,14 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
         document.body.querySelector(".modalDialogParent").remove();
 
         this.asyncChannel.watch(waitNextFrame()).then(() => this.stage3CreateCore());
+
+        let buttonIds = ["settings"];
+        this.modlist = false;
+        if (shapezAPI.exports.HUDSettingsMenu.buttons.find((x) => x.id === "mods")) {
+            buttonIds.push("mods");
+            this.modlist = true;
+        }
+        shapezAPI.exports.HUDSettingsMenu.buttons = shapezAPI.exports.HUDSettingsMenu.buttons.filter((x) => !buttonIds.includes(x.id));
     }
 
     /**

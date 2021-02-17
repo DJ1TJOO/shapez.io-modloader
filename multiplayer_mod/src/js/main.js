@@ -1,8 +1,8 @@
+import { modId } from "./modid";
 import { MultiplayerCommandsHandler } from "./multiplayer/multiplayer_commands";
 import { addMultiplayerButton, MultiplayerState } from "./states/multiplayer";
 import { InMultiplayerGameState } from "./states/multiplayer_ingame";
 
-const modId = "2b57757b-d053-4a2b-b2bb-c7b701374531";
 registerMod({
     title: "Multiplayer",
     id: modId,
@@ -12,11 +12,28 @@ registerMod({
     gameVersion: "ML01",
     dependencies: [],
     incompatible: [],
-    settings: {},
+    settings: {
+        showOtherPlayers: {
+            type: "bool",
+            value: true,
+            title: "Show other players",
+            description: "Show other players in multiplayer game",
+            enabled: () => true,
+        },
+    },
     translations: {
+        //TODO: add missing translations
         en: {
             [modId]: {
                 description: "A mod that adds multiplayer to shapez.io",
+            },
+            settings: {
+                labels: {
+                    showOtherPlayers: {
+                        title: "Show other players",
+                        description: "Show other players in multiplayer game",
+                    },
+                },
             },
             multiplayer: {
                 back: "Back",
@@ -104,5 +121,17 @@ registerMod({
         };
         addMultiplayerButton(modId);
         shapezAPI.exports.MultiplayerCommandsHandler = MultiplayerCommandsHandler;
+        shapezAPI.exports.HUDSettingsMenu.prototype.shouldPauseGame = function() {
+            if (this.root.gameState.peer) return false;
+            else return this.visible;
+        };
+        shapezAPI.exports.HUDSettingsMenu.prototype.shouldPauseRendering = function() {
+            if (this.root.gameState.peer) return false;
+            else return this.visible;
+        };
+        shapezAPI.exports.HUDModalDialogs.prototype.shouldPauseRendering = function() {
+            if (this.root.gameState.peer) return false;
+            else return this.dialogStack.length > 0;
+        };
     },
 });

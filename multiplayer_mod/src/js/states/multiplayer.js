@@ -191,7 +191,6 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
 	renderMainMenu() {
 		const buttonContainer = this.htmlElement.querySelector(".mainContainer .buttons");
 		removeAllChildren(buttonContainer);
-		//TODO: redo hole multiplayer menu, add public and private rooms, create room
 		// Join game
 		const joinButton = makeButton(buttonContainer, ["joinButton", "styledButton"], shapezAPI.translations.multiplayer.join);
 		this.trackClicks(joinButton, this.onJoinButtonClicked);
