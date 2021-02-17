@@ -2,7 +2,7 @@ import { JFL17GameMode } from "./modes/JFL17";
 
 const modId = "b89404ac-7cbc-45bf-81b7-7d4d8108faf0";
 registerMod({
-    title: "JFL17 Classic",
+    title: "JFL17",
     id: modId,
     description: "The shape and mod you never asked for but always wanted. Hard facts",
     authors: ["DJ1TJOO", "SargeanTravis"],
