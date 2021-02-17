@@ -83,7 +83,7 @@ const logger = createLogger("main");
     var modMgr = new ModManager({}, {
         mods: [{
             url: "http://localhost:3010/mod",
-            id: "**PUT ID**",
+            id: "b89404ac-7cbc-45bf-81b7-7d4d8108faf0",
             config: {},
             settings: {},
         }, ],
