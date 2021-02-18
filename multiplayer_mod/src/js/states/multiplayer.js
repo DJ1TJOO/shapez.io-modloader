@@ -21,6 +21,7 @@ const EnumSetting = shapezAPI.exports.EnumSetting;
 const FormElementInput = shapezAPI.exports.FormElementInput;
 const SavegameMetadata = shapezAPI.exports.SavegameMetadata;
 const DialogWithForm = shapezAPI.exports.DialogWithForm;
+const Dialog = shapezAPI.exports.Dialog;
 
 const globalConfig = shapezAPI.exports.globalConfig;
 const trim = require("trim");
@@ -537,8 +538,16 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
 					var gameDataState = -1;
 					var gameData = "";
 
-					var cancel = (title, description) => {
+					var canceled = (title, description) => {
 						pc.destroy();
+						//Show uuid of room
+						let dialog = new Dialog({
+							app: this.app,
+							title: title,
+							contentHTML: description,
+							buttons: ["ok:good"],
+						});
+						this.dialogs.internalShowDialog(dialog);
 					};
 
 					var onMessage = (data) => {
@@ -552,11 +561,11 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
 
 							for (let i = 0; i < shapezAPI.modOrder.length; i++) {
 								const modId = shapezAPI.modOrder[i];
-								if (!gameDataJson.mods.includes(modId)) return cancel(shapezAPI.translations.multiplayer.notSameMods.title, shapezAPI.translations.multiplayer.notSameMods.desc);
+								if (!gameDataJson.mods.includes(modId)) return canceled(shapezAPI.translations.multiplayer.notSameMods.title, shapezAPI.translations.multiplayer.notSameMods.desc);
 							}
 							for (let i = 0; i < gameDataJson.mods.length; i++) {
 								const modId = gameDataJson.mods[i];
-								if (!shapezAPI.modOrder.includes(modId)) return cancel(shapezAPI.translations.multiplayer.notSameMods.title, shapezAPI.translations.multiplayer.notSameMods.desc);
+								if (!shapezAPI.modOrder.includes(modId)) return canceled(shapezAPI.translations.multiplayer.notSameMods.title, shapezAPI.translations.multiplayer.notSameMods.desc);
 							}
 
 							var connection = new MultiplayerConnection(pc, gameDataJson);
