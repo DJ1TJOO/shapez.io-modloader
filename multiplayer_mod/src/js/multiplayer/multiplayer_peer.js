@@ -1,5 +1,5 @@
 import { MultiplayerBuilder } from "./multiplayer_builder";
-import { enumNotificationType } from "./multiplayer_notifications";
+import { enumNotificationType } from "./multiplayer_notification_types";
 import { MultiplayerPacket, TextPacket, TextPacketTypes, SignalPacket, SignalPacketSignals, StringSerializable, DataPacket, FlagPacket, FlagPacketFlags, MultiplayerPacketTypes } from "./multiplayer_packets";
 
 const { v4: uuidv4 } = require("uuid");
@@ -128,7 +128,7 @@ export class MultiplayerPeer {
                     if (this.connections[i].peerId === peerId) continue;
                     MultiplayerPacket.sendPacket(this.connections[i].peer, new TextPacket(TextPacketTypes.USER_DISCONNECTED, JSON.stringify(connection.user)), this.connections);
                 }
-                this.ingameState.core.root.hud.parts.notifications.onNotification(connection.user.username + " has disconnected.", enumNotificationType.success);
+                this.ingameState.core.root.hud.parts.notifications.onNotification(shapezAPI.translations.multiplayer.user.disconnected.replaceAll("<username>", connection.user.username), enumNotificationType.success);
                 this.users.splice(this.users.indexOf(connection.user), 1);
             }
             this.connections.splice(this.connections.indexOf(connection), 1);
@@ -291,10 +291,10 @@ export class MultiplayerPeer {
                     //Add user
                     this.users.push(user);
                     if (this.host) this.connections.find((x) => x.peerId === peerId).user = user;
-                    this.ingameState.core.root.hud.parts.notifications.onNotification(user.username + " has joined the game.", enumNotificationType.success);
+                    this.ingameState.core.root.hud.parts.notifications.onNotification(shapezAPI.translations.multiplayer.user.joined.replaceAll("<username>", user.username), enumNotificationType.success);
                 } else if (packet.textType === TextPacketTypes.USER_DISCONNECTED) {
                     let user = JSON.parse(packet.text);
-                    this.ingameState.core.root.hud.parts.notifications.onNotification(user.username + " has disconnected.", enumNotificationType.success);
+                    this.ingameState.core.root.hud.parts.notifications.onNotification(shapezAPI.translations.multiplayer.user.disconnected.replaceAll("<username>", user.username), enumNotificationType.success);
                     this.users.splice(this.users.indexOf(user), 1);
                 } else if (packet.textType === TextPacketTypes.HOST_USER) {
                     let user = JSON.parse(packet.text);

@@ -1,19 +1,11 @@
 import { MultiplayerCommandsHandler } from "./multiplayer_commands";
+import { enumNotificationType } from "./multiplayer_notification_types";
 import { MultiplayerPacket, TextPacket, TextPacketTypes } from "./multiplayer_packets";
 
 const T = shapezAPI.translations;
 const makeDiv = shapezAPI.exports.makeDiv;
 const InputReceiver = shapezAPI.exports.InputReceiver;
 const KeyActionMapper = shapezAPI.exports.KeyActionMapper;
-
-/** @enum {string} */
-export const enumNotificationType = {
-    saved: "saved",
-    upgrade: "upgrade",
-    success: "success",
-    message: "message",
-    error: "error",
-};
 
 export function makeDivElement(id = null, classes = [], innerHTML = "") {
     const div = document.createElement("div");
@@ -102,8 +94,8 @@ export class MultiplayerHUDNotifications extends shapezAPI.exports.BaseHUDPart {
         if (this.commandHandler.isCommandString(value)) {
             let command = this.commandHandler.getCommandFromCommandString(value);
             if (command && this.commandHandler.isCommand(command.cmd)) {
-                if (!this.commandHandler.executeCommand(command.cmd, command.args)) this.onNotification(`There was an error while executing the '${command.cmd}' command`, enumNotificationType.error);
-            } else this.onNotification(`Command '${command.cmd}' doesn't exist`, enumNotificationType.error);
+                if (!this.commandHandler.executeCommand(command.cmd, command.args)) this.onNotification(shapezAPI.translations.multiplayer.commands.error.replaceAll("<cmd>", command.cmd), enumNotificationType.error);
+            } else this.onNotification(shapezAPI.translations.multiplayer.commands.doesNotExist.replaceAll("<cmd>", command.cmd), enumNotificationType.error);
         } else {
             let message = this.root.gameState.peer.user.username + ": " + value;
             if (this.root.gameState.peer.host) {

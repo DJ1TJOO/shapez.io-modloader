@@ -1,3 +1,8 @@
+String.prototype.replaceAll = function(search, replacement) {
+    var target = this;
+    return target.split(search).join(replacement);
+};
+
 import { modId } from "./modid";
 import { MultiplayerCommandsHandler } from "./multiplayer/multiplayer_commands";
 import { addMultiplayerButton, MultiplayerState } from "./states/multiplayer";
@@ -8,7 +13,7 @@ registerMod({
     id: modId,
     description: "A mod that adds multiplayer to shapez.io",
     authors: ["DJ1TJOO"],
-    version: "0.0.3",
+    version: "0.0.4",
     gameVersion: "ML01",
     dependencies: [],
     incompatible: [],
@@ -22,7 +27,6 @@ registerMod({
         },
     },
     translations: {
-        //TODO: add missing translations
         en: {
             [modId]: {
                 description: "A mod that adds multiplayer to shapez.io",
@@ -52,9 +56,63 @@ registerMod({
                 },
                 multiplayerGameError: {
                     title: "Game not found",
-                    desc: "The multiplayer game you wanted to join is not found or does not exsist.",
+                    desc: "The multiplayer game you wanted to join is not found or does not exist.",
                 },
+                user: {
+                    disconnected: "<username> has disconnected",
+                    joined: "<username> has joined the game",
+                },
+
                 shareCode: "Share the code with your friends",
+                hostOnly: "Only the host can get the game code",
+                commands: {
+                    error: "There was an error while executing the '<cmd>' command",
+                    doesNotExist: "The command '<cmd>' doesn't exist",
+                },
+            },
+        },
+        nl: {
+            [modId]: {
+                description: "Een mod die multiplayer toevoegt aan shapez.io",
+            },
+            settings: {
+                labels: {
+                    showOtherPlayers: {
+                        title: "Laat andere spelers zien",
+                        description: "Laat andere spelers zien in een multiplayer spel",
+                    },
+                },
+            },
+            multiplayer: {
+                back: "Terug",
+                join: "Meedoen",
+                createMultiplayerGameHost: {
+                    title: "Multiplayer Spel",
+                    desc: "Voer een multiplayer spel server in.",
+                },
+                joinMultiplayerGame: {
+                    title: "Multiplayer Spel",
+                    desc: "Voer de multiplayer spelcode in die je van de host hebt gekregen",
+                },
+                joinMultiplayerGameHost: {
+                    title: "Multiplayer Spel",
+                    desc: "Voer een multiplayer spel server in die je hebt gekregen van de host.",
+                },
+                multiplayerGameError: {
+                    title: "Spel niet gevonden",
+                    desc: "Het multiplayer spel waaraan je wilde deelnemen, is niet gevonden of bestaat niet.",
+                },
+                user: {
+                    disconnected: "<username> heeft het spel verlaten",
+                    joined: "<username> heeft zich aangesloten",
+                },
+
+                shareCode: "Deel de code met je vrienden",
+                hostOnly: "Alleen de host kan de spel code krijgen",
+                commands: {
+                    error: "Er is een fout opgetreden bij het uitvoeren van de '<cmd>' command",
+                    doesNotExist: "Het command '<cmd>' bestaat niet",
+                },
             },
         },
     },

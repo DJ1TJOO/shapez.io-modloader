@@ -1,4 +1,4 @@
-import { enumNotificationType } from "./multiplayer_notifications";
+import { enumNotificationType } from "./multiplayer_notification_types";
 
 const Dialog = shapezAPI.exports.Dialog;
 
@@ -49,7 +49,7 @@ MultiplayerCommandsHandler.commands = {
             });
             root.hud.parts.dialogs.internalShowDialog(dialog);
         } else {
-            root.hud.parts.notifications.onNotification(`Only the host can get the gamecode`, enumNotificationType.error);
+            root.hud.parts.notifications.onNotification(shapezAPI.translations.multiplayer.hostOnly, enumNotificationType.error);
         }
         return true;
     },
