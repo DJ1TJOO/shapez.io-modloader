@@ -1,3 +1,5 @@
+import { enumNotificationType } from "./multiplayer_notifications";
+
 const Dialog = shapezAPI.exports.Dialog;
 
 export class MultiplayerCommandsHandler {
@@ -35,16 +37,20 @@ export class MultiplayerCommandsHandler {
 
 MultiplayerCommandsHandler.commands = {
     gamecode: (root, user, multiplayerPeer, cmd, args) => {
-        //Show uuid of room
-        let dialog = new Dialog({
-            app: multiplayerPeer.ingameState.app,
-            title: shapezAPI.translations.multiplayer.shareCode,
-            contentHTML: `
+        if (multiplayerPeer.host) {
+            //Show uuid of room
+            let dialog = new Dialog({
+                app: multiplayerPeer.ingameState.app,
+                title: shapezAPI.translations.multiplayer.shareCode,
+                contentHTML: `
             <a id="share-connection-${multiplayerPeer.connectionId}" onclick="function fallbackCopyTextToClipboard(o){var e=document.createElement('textarea');e.value=o,e.style.top='0',e.style.left='0',e.style.position='fixed',document.body.appendChild(e),e.focus(),e.select();try{document.execCommand('copy')}catch(o){console.error('Fallback: Oops, unable to copy',o)}document.body.removeChild(e)}event.preventDefault();let copyTextToClipboard=o=>{navigator.clipboard?navigator.clipboard.writeText(o).then(function(){},function(o){console.error('Async: Could not copy text: ',o)}):fallbackCopyTextToClipboard(o)};copyTextToClipboard('${multiplayerPeer.connectionId}');">${multiplayerPeer.connectionId}</a>
                   `,
-            buttons: ["ok:good"],
-        });
-        multiplayerPeer.ingameState.core.root.hud.parts.dialogs.internalShowDialog(dialog);
+                buttons: ["ok:good"],
+            });
+            root.hud.parts.dialogs.internalShowDialog(dialog);
+        } else {
+            root.hud.parts.notifications.onNotification(`Only the host can get the gamecode`, enumNotificationType.error);
+        }
         return true;
     },
 };
