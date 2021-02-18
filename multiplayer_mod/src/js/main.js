@@ -58,6 +58,10 @@ registerMod({
                     title: "Game not found",
                     desc: "The multiplayer game you wanted to join is not found or does not exist.",
                 },
+                notSameMods: {
+                    title: "Not same mods installed",
+                    desc: "You don't have the same mods installed as the owner",
+                },
                 user: {
                     disconnected: "<username> has disconnected",
                     joined: "<username> has joined the game",

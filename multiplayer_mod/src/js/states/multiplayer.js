@@ -537,15 +537,29 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
 					var gameDataState = -1;
 					var gameData = "";
 
+					var cancel = (title, description) => {
+						pc.destroy();
+					};
+
 					var onMessage = (data) => {
 						var packet = JSON.parse(data);
 
 						//When data ends
 						if (packet.type === MultiplayerPacketTypes.FLAG && packet.flag === FlagPacketFlags.ENDDATA) {
 							gameDataState = 1;
-							console.log(gameData);
-							gameData = JSON.parse(gameData);
-							var connection = new MultiplayerConnection(pc, gameData);
+							let gameDataJson = JSON.parse(gameData);
+							console.log(gameDataJson);
+
+							for (let i = 0; i < shapezAPI.modOrder.length; i++) {
+								const modId = shapezAPI.modOrder[i];
+								if (!gameDataJson.mods.includes(modId)) return cancel(shapezAPI.translations.multiplayer.notSameMods.title, shapezAPI.translations.multiplayer.notSameMods.desc);
+							}
+							for (let i = 0; i < gameDataJson.mods.length; i++) {
+								const modId = gameDataJson.mods[i];
+								if (!shapezAPI.modOrder.includes(modId)) return cancel(shapezAPI.translations.multiplayer.notSameMods.title, shapezAPI.translations.multiplayer.notSameMods.desc);
+							}
+
+							var connection = new MultiplayerConnection(pc, gameDataJson);
 							this.moveToState("InMultiplayerGameState", {
 								connection,
 								connectionId,

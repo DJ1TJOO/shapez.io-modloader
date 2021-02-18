@@ -205,6 +205,7 @@ export class MultiplayerPeer {
                 await this.ingameState.doSave();
 
                 var dataPackets = DataPacket.createFromData({
+                        mods: shapezAPI.modOrder,
                         version: this.ingameState.savegame.getCurrentVersion(),
                         dump: this.ingameState.savegame.getCurrentDump(),
                         stats: this.ingameState.savegame.getStatistics(),

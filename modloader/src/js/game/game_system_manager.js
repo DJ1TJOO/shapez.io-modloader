@@ -38,8 +38,6 @@ export function addVanillaSystemsToAPI() {
 
         ItemAcceptorSystem,
 
-        MapResourcesSystem,
-
         BeltSystem,
 
         UndergroundBeltSystem,
@@ -55,6 +53,8 @@ export function addVanillaSystemsToAPI() {
         ItemProducerSystem,
 
         ItemEjectorSystem,
+
+        MapResourcesSystem,
 
         HubSystem,
 
@@ -81,6 +81,21 @@ export function addVanillaSystemsToAPI() {
 
         ItemProcessorOverlaysSystem,
     ];
+
+    shapezAPI.ingame["systemsRenderOrderBackground"] = [MapResourcesSystem, BeltUnderlaysSystem, BeltSystem];
+
+    shapezAPI.ingame["systemsRenderOrderDynamic"] = [ItemEjectorSystem, ItemAcceptorSystem, MinerSystem];
+
+    shapezAPI.ingame["systemsRenderOrderStatic"] = [
+        StaticMapEntitySystem,
+        LeverSystem,
+        DisplaySystem,
+        StorageSystem,
+        ItemProcessorOverlaysSystem,
+    ];
+    shapezAPI.ingame["systemsRenderOrderForeground"] = [StaticMapEntitySystem];
+
+    shapezAPI.ingame["systemsRenderOrderWires"] = [WireSystem, StaticMapEntitySystem, WiredPinsSystem];
 }
 
 export class GameSystemManager {
@@ -94,6 +109,12 @@ export class GameSystemManager {
 
         this.systemUpdateOrder = [];
 
+        this.renderOrderForeground = [];
+        this.renderOrderBackground = [];
+        this.renderOrderDynamic = [];
+        this.renderOrderStatic = [];
+        this.renderOrderWires = [];
+
         this.internalInitSystems();
     }
 
@@ -106,6 +127,22 @@ export class GameSystemManager {
             const system = systems[i];
             this.systems[system.getId()] = new system(this.root);
             this.systemUpdateOrder.push(system.getId());
+        }
+
+        for (let i = 0; i < shapezAPI.ingame["systemsRenderOrderForeground"].length; i++) {
+            this.renderOrderForeground.push(shapezAPI.ingame["systemsRenderOrderForeground"][i].getId());
+        }
+        for (let i = 0; i < shapezAPI.ingame["systemsRenderOrderBackground"].length; i++) {
+            this.renderOrderBackground.push(shapezAPI.ingame["systemsRenderOrderBackground"][i].getId());
+        }
+        for (let i = 0; i < shapezAPI.ingame["systemsRenderOrderDynamic"].length; i++) {
+            this.renderOrderDynamic.push(shapezAPI.ingame["systemsRenderOrderDynamic"][i].getId());
+        }
+        for (let i = 0; i < shapezAPI.ingame["systemsRenderOrderStatic"].length; i++) {
+            this.renderOrderStatic.push(shapezAPI.ingame["systemsRenderOrderStatic"][i].getId());
+        }
+        for (let i = 0; i < shapezAPI.ingame["systemsRenderOrderWires"].length; i++) {
+            this.renderOrderWires.push(shapezAPI.ingame["systemsRenderOrderWires"][i].getId());
         }
 
         logger.log("📦 There are", this.systemUpdateOrder.length, "game systems");
