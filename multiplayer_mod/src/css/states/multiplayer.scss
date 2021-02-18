@@ -456,6 +456,20 @@
         @include S(grid-gap,
         4px);
     }
+    .gameLoadingOverlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        pointer-events: all;
+        display: flex;
+        background: $mainBgColor;
+        flex-direction: column;
+    }
     @include DarkThemeOverride {
         background: $darkModeGameBackground center center / cover !important;
         .mainContainer {
@@ -464,6 +478,9 @@
                 background: darken($darkModeControlsBackground, 5);
                 color: white;
             }
+        }
+        .gameLoadingOverlay {
+            background: $darkModeGameBackground;
         }
         .footer {
             >a,

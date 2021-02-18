@@ -540,6 +540,7 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
 
 					var canceled = (title, description) => {
 						pc.destroy();
+						this.loadingOverlay.removeIfAttached();
 						//Show uuid of room
 						let dialog = new Dialog({
 							app: this.app,
