@@ -18,6 +18,7 @@
  *   dump: SerializedGame,
  *   stats: SavegameStats,
  *   lastUpdate: number,
+ *   gamemode: string|null,
  * }} SavegameData
  *
  * @typedef {{

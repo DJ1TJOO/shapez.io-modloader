@@ -978,10 +978,10 @@ export class ShapezAPI {
             head.appendChild(style);
         }
         css = `
-               [data-icon="${id}.png"] {
-                   background-image: url(${iconDataURL}) !important;
-               }
-           `;
+            [data-icon="${id}.png"] {
+                background-image: url(${iconDataURL}) !important;
+            }
+        `;
         style.appendChild(document.createTextNode(css));
     }
 
