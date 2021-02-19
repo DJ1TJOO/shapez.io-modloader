@@ -13,6 +13,7 @@ import { SavegameInterface_V1005 } from "./schemas/1005";
 import { SavegameInterface_V1006 } from "./schemas/1006";
 import { SavegameInterface_V1007 } from "./schemas/1007";
 import { SavegameInterface_ML01 } from "./schemas/ML01";
+import { RegularGameMode } from "../game/modes/regular";
 
 const logger = createLogger("savegame");
 
@@ -24,14 +25,14 @@ export class Savegame extends ReadWriteProxy {
      * @param {string} param0.internalId
      * @param {import("./savegame_typedefs").SavegameMetadata} param0.metaDataRef Handle to the meta data
      */
-    constructor(app, { internalId, metaDataRef }) {
+    constructor(app, { internalId, metaDataRef }, gamemode = null) {
         super(app, "savegame-" + internalId + ".bin");
         this.internalId = internalId;
         this.metaDataRef = metaDataRef;
 
         /** @type {import("./savegame_typedefs").SavegameData} */
         this.currentData = this.getDefaultData();
-
+        if (gamemode) this.currentData.gamemode = gamemode;
         assert(
             savegameInterfaces[Savegame.getCurrentVersion()],
             "Savegame interface not defined: " + Savegame.getCurrentVersion()
@@ -71,6 +72,7 @@ export class Savegame extends ReadWriteProxy {
             dump: null,
             stats: {},
             lastUpdate: Date.now(),
+            gamemode: RegularGameMode.getId(),
         };
     }
 
@@ -232,6 +234,8 @@ export class Savegame extends ReadWriteProxy {
         shadowData.dump = dump;
         shadowData.lastUpdate = new Date().getTime();
         shadowData.version = this.getCurrentVersion();
+        // @ts-ignore
+        shadowData.gamemode = root.gameMode.constructor.getId();
 
         const reader = this.getDumpReaderForExternalData(shadowData);
 

@@ -420,6 +420,7 @@ import { SerializerInternal } from "../savegame/serializer_internal";
 export class ShapezAPI {
     constructor(user) {
         this.user = user;
+
         this.exports = {
             //Core
             AtlasDefinition,
@@ -927,8 +928,7 @@ export class ShapezAPI {
         sourceImage.crossOrigin = "anonymous";
         sourceImage.onload = () => {
             // @ts-ignore
-            Loader.internalParseAtlas(
-                {
+            Loader.internalParseAtlas({
                     meta: atlasData.atlasData.meta,
                     sourceData: atlasData.atlasData.frames,
                 },
@@ -978,10 +978,10 @@ export class ShapezAPI {
             head.appendChild(style);
         }
         css = `
-                  [data-icon="${id}.png"] {
-                      background-image: url(${iconDataURL}) !important;
-                  }
-              `;
+            [data-icon="${id}.png"] {
+                background-image: url(${iconDataURL}) !important;
+            }
+        `;
         style.appendChild(document.createTextNode(css));
     }
 
