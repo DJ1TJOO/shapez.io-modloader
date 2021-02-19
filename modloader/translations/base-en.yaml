@@ -963,6 +963,9 @@ settings:
             description: >-
                 Change the language. All translations are user-contributed and might be incomplete!
 
+        gamemodes:
+            title: Gamemodes
+
         enableColorBlindHelper:
             title: Color Blind Mode
             description: >-
