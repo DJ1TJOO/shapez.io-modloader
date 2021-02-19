@@ -371,69 +371,16 @@ export class ShapeDefinition extends BasicSerializableObject {
 
                 const insetPadding = 0.0;
 
-                switch (subShape) {
-                    case enumSubShape.rect:
-                        {
-                            context.beginPath();
-                            const dims = quadrantSize * layerScale;
-                            context.rect(
-                                insetPadding + -quadrantHalfSize, -insetPadding + quadrantHalfSize - dims,
-                                dims,
-                                dims
-                            );
-
-                            break;
-                        }
-                    case enumSubShape.star:
-                        {
-                            context.beginPath();
-                            const dims = quadrantSize * layerScale;
-
-                            let originX = insetPadding - quadrantHalfSize;
-                            let originY = -insetPadding + quadrantHalfSize - dims;
-
-                            const moveInwards = dims * 0.4;
-                            context.moveTo(originX, originY + moveInwards);
-                            context.lineTo(originX + dims, originY);
-                            context.lineTo(originX + dims - moveInwards, originY + dims);
-                            context.lineTo(originX, originY + dims);
-                            context.closePath();
-                            break;
-                        }
-
-                    case enumSubShape.windmill:
-                        {
-                            context.beginPath();
-                            const dims = quadrantSize * layerScale;
-
-                            let originX = insetPadding - quadrantHalfSize;
-                            let originY = -insetPadding + quadrantHalfSize - dims;
-                            const moveInwards = dims * 0.4;
-                            context.moveTo(originX, originY + moveInwards);
-                            context.lineTo(originX + dims, originY);
-                            context.lineTo(originX + dims, originY + dims);
-                            context.lineTo(originX, originY + dims);
-                            context.closePath();
-                            break;
-                        }
-
-                    case enumSubShape.circle:
-                        {
-                            context.beginPath();
-                            context.moveTo(insetPadding + -quadrantHalfSize, -insetPadding + quadrantHalfSize);
-                            context.arc(
-                                insetPadding + -quadrantHalfSize, -insetPadding + quadrantHalfSize,
-                                quadrantSize * layerScale, -Math.PI * 0.5,
-                                0
-                            );
-                            context.closePath();
-                            break;
-                        }
-
-                    default:
-                        {
-                            assertAlways(false, "Unkown sub shape: " + subShape);
-                        }
+                if (typeof ShapeDefinition.renderQuad[subShape] === "function") {
+                    ShapeDefinition.renderQuad[subShape](
+                        context,
+                        quadrantSize,
+                        quadrantHalfSize,
+                        layerScale,
+                        insetPadding
+                    );
+                } else {
+                    assertAlways(false, "Unkown sub shape: " + subShape);
                 }
 
                 context.fill();
@@ -622,3 +569,48 @@ export class ShapeDefinition extends BasicSerializableObject {
         return new ShapeDefinition({ layers: newLayers });
     }
 }
+
+ShapeDefinition.renderQuad = {
+    [enumSubShape.rect]: (context, quadrantSize, quadrantHalfSize, layerScale, insetPadding) => {
+        context.beginPath();
+        const dims = quadrantSize * layerScale;
+        context.rect(insetPadding + -quadrantHalfSize, -insetPadding + quadrantHalfSize - dims, dims, dims);
+    },
+    [enumSubShape.star]: (context, quadrantSize, quadrantHalfSize, layerScale, insetPadding) => {
+        context.beginPath();
+        const dims = quadrantSize * layerScale;
+
+        let originX = insetPadding - quadrantHalfSize;
+        let originY = -insetPadding + quadrantHalfSize - dims;
+
+        const moveInwards = dims * 0.4;
+        context.moveTo(originX, originY + moveInwards);
+        context.lineTo(originX + dims, originY);
+        context.lineTo(originX + dims - moveInwards, originY + dims);
+        context.lineTo(originX, originY + dims);
+        context.closePath();
+    },
+    [enumSubShape.windmill]: (context, quadrantSize, quadrantHalfSize, layerScale, insetPadding) => {
+        context.beginPath();
+        const dims = quadrantSize * layerScale;
+
+        let originX = insetPadding - quadrantHalfSize;
+        let originY = -insetPadding + quadrantHalfSize - dims;
+        const moveInwards = dims * 0.4;
+        context.moveTo(originX, originY + moveInwards);
+        context.lineTo(originX + dims, originY);
+        context.lineTo(originX + dims, originY + dims);
+        context.lineTo(originX, originY + dims);
+        context.closePath();
+    },
+    [enumSubShape.circle]: (context, quadrantSize, quadrantHalfSize, layerScale, insetPadding) => {
+        context.beginPath();
+        context.moveTo(insetPadding + -quadrantHalfSize, -insetPadding + quadrantHalfSize);
+        context.arc(
+            insetPadding + -quadrantHalfSize, -insetPadding + quadrantHalfSize,
+            quadrantSize * layerScale, -Math.PI * 0.5,
+            0
+        );
+        context.closePath();
+    },
+};
