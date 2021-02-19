@@ -135,7 +135,7 @@ export class SavegameManager extends ReadWriteProxy {
      * Creates a new savegame
      * @returns {Savegame}
      */
-    createNewSavegame() {
+    createNewSavegame(gamemode) {
         const id = this.generateInternalId();
 
         const metaData = /** @type {import("./savegame_typedefs").SavegameMetadata} */ ({
@@ -149,10 +149,13 @@ export class SavegameManager extends ReadWriteProxy {
         // Notice: This is async and happening in the background
         this.updateAfterSavegamesChanged();
 
-        return new Savegame(this.app, {
-            internalId: id,
-            metaDataRef: metaData,
-        });
+        return new Savegame(
+            this.app, {
+                internalId: id,
+                metaDataRef: metaData,
+            },
+            gamemode
+        );
     }
 
     /**

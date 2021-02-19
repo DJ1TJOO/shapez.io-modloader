@@ -12,7 +12,7 @@ import { globalConfig } from "../core/config";
 import { getDeviceDPI, resizeHighDPICanvas } from "../core/dpi_manager";
 import { DrawParameters } from "../core/draw_parameters";
 import { ExplainedResult } from "../core/explained_result";
-import { gMetaBuildingRegistry } from "../core/global_registries";
+import { gGameModeRegistry, gMetaBuildingRegistry } from "../core/global_registries";
 import { createLogger } from "../core/logging";
 import { Rectangle } from "../core/rectangle";
 import { ORIGINAL_SPRITE_SCALE } from "../core/sprites";
@@ -104,7 +104,9 @@ export class GameCore {
         root.dynamicTickrate = new DynamicTickrate(root);
 
         // Init game mode
-        root.gameMode = new RegularGameMode(root);
+        if (!savegame.currentData.gamemode) root.gameMode = new RegularGameMode(root);
+        else if (shapezAPI.ingame.gamemodes[savegame.currentData.gamemode])
+            root.gameMode = new shapezAPI.ingame.gamemodes[savegame.currentData.gamemode](root);
 
         // Init classes
         root.camera = new Camera(root);
@@ -206,6 +208,10 @@ export class GameCore {
         } catch (ex) {
             logger.error("Exception during deserialization:", ex);
             return ExplainedResult.bad("Exception during deserialization:", ex);
+        }
+        if (!this.root.gameMode) {
+            logger.error("gamemode missing");
+            return ExplainedResult.bad("Gamemode missing");
         }
         this.root.gameIsFresh = false;
 

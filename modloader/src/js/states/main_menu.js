@@ -17,6 +17,7 @@ import {
     waitNextFrame,
 } from "../core/utils";
 import { HUDModalDialogs } from "../game/hud/parts/modal_dialogs";
+import { RegularGameMode } from "../game/modes/regular";
 import { getApplicationSettingById } from "../profile/application_settings";
 import { T } from "../translations";
 
@@ -567,15 +568,43 @@ export class MainMenuState extends GameState {
             return;
         }
 
-        this.app.analytics.trackUiClick("startgame");
-        this.app.adProvider.showVideoAd().then(() => {
-            const savegame = this.app.savegameMgr.createNewSavegame();
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
 
-            this.moveToState("InGameState", {
-                savegame,
+        let gamemode = RegularGameMode.getId();
+        if (Object.keys(shapezAPI.ingame.gamemodes).length > 1) {
+            const { optionSelected } = this.dialogs.showOptionChooser(T.settings.labels.gamemodes.title, {
+                active: null,
+                options: Object.keys(shapezAPI.ingame.gamemodes).map(option => ({
+                    value: option,
+                    text: capitalizeFirstLetter(option.toLowerCase()),
+                })),
             });
-            this.app.analytics.trackUiClick("startgame_adcomplete");
-        });
+
+            optionSelected.add(value => {
+                gamemode = value;
+                this.app.analytics.trackUiClick("startgame");
+                this.app.adProvider.showVideoAd().then(() => {
+                    const savegame = this.app.savegameMgr.createNewSavegame(gamemode);
+
+                    this.moveToState("InGameState", {
+                        savegame,
+                    });
+                    this.app.analytics.trackUiClick("startgame_adcomplete");
+                });
+            }, this);
+        } else {
+            this.app.analytics.trackUiClick("startgame");
+            this.app.adProvider.showVideoAd().then(() => {
+                const savegame = this.app.savegameMgr.createNewSavegame(gamemode);
+
+                this.moveToState("InGameState", {
+                    savegame,
+                });
+                this.app.analytics.trackUiClick("startgame_adcomplete");
+            });
+        }
     }
 
     onContinueButtonClicked() {
