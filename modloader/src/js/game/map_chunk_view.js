@@ -40,10 +40,12 @@ export class MapChunkView extends MapChunk {
      * @param {DrawParameters} parameters
      */
     drawBackgroundLayer(parameters) {
-        const systemUpdateOrder = JSON.parse(JSON.stringify(this.root.systemMgr.systemUpdateOrder));
+        const order = this.root.systemMgr.renderOrderBackground;
         const systems = this.root.systemMgr.systems;
-        for (let i = 0; i < systemUpdateOrder.length; i++) {
-            const system = systems[systemUpdateOrder[i]];
+        const systemsWithoutOrderd = Object.keys(systems).filter(system => !order.includes(system));
+        const renderOrder = [...systemsWithoutOrderd, ...order];
+        for (let i = 0; i < renderOrder.length; i++) {
+            const system = systems[renderOrder[i]];
             if (typeof system.drawChunk_BackgroundLayer !== "function") continue;
             system.drawChunk_BackgroundLayer(parameters, this);
         }
@@ -54,10 +56,12 @@ export class MapChunkView extends MapChunk {
      * @param {DrawParameters} parameters
      */
     drawForegroundDynamicLayer(parameters) {
-        const systemUpdateOrder = JSON.parse(JSON.stringify(this.root.systemMgr.systemUpdateOrder));
+        const order = this.root.systemMgr.renderOrderDynamic;
         const systems = this.root.systemMgr.systems;
-        for (let i = 0; i < systemUpdateOrder.length; i++) {
-            const system = systems[systemUpdateOrder[i]];
+        const systemsWithoutOrderd = Object.keys(systems).filter(system => !order.includes(system));
+        const renderOrder = [...systemsWithoutOrderd, ...order];
+        for (let i = 0; i < renderOrder.length; i++) {
+            const system = systems[renderOrder[i]];
             if (typeof system.drawChunk_ForegroundDynamicLayer !== "function") continue;
             system.drawChunk_ForegroundDynamicLayer(parameters, this);
         }
@@ -68,10 +72,12 @@ export class MapChunkView extends MapChunk {
      * @param {DrawParameters} parameters
      */
     drawForegroundStaticLayer(parameters) {
-        const systemUpdateOrder = JSON.parse(JSON.stringify(this.root.systemMgr.systemUpdateOrder));
+        const order = this.root.systemMgr.renderOrderStatic;
         const systems = this.root.systemMgr.systems;
-        for (let i = 0; i < systemUpdateOrder.length; i++) {
-            const system = systems[systemUpdateOrder[i]];
+        const systemsWithoutOrderd = Object.keys(systems).filter(system => !order.includes(system));
+        const renderOrder = [...systemsWithoutOrderd, ...order];
+        for (let i = 0; i < renderOrder.length; i++) {
+            const system = systems[renderOrder[i]];
             if (typeof system.drawChunk_ForegroundStaticLayer !== "function") continue;
             system.drawChunk_ForegroundStaticLayer(parameters, this);
         }
@@ -317,10 +323,12 @@ export class MapChunkView extends MapChunk {
      * @param {DrawParameters} parameters
      */
     drawWiresForegroundLayer(parameters) {
-        const systemUpdateOrder = JSON.parse(JSON.stringify(this.root.systemMgr.systemUpdateOrder));
+        const order = this.root.systemMgr.renderOrderWires;
         const systems = this.root.systemMgr.systems;
-        for (let i = 0; i < systemUpdateOrder.length; i++) {
-            const system = systems[systemUpdateOrder[i]];
+        const systemsWithoutOrderd = Object.keys(systems).filter(system => !order.includes(system));
+        const renderOrder = [...systemsWithoutOrderd, ...order];
+        for (let i = 0; i < renderOrder.length; i++) {
+            const system = systems[renderOrder[i]];
             if (typeof system.drawChunk_WiresForegroundLayer !== "function") continue;
             system.drawChunk_WiresForegroundLayer(parameters, this);
         }
@@ -332,10 +340,12 @@ export class MapChunkView extends MapChunk {
      * @param {Layer} layer
      */
     drawForegroundLayer(parameters, layer) {
-        const systemUpdateOrder = JSON.parse(JSON.stringify(this.root.systemMgr.systemUpdateOrder));
+        const order = this.root.systemMgr.renderOrderForeground;
         const systems = this.root.systemMgr.systems;
-        for (let i = 0; i < systemUpdateOrder.length; i++) {
-            const system = systems[systemUpdateOrder[i]];
+        const systemsWithoutOrderd = Object.keys(systems).filter(system => !order.includes(system));
+        const renderOrder = [...systemsWithoutOrderd, ...order];
+        for (let i = 0; i < renderOrder.length; i++) {
+            const system = systems[renderOrder[i]];
             if (typeof system.drawChunk_ForegroundLayer !== "function") continue;
             system.drawChunk_ForegroundLayer(parameters, this, layer);
         }

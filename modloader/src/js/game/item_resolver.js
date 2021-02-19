@@ -3,7 +3,7 @@ import { gItemRegistry } from "../core/global_registries";
 
 /**
  * Resolves items so we share instances
- * @param {import("../savegame/savegame_serializer").GameRoot} root
+ * @param {import("./root").GameRoot} root
  * @param {{$: string, data: any }} data
  */
 export function itemResolverSingleton(root, data) {
