@@ -42,9 +42,7 @@ registerMod({
     },
     updateStaticSettings: () => {},
     updateStaticTranslations: (id) => {},
-    gameInitializedRootClasses: (root) => {
-        root.gameMode = new JFL17GameMode(root);
-    },
+    gameInitializedRootClasses: (root) => {},
     gameInitializedRootManagers: (root) => {},
     gameBeforeFirstUpdate: (root) => {},
     main: (config) => {
@@ -65,7 +63,12 @@ registerMod({
 
         //Remove second dairy colors and blue random colorset
         shapezAPI.ingame.hub_goals.prototype.generateRandomColorSet = function(rng, allowUncolored = false) {
-            const colorWheel = [shapezAPI.exports.enumColors.red, shapezAPI.exports.enumColors.green, shapezAPI.exports.enumColors.red];
+            let colorWheel = [];
+            if (this.root.gameMode.constructor.getId() === JFL17GameMode.getId()) {
+                colorWheel = [shapezAPI.exports.enumColors.red, shapezAPI.exports.enumColors.green, shapezAPI.exports.enumColors.red];
+            } else {
+                colorWheel = [shapezAPI.exports.enumColors.red, shapezAPI.exports.enumColors.yellow, shapezAPI.exports.enumColors.green, shapezAPI.exports.enumColors.cyan, shapezAPI.exports.enumColors.blue, shapezAPI.exports.enumColors.purple, shapezAPI.exports.enumColors.red, shapezAPI.exports.enumColors.yellow];
+            }
 
             const universalColors = [shapezAPI.exports.enumColors.white];
             if (allowUncolored) {
@@ -140,7 +143,7 @@ registerMod({
             for (let i = 0; i < payload.items.length; ++i) {
                 const item = payload.items[i].item;
 
-                if (item.definition.getHash() === "Sg----Sg:CgCgCgCg:--CyCy--") {
+                if (this.root.gameMode.constructor.getId() === JFL17GameMode.getId() && item.definition.getHash() === "Sg----Sg:CgCgCgCg:--CyCy--") {
                     // Delivering the evil shape makes you lose.
                     this.root.hubGoals.gameOver();
                     return;
