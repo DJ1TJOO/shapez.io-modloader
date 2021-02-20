@@ -372,7 +372,7 @@ export class ShapeDefinition extends BasicSerializableObject {
                 const insetPadding = 0.0;
 
                 if (typeof ShapeDefinition.renderQuad[subShape] === "function") {
-                    ShapeDefinition.renderQuad[subShape](
+                    ShapeDefinition.renderQuad[subShape].bind(this)(
                         context,
                         quadrantSize,
                         quadrantHalfSize,

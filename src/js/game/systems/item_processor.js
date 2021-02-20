@@ -160,7 +160,7 @@ export class ItemProcessorSystem extends GameSystemWithFilter {
         const pinsComp = entity.components.WiredPins;
 
         if (ItemProcessorSystem.checkRequirements[itemProcessorComp.processingRequirement])
-            return ItemProcessorSystem.checkRequirements[itemProcessorComp.processingRequirement](
+            return ItemProcessorSystem.checkRequirements[itemProcessorComp.processingRequirement].bind(this)(
                 entity,
                 item,
                 slotIndex,
@@ -178,7 +178,10 @@ export class ItemProcessorSystem extends GameSystemWithFilter {
         const processorComp = entity.components.ItemProcessor;
 
         if (ItemProcessorSystem.canProcess[processorComp.processingRequirement])
-            return ItemProcessorSystem.canProcess[processorComp.processingRequirement](entity, processorComp);
+            return ItemProcessorSystem.canProcess[processorComp.processingRequirement].bind(this)(
+                entity,
+                processorComp
+            );
         else return processorComp.inputSlots.length >= processorComp.inputsPerCharge;
     }
 
