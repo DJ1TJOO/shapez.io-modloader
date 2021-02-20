@@ -15,7 +15,7 @@ import { ShapeItem } from "../items/shape_item";
 /**
  * We need to allow queuing charges, otherwise the throughput will stall
  */
-const MAX_QUEUED_CHARGES = 2;
+export const MAX_QUEUED_CHARGES = 2;
 
 /**
  * Whole data for a produced item
@@ -159,27 +159,15 @@ export class ItemProcessorSystem extends GameSystemWithFilter {
         const itemProcessorComp = entity.components.ItemProcessor;
         const pinsComp = entity.components.WiredPins;
 
-        switch (itemProcessorComp.processingRequirement) {
-            case enumItemProcessorRequirements.painterQuad:
-                {
-                    if (slotIndex === 0) {
-                        // Always accept the shape
-                        return true;
-                    }
-
-                    // Check the network value at the given slot
-                    const network = pinsComp.slots[slotIndex - 1].linkedNetwork;
-                    const slotIsEnabled = network && network.hasValue() && isTruthyItem(network.currentValue);
-                    if (!slotIsEnabled) {
-                        return false;
-                    }
-                    return true;
-                }
-
-                // By default, everything is accepted
-            default:
-                return true;
-        }
+        if (ItemProcessorSystem.checkRequirements[itemProcessorComp.processingRequirement])
+            return ItemProcessorSystem.checkRequirements[itemProcessorComp.processingRequirement](
+                entity,
+                item,
+                slotIndex,
+                itemProcessorComp,
+                pinsComp
+            );
+        else return true;
     }
 
     /**
@@ -189,74 +177,9 @@ export class ItemProcessorSystem extends GameSystemWithFilter {
     canProcess(entity) {
         const processorComp = entity.components.ItemProcessor;
 
-        switch (processorComp.processingRequirement) {
-            // DEFAULT
-            // By default, we can start processing once all inputs are there
-            case null:
-                {
-                    return processorComp.inputSlots.length >= processorComp.inputsPerCharge;
-                }
-
-                // QUAD PAINTER
-                // For the quad painter, it might be possible to start processing earlier
-            case enumItemProcessorRequirements.painterQuad:
-                {
-                    const pinsComp = entity.components.WiredPins;
-
-                    /** @type {Object.<number, { item: BaseItem, sourceSlot: number }>} */
-                    const itemsBySlot = {};
-                    for (let i = 0; i < processorComp.inputSlots.length; ++i) {
-                        itemsBySlot[processorComp.inputSlots[i].sourceSlot] = processorComp.inputSlots[i];
-                    }
-
-                    // First slot is the shape, so if it's not there we can't do anything
-                    if (!itemsBySlot[0]) {
-                        return false;
-                    }
-
-                    const shapeItem = /** @type {ShapeItem} */ (itemsBySlot[0].item);
-                    const slotStatus = [];
-
-                    // Check which slots are enabled
-                    for (let i = 0; i < 4; ++i) {
-                        // Extract the network value on the Nth pin
-                        const network = pinsComp.slots[i].linkedNetwork;
-                        const networkValue = network && network.hasValue() ? network.currentValue : null;
-
-                        // If there is no "1" on that slot, don't paint there
-                        if (!isTruthyItem(networkValue)) {
-                            slotStatus.push(false);
-                            continue;
-                        }
-
-                        slotStatus.push(true);
-                    }
-
-                    // All slots are disabled
-                    if (!slotStatus.includes(true)) {
-                        return false;
-                    }
-
-                    // Check if all colors of the enabled slots are there
-                    for (let i = 0; i < slotStatus.length; ++i) {
-                        if (slotStatus[i] && !itemsBySlot[1 + i]) {
-                            // A slot which is enabled wasn't enabled. Make sure if there is anything on the quadrant,
-                            // it is not possible to paint, but if there is nothing we can ignore it
-                            for (let j = 0; j < 4; ++j) {
-                                const layer = shapeItem.definition.layers[j];
-                                if (layer && layer[i]) {
-                                    return false;
-                                }
-                            }
-                        }
-                    }
-
-                    return true;
-                }
-
-            default:
-                assertAlways(false, "Unknown requirement for " + processorComp.processingRequirement);
-        }
+        if (ItemProcessorSystem.canProcess[processorComp.processingRequirement])
+            return ItemProcessorSystem.canProcess[processorComp.processingRequirement](entity, processorComp);
+        else return processorComp.inputSlots.length >= processorComp.inputsPerCharge;
     }
 
     /**
@@ -572,3 +495,76 @@ export class ItemProcessorSystem extends GameSystemWithFilter {
         }
     }
 }
+
+ItemProcessorSystem.checkRequirements = {
+    [enumItemProcessorRequirements.painterQuad]: (entity, item, slotIndex, itemProcessorComp, pinsComp) => {
+        if (slotIndex === 0) {
+            // Always accept the shape
+            return true;
+        }
+
+        // Check the network value at the given slot
+        const network = pinsComp.slots[slotIndex - 1].linkedNetwork;
+        const slotIsEnabled = network && network.hasValue() && isTruthyItem(network.currentValue);
+        if (!slotIsEnabled) {
+            return false;
+        }
+        return true;
+    },
+};
+
+ItemProcessorSystem.canProcess = {
+    [enumItemProcessorRequirements.painterQuad]: (entity, processorComp) => {
+        const pinsComp = entity.components.WiredPins;
+
+        /** @type {Object.<number, { item: BaseItem, sourceSlot: number }>} */
+        const itemsBySlot = {};
+        for (let i = 0; i < processorComp.inputSlots.length; ++i) {
+            itemsBySlot[processorComp.inputSlots[i].sourceSlot] = processorComp.inputSlots[i];
+        }
+
+        // First slot is the shape, so if it's not there we can't do anything
+        if (!itemsBySlot[0]) {
+            return false;
+        }
+
+        const shapeItem = /** @type {ShapeItem} */ (itemsBySlot[0].item);
+        const slotStatus = [];
+
+        // Check which slots are enabled
+        for (let i = 0; i < 4; ++i) {
+            // Extract the network value on the Nth pin
+            const network = pinsComp.slots[i].linkedNetwork;
+            const networkValue = network && network.hasValue() ? network.currentValue : null;
+
+            // If there is no "1" on that slot, don't paint there
+            if (!isTruthyItem(networkValue)) {
+                slotStatus.push(false);
+                continue;
+            }
+
+            slotStatus.push(true);
+        }
+
+        // All slots are disabled
+        if (!slotStatus.includes(true)) {
+            return false;
+        }
+
+        // Check if all colors of the enabled slots are there
+        for (let i = 0; i < slotStatus.length; ++i) {
+            if (slotStatus[i] && !itemsBySlot[1 + i]) {
+                // A slot which is enabled wasn't enabled. Make sure if there is anything on the quadrant,
+                // it is not possible to paint, but if there is nothing we can ignore it
+                for (let j = 0; j < 4; ++j) {
+                    const layer = shapeItem.definition.layers[j];
+                    if (layer && layer[i]) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    },
+};
