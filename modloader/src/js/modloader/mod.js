@@ -167,7 +167,7 @@ import { StorageSystem } from "../game/systems/storage";
 import { UndergroundBeltSystem } from "../game/systems/underground_belt";
 import { WireSystem } from "../game/systems/wire";
 import { WiredPinsSystem } from "../game/systems/wired_pins";
-import { applyGameTheme, VANILLA_THEMES } from "../game/theme";
+import { applyGameTheme, THEME, VANILLA_THEMES } from "../game/theme";
 import { BaseGameSpeed } from "../game/time/base_game_speed";
 import { FastForwardGameSpeed } from "../game/time/fast_forward_game_speed";
 import { PausedGameSpeed } from "../game/time/paused_game_speed";
@@ -685,6 +685,7 @@ export class ShapezAPI {
             enumShortcodeToSubShape,
             enumSubShapeToShortcode,
             enumSubShape,
+            THEME,
 
             MetaBuilding,
             Component,
@@ -978,10 +979,10 @@ export class ShapezAPI {
             head.appendChild(style);
         }
         css = `
-            [data-icon="${id}.png"] {
-                background-image: url(${iconDataURL}) !important;
-            }
-        `;
+                  [data-icon="${id}.png"] {
+                      background-image: url(${iconDataURL}) !important;
+                  }
+              `;
         style.appendChild(document.createTextNode(css));
     }
 
