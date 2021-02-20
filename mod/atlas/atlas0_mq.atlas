@@ -1,0 +1,412 @@
+
+atlas0_mq.png
+size: 2048, 512
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+sprites/blueprints/balancer-merger-triple_all
+  rotate: false
+  xy: 265, 297
+  size: 96, 92
+  orig: 96, 96
+  offset: 0, 3
+  index: -1
+sprites/blueprints/balancer-merger-triple_both
+  rotate: false
+  xy: 554, 306
+  size: 96, 84
+  orig: 96, 96
+  offset: 0, 11
+  index: -1
+sprites/blueprints/balancer-merger-triple_center
+  rotate: false
+  xy: 376, 24
+  size: 91, 92
+  orig: 96, 96
+  offset: 3, 3
+  index: -1
+sprites/blueprints/balancer-merger-triple_left
+  rotate: false
+  xy: 1356, 395
+  size: 94, 92
+  orig: 96, 96
+  offset: 0, 3
+  index: -1
+sprites/blueprints/balancer-merger-triple_right
+  rotate: false
+  xy: 1645, 395
+  size: 93, 92
+  orig: 96, 96
+  offset: 3, 3
+  index: -1
+sprites/blueprints/balancer-splitter-triple_all
+  rotate: false
+  xy: 1063, 395
+  size: 96, 92
+  orig: 96, 96
+  offset: 0, 3
+  index: -1
+sprites/blueprints/balancer-splitter-triple_both
+  rotate: false
+  xy: 750, 306
+  size: 96, 83
+  orig: 96, 96
+  offset: 0, 3
+  index: -1
+sprites/blueprints/balancer-splitter-triple_center
+  rotate: false
+  xy: 282, 23
+  size: 92, 92
+  orig: 96, 96
+  offset: 3, 3
+  index: -1
+sprites/blueprints/balancer-splitter-triple_left
+  rotate: false
+  xy: 1259, 395
+  size: 95, 92
+  orig: 96, 96
+  offset: 0, 3
+  index: -1
+sprites/blueprints/balancer-splitter-triple_right
+  rotate: false
+  xy: 1740, 395
+  size: 93, 92
+  orig: 96, 96
+  offset: 3, 3
+  index: -1
+sprites/blueprints/belt_crossing
+  rotate: false
+  xy: 741, 131
+  size: 84, 84
+  orig: 96, 96
+  offset: 8, 8
+  index: -1
+sprites/blueprints/belt_crossing-corner
+  rotate: false
+  xy: 1162, 311
+  size: 84, 83
+  orig: 96, 96
+  offset: 8, 9
+  index: -1
+sprites/blueprints/belt_crossing-switcher
+  rotate: false
+  xy: 1, 1
+  size: 171, 96
+  orig: 192, 96
+  offset: 11, 0
+  index: -1
+sprites/blueprints/cutter-laser
+  rotate: false
+  xy: 1, 99
+  size: 185, 96
+  orig: 192, 96
+  offset: 5, 0
+  index: -1
+sprites/blueprints/hyperlink
+  rotate: false
+  xy: 1034, 299
+  size: 42, 90
+  orig: 96, 96
+  offset: 27, 3
+  index: -1
+sprites/blueprints/hyperlink-hyperlink_entrance
+  rotate: false
+  xy: 188, 17
+  size: 92, 178
+  orig: 96, 192
+  offset: 2, 7
+  index: -1
+sprites/blueprints/hyperlink-hyperlink_exit
+  rotate: false
+  xy: 376, 118
+  size: 92, 178
+  orig: 96, 192
+  offset: 2, 7
+  index: -1
+sprites/blueprints/hyperlink_left
+  rotate: false
+  xy: 871, 156
+  size: 60, 67
+  orig: 96, 96
+  offset: 3, 3
+  index: -1
+sprites/blueprints/hyperlink_right
+  rotate: false
+  xy: 871, 87
+  size: 60, 67
+  orig: 96, 96
+  offset: 33, 3
+  index: -1
+sprites/blueprints/miner-deep
+  rotate: false
+  xy: 871, 391
+  size: 94, 96
+  orig: 96, 96
+  offset: 2, 0
+  index: -1
+sprites/blueprints/shape_combiner
+  rotate: false
+  xy: 265, 391
+  size: 242, 96
+  orig: 288, 96
+  offset: 23, 0
+  index: -1
+sprites/blueprints/stacker-smart
+  rotate: false
+  xy: 1, 392
+  size: 262, 95
+  orig: 288, 96
+  offset: 7, 1
+  index: -1
+sprites/blueprints/storage-mini
+  rotate: false
+  xy: 564, 208
+  size: 87, 96
+  orig: 96, 96
+  offset: 9, 0
+  index: -1
+sprites/blueprints/underground_belt_entry-smart_0
+  rotate: false
+  xy: 657, 132
+  size: 82, 87
+  orig: 96, 96
+  offset: 10, 0
+  index: -1
+sprites/blueprints/underground_belt_entry-smart_2
+  rotate: false
+  xy: 564, 119
+  size: 91, 87
+  orig: 96, 96
+  offset: 1, 0
+  index: -1
+sprites/blueprints/underground_belt_entry-smart_4
+  rotate: false
+  xy: 941, 302
+  size: 91, 87
+  orig: 96, 96
+  offset: 4, 0
+  index: -1
+sprites/blueprints/underground_belt_exit-smart_1
+  rotate: false
+  xy: 1115, 217
+  size: 78, 88
+  orig: 96, 96
+  offset: 10, 8
+  index: -1
+sprites/blueprints/underground_belt_exit-smart_3
+  rotate: false
+  xy: 940, 221
+  size: 88, 79
+  orig: 96, 96
+  offset: 0, 8
+  index: -1
+sprites/blueprints/underground_belt_exit-smart_5
+  rotate: false
+  xy: 1248, 314
+  size: 88, 79
+  orig: 96, 96
+  offset: 8, 8
+  index: -1
+sprites/blueprints/underground_belt_exit-tier2
+  rotate: false
+  xy: 844, 225
+  size: 94, 75
+  orig: 96, 96
+  offset: 2, 21
+  index: -1
+sprites/buildings/balancer-merger-triple_all
+  rotate: false
+  xy: 363, 298
+  size: 96, 91
+  orig: 96, 96
+  offset: 0, 3
+  index: -1
+sprites/buildings/balancer-merger-triple_both
+  rotate: false
+  xy: 652, 306
+  size: 96, 83
+  orig: 96, 96
+  offset: 0, 11
+  index: -1
+sprites/buildings/balancer-merger-triple_center
+  rotate: false
+  xy: 461, 298
+  size: 91, 91
+  orig: 96, 96
+  offset: 3, 3
+  index: -1
+sprites/buildings/balancer-merger-triple_left
+  rotate: false
+  xy: 1549, 396
+  size: 94, 91
+  orig: 96, 96
+  offset: 0, 3
+  index: -1
+sprites/buildings/balancer-merger-triple_right
+  rotate: false
+  xy: 1835, 396
+  size: 93, 91
+  orig: 96, 96
+  offset: 3, 3
+  index: -1
+sprites/buildings/balancer-splitter-triple_all
+  rotate: false
+  xy: 1161, 396
+  size: 96, 91
+  orig: 96, 96
+  offset: 0, 3
+  index: -1
+sprites/buildings/balancer-splitter-triple_both
+  rotate: false
+  xy: 653, 221
+  size: 96, 83
+  orig: 96, 96
+  offset: 0, 3
+  index: -1
+sprites/buildings/balancer-splitter-triple_center
+  rotate: false
+  xy: 469, 25
+  size: 92, 91
+  orig: 96, 96
+  offset: 3, 3
+  index: -1
+sprites/buildings/balancer-splitter-triple_left
+  rotate: false
+  xy: 1452, 396
+  size: 95, 91
+  orig: 96, 96
+  offset: 0, 3
+  index: -1
+sprites/buildings/balancer-splitter-triple_right
+  rotate: false
+  xy: 1930, 396
+  size: 93, 91
+  orig: 96, 96
+  offset: 3, 3
+  index: -1
+sprites/buildings/belt_crossing
+  rotate: false
+  xy: 1030, 214
+  size: 83, 83
+  orig: 96, 96
+  offset: 8, 8
+  index: -1
+sprites/buildings/belt_crossing-corner
+  rotate: false
+  xy: 1275, 230
+  size: 82, 82
+  orig: 96, 96
+  offset: 9, 9
+  index: -1
+sprites/buildings/belt_crossing-switcher
+  rotate: false
+  xy: 698, 391
+  size: 171, 96
+  orig: 192, 96
+  offset: 11, 0
+  index: -1
+sprites/buildings/cutter-laser
+  rotate: false
+  xy: 509, 392
+  size: 187, 95
+  orig: 192, 96
+  offset: 5, 0
+  index: -1
+sprites/buildings/hyperlink
+  rotate: false
+  xy: 827, 125
+  size: 42, 90
+  orig: 96, 96
+  offset: 27, 3
+  index: -1
+sprites/buildings/hyperlink-hyperlink_entrance
+  rotate: false
+  xy: 282, 117
+  size: 92, 178
+  orig: 96, 192
+  offset: 2, 7
+  index: -1
+sprites/buildings/hyperlink-hyperlink_exit
+  rotate: false
+  xy: 470, 118
+  size: 92, 178
+  orig: 96, 192
+  offset: 2, 7
+  index: -1
+sprites/buildings/hyperlink_left
+  rotate: false
+  xy: 933, 153
+  size: 60, 66
+  orig: 96, 96
+  offset: 3, 3
+  index: -1
+sprites/buildings/hyperlink_right
+  rotate: false
+  xy: 933, 85
+  size: 60, 66
+  orig: 96, 96
+  offset: 33, 3
+  index: -1
+sprites/buildings/miner-deep
+  rotate: false
+  xy: 967, 391
+  size: 94, 96
+  orig: 96, 96
+  offset: 2, 0
+  index: -1
+sprites/buildings/shape_combiner
+  rotate: false
+  xy: 1, 197
+  size: 242, 96
+  orig: 288, 96
+  offset: 23, 0
+  index: -1
+sprites/buildings/stacker-smart
+  rotate: false
+  xy: 1, 295
+  size: 262, 95
+  orig: 288, 96
+  offset: 7, 1
+  index: -1
+sprites/buildings/underground_belt_entry-smart_0
+  rotate: false
+  xy: 1078, 307
+  size: 82, 86
+  orig: 96, 96
+  offset: 10, 0
+  index: -1
+sprites/buildings/underground_belt_entry-smart_2
+  rotate: false
+  xy: 848, 302
+  size: 91, 87
+  orig: 96, 96
+  offset: 1, 0
+  index: -1
+sprites/buildings/underground_belt_entry-smart_4
+  rotate: false
+  xy: 751, 217
+  size: 91, 87
+  orig: 96, 96
+  offset: 4, 0
+  index: -1
+sprites/buildings/underground_belt_exit-smart_1
+  rotate: false
+  xy: 1195, 221
+  size: 78, 88
+  orig: 96, 96
+  offset: 10, 8
+  index: -1
+sprites/buildings/underground_belt_exit-smart_3
+  rotate: false
+  xy: 1338, 315
+  size: 88, 78
+  orig: 96, 96
+  offset: 0, 8
+  index: -1
+sprites/buildings/underground_belt_exit-smart_5
+  rotate: false
+  xy: 1359, 235
+  size: 88, 78
+  orig: 96, 96
+  offset: 8, 8
+  index: -1

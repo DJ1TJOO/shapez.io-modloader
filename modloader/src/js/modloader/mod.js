@@ -155,7 +155,7 @@ import { FilterSystem } from "../game/systems/filter";
 import { HubSystem } from "../game/systems/hub";
 import { ItemAcceptorSystem } from "../game/systems/item_acceptor";
 import { ItemEjectorSystem } from "../game/systems/item_ejector";
-import { ItemProcessorSystem } from "../game/systems/item_processor";
+import { ItemProcessorSystem, MAX_QUEUED_CHARGES } from "../game/systems/item_processor";
 import { ItemProcessorOverlaysSystem } from "../game/systems/item_processor_overlays";
 import { ItemProducerSystem } from "../game/systems/item_producer";
 import { LeverSystem } from "../game/systems/lever";
@@ -167,7 +167,7 @@ import { StorageSystem } from "../game/systems/storage";
 import { UndergroundBeltSystem } from "../game/systems/underground_belt";
 import { WireSystem } from "../game/systems/wire";
 import { WiredPinsSystem } from "../game/systems/wired_pins";
-import { applyGameTheme, VANILLA_THEMES } from "../game/theme";
+import { applyGameTheme, THEME, VANILLA_THEMES } from "../game/theme";
 import { BaseGameSpeed } from "../game/time/base_game_speed";
 import { FastForwardGameSpeed } from "../game/time/fast_forward_game_speed";
 import { PausedGameSpeed } from "../game/time/paused_game_speed";
@@ -420,7 +420,6 @@ import { SerializerInternal } from "../savegame/serializer_internal";
 export class ShapezAPI {
     constructor(user) {
         this.user = user;
-
         this.exports = {
             //Core
             AtlasDefinition,
@@ -668,9 +667,6 @@ export class ShapezAPI {
             ProductionAnalytics,
             GameRoot,
             ShapeDefinitionManager,
-            enumShortcodeToSubShape,
-            enumSubShapeToShortcode,
-            enumSubShape,
             ShapeDefinition,
             SoundProxy,
             itemResolverSingleton,
@@ -685,6 +681,11 @@ export class ShapezAPI {
             USER_INTERACT_MOVE,
             USER_INTERACT_ZOOM,
             USER_INTERACT_TOUCHEND,
+            MAX_QUEUED_CHARGES,
+            enumShortcodeToSubShape,
+            enumSubShapeToShortcode,
+            enumSubShape,
+            THEME,
 
             MetaBuilding,
             Component,
@@ -978,10 +979,10 @@ export class ShapezAPI {
             head.appendChild(style);
         }
         css = `
-            [data-icon="${id}.png"] {
-                background-image: url(${iconDataURL}) !important;
-            }
-        `;
+               [data-icon="${id}.png"] {
+                   background-image: url(${iconDataURL}) !important;
+               }
+           `;
         style.appendChild(document.createTextNode(css));
     }
 

@@ -1,0 +1,1 @@
+export const modId = "b1b23b5d-d6b5-4b72-8239-365391d09046";
