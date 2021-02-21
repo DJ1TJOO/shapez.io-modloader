@@ -1,8 +1,10 @@
 import { MetaBeltCrossingBuilding } from "./buildings/belt_crossing";
+import { addCutterVariant } from "./buildings/cutter";
 import { addMinerVariant } from "./buildings/miner";
 import { MetaShapeCombinerBuilding } from "./buildings/shape_combiner";
 import { addStackerVariant } from "./buildings/stacker";
 import { addStorageVariant } from "./buildings/storage";
+import { addUndergroundBeltVariant } from "./buildings/underground_belt";
 import { BeltCrossingComponent } from "./components/belt_crossing";
 import { MinerDeepComponent } from "./components/miner_deep";
 import { SIGameMode } from "./modes/SI";
@@ -182,16 +184,21 @@ registerMod({
     gameInitializedRootManagers: (root) => {
         addHandlers(root);
     },
-    gameBeforeFirstUpdate: (root) => {},
+    gameBeforeFirstUpdate: (root) => {
+        root.signals.entityDestroyed.add(updateSmartUndergroundBeltVariant, root);
+
+        // Notice: These must come *after* the entity destroyed signals
+        root.signals.entityAdded.add(updateSmartUndergroundBeltVariant, root);
+    },
     main: (config) => {
         //TODO:
         // Shapez Industries:
         // - Remove default splitter and merger
-        // - Add building speeds to config and add new underground belt tier (smart)
+        // - Add new underground belt tier (smart)
         // - Add smart merger and splitter
         // - Add hyperlink
-        // - Add smart cutter (laser?)
         //DONE:
+        // - Add building speeds to config and
         // - Add new miner variant deep
         // - Add belt crossing
         // - Add shape combiner
@@ -201,6 +208,7 @@ registerMod({
         // - Add smart stacker
         // - Resources: add tutorials
         // - Add tutorial goal mappings
+        // - Add smart cutter (laser?)
         shapezAPI.injectCss("**{css}**", modId);
         shapezAPI.registerAtlases("**{atlas_atlas0_hq}**", "**{atlas_atlas0_mq}**", "**{atlas_atlas0_lq}**");
         shapezAPI.ingame.gamemodes[SIGameMode.getId()] = SIGameMode;
@@ -230,6 +238,12 @@ registerMod({
         enumHubGoalRewards.reward_smart_stacker = "reward_smart_stacker";
         addStackerVariant();
 
+        enumHubGoalRewards.reward_smart_cutter = "reward_smart_cutter";
+        addCutterVariant();
+
+        enumHubGoalRewards.reward_underground_belt_tier_3 = "reward_underground_belt_tier_3";
+        addUndergroundBeltVariant();
+
         const typed = (x) => x;
         shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_belt_crossing] = typed([
             [MetaBeltCrossingBuilding, shapezAPI.exports.defaultBuildingVariant]
@@ -246,9 +260,76 @@ registerMod({
         shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.no_reward_upgrades] = null;
         shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_research_level] = null;
         // shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_hyperlink]= typed([[MetaHyperlinkBuilding, defaultBuildingVariant]]);
-        // shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_underground_belt_tier_3]= typed([[shapezAPI.exports.MetaUndergroundBeltBuilding, shapezAPI.ingame.buildings.underground_belt.variants.smart]]);
-        // shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_smart_cutter]= typed([[shapezAPI.exports.MetaCutterBuilding, shapezAPI.ingame.buildings.cutter.variants.laser]]);
+        shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_underground_belt_tier_3] = typed([
+            [shapezAPI.exports.MetaUndergroundBeltBuilding, shapezAPI.ingame.buildings.underground_belt.variants.smart]
+        ]);
+        shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_smart_cutter] = typed([
+            [shapezAPI.exports.MetaCutterBuilding, shapezAPI.ingame.buildings.cutter.variants.laser]
+        ]);
         // shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_splitter]= typed([[shapezAPI.exports.MetaBalancerBuilding, shapezAPI.ingame.buildings.balancer.variants.splitterTriple]]);
         // shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_merger]= typed([[shapezAPI.exports.MetaBalancerBuilding, shapezAPI.ingame.buildings.balancer.variants.mergerTriple]]);
     },
 });
+
+const gMetaBuildingRegistry = shapezAPI.exports.gMetaBuildingRegistry;
+const Vector = shapezAPI.exports.Vector;
+const getCodeFromBuildingData = shapezAPI.exports.getCodeFromBuildingData;
+const MetaUndergroundBeltBuilding = shapezAPI.ingame.buildings.underground_belt;
+
+/**
+ * @this {any}
+ */
+function updateSmartUndergroundBeltVariant(entity) {
+    if (!this.gameInitialized) {
+        return;
+    }
+
+    const staticComp = entity.components.StaticMapEntity;
+    if (!staticComp) {
+        return;
+    }
+
+    const metaUndergroundBelt = gMetaBuildingRegistry.findByClass(MetaUndergroundBeltBuilding);
+    // Compute affected area
+    const originalRect = staticComp.getTileSpaceBounds();
+    const affectedArea = originalRect.expandedInAllDirections(1);
+
+    for (let x = affectedArea.x; x < affectedArea.right(); ++x) {
+        for (let y = affectedArea.y; y < affectedArea.bottom(); ++y) {
+            if (originalRect.containsPoint(x, y)) {
+                // Make sure we don't update the original entity
+                continue;
+            }
+
+            const targetEntities = this.map.getLayersContentsMultipleXY(x, y);
+            for (let i = 0; i < targetEntities.length; ++i) {
+                const targetEntity = targetEntities[i];
+
+                const targetUndergroundBeltComp = targetEntity.components.UndergroundBelt;
+                const targetStaticComp = targetEntity.components.StaticMapEntity;
+
+                if (!targetUndergroundBeltComp || !(targetUndergroundBeltComp.tier == 2)) {
+                    // Not a smart tunnel
+                    continue;
+                }
+
+                const { rotation, rotationVariant } = metaUndergroundBelt.computeOptimalDirectionAndRotationVariantAtTile({
+                    root: this,
+                    tile: new Vector(x, y),
+                    rotation: targetStaticComp.originalRotation,
+                    variant: MetaUndergroundBeltBuilding.variants.smart,
+                    layer: targetEntity.layer,
+                    entity: targetEntity,
+                });
+                // Change stuff
+                metaUndergroundBelt.updateVariants(targetEntity, rotationVariant, MetaUndergroundBeltBuilding.variants.smart);
+
+                // Update code as well
+                targetStaticComp.code = getCodeFromBuildingData(metaUndergroundBelt, MetaUndergroundBeltBuilding.variants.smart, rotationVariant);
+
+                // Make sure the chunks know about the update
+                this.signals.entityChanged.dispatch(targetEntity);
+            }
+        }
+    }
+}

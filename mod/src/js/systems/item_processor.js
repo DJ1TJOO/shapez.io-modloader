@@ -1,6 +1,18 @@
 import { enumMergedShape } from "../shapes";
 const ItemProcessorSystem = shapezAPI.ingame.systems.find((x) => x.getId() === shapezAPI.exports.ItemProcessorSystem.getId());
 const globalConfig = shapezAPI.exports.globalConfig;
+
+function isTruthyItem(item) {
+    if (!item) {
+        return false;
+    }
+
+    if (item.getItemType() === "boolean") {
+        return !!item.value;
+    }
+
+    return true;
+}
 export function setupItemProcessor() {
     // ItemProcessorSystem.prototype.update = function() {
     //     for (let i = 0; i < this.allEntities.length; ++i) {
@@ -216,7 +228,7 @@ export function setupItemProcessor() {
         for (let i = 0; i < 4; ++i) {
             const network = pinsComp.slots[i].linkedNetwork;
             const networkValue = network && network.hasValue() ? network.currentValue : null;
-            if (networkValue && shapezAPI.exports.isTruthyItem(networkValue)) {
+            if (networkValue && isTruthyItem(networkValue)) {
                 wantedCorners.splice(i - 4 + wantedCorners.length, 1);
                 unwantedCorners.push(i);
             }

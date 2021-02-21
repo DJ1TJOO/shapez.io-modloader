@@ -225,6 +225,12 @@ export function addShapes() {
         return new shapezAPI.exports.ShapeDefinition({ layers: [outDefinition] });
     };
 
+    shapezAPI.exports.ShapeDefinitionManager.prototype.shapeActionCutLaser = function(definition, wantedCorners, unwantedCorners) {
+        const wantedShape = definition.cloneFilteredByQuadrants(wantedCorners);
+        const remainder = definition.cloneFilteredByQuadrants(unwantedCorners);
+        return [wantedShape, remainder];
+    };
+
     shapezAPI.exports.ShapeDefinitionManager.prototype.shapeActionSmartStack = function(mainDefinition, definition1, definition2, definition3) {
         const stacked = mainDefinition.cloneAndSmartStackWith(definition1, definition2, definition3);
         return stacked;
