@@ -622,8 +622,6 @@ export class HUDBuildingPlacerLogic extends BaseHUDPart {
             this.currentVariant.set(variant);
 
             this.fakeEntity = new Entity(null);
-            metaBuilding.setupEntityComponents(this.fakeEntity, null);
-
             this.fakeEntity.addComponent(
                 new StaticMapEntityComponent({
                     origin: new Vector(0, 0),
@@ -632,6 +630,8 @@ export class HUDBuildingPlacerLogic extends BaseHUDPart {
                     code: getCodeFromBuildingData(metaBuilding, variant, 0),
                 })
             );
+            metaBuilding.setupEntityComponents(this.fakeEntity, null);
+
             metaBuilding.updateVariants(this.fakeEntity, 0, this.currentVariant.get());
         } else {
             this.fakeEntity = null;
