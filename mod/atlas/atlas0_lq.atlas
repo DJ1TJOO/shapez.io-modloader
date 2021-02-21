@@ -83,7 +83,7 @@ sprites/blueprints/belt_crossing
   index: -1
 sprites/blueprints/belt_crossing-corner
   rotate: false
-  xy: 884, 35
+  xy: 930, 35
   size: 44, 43
   orig: 48, 48
   offset: 3, 4
@@ -104,7 +104,7 @@ sprites/blueprints/cutter-laser
   index: -1
 sprites/blueprints/hyperlink
   rotate: false
-  xy: 1193, 32
+  xy: 1239, 32
   size: 22, 46
   orig: 48, 48
   offset: 13, 1
@@ -167,7 +167,7 @@ sprites/blueprints/storage-mini
   index: -1
 sprites/blueprints/underground_belt_entry-smart_0
   rotate: false
-  xy: 975, 34
+  xy: 1021, 34
   size: 42, 44
   orig: 48, 48
   offset: 4, 0
@@ -188,7 +188,7 @@ sprites/blueprints/underground_belt_entry-smart_4
   index: -1
 sprites/blueprints/underground_belt_exit-smart_1
   rotate: false
-  xy: 1063, 33
+  xy: 1109, 33
   size: 41, 45
   orig: 48, 48
   offset: 4, 3
@@ -286,14 +286,14 @@ sprites/buildings/balancer-splitter-triple_right
   index: -1
 sprites/buildings/belt_crossing
   rotate: false
-  xy: 930, 35
+  xy: 976, 35
   size: 43, 43
   orig: 48, 48
   offset: 3, 3
   index: -1
 sprites/buildings/belt_crossing-corner
   rotate: false
-  xy: 1149, 36
+  xy: 1195, 36
   size: 42, 42
   orig: 48, 48
   offset: 4, 4
@@ -314,7 +314,7 @@ sprites/buildings/cutter-laser
   index: -1
 sprites/buildings/hyperlink
   rotate: false
-  xy: 1217, 32
+  xy: 1263, 32
   size: 22, 46
   orig: 48, 48
   offset: 13, 1
@@ -368,9 +368,16 @@ sprites/buildings/stacker-smart
   orig: 144, 48
   offset: 3, 0
   index: -1
+sprites/buildings/storage-mini
+  rotate: false
+  xy: 884, 30
+  size: 44, 48
+  orig: 48, 48
+  offset: 4, 0
+  index: -1
 sprites/buildings/underground_belt_entry-smart_0
   rotate: false
-  xy: 1019, 34
+  xy: 1065, 34
   size: 42, 44
   orig: 48, 48
   offset: 4, 0
@@ -391,7 +398,7 @@ sprites/buildings/underground_belt_entry-smart_4
   index: -1
 sprites/buildings/underground_belt_exit-smart_1
   rotate: false
-  xy: 1106, 33
+  xy: 1152, 33
   size: 41, 45
   orig: 48, 48
   offset: 4, 3

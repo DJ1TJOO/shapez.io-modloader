@@ -48,7 +48,7 @@ sprites/blueprints/balancer-splitter-triple_all
   index: -1
 sprites/blueprints/balancer-splitter-triple_both
   rotate: false
-  xy: 750, 306
+  xy: 652, 306
   size: 96, 83
   orig: 96, 96
   offset: 0, 3
@@ -76,14 +76,14 @@ sprites/blueprints/balancer-splitter-triple_right
   index: -1
 sprites/blueprints/belt_crossing
   rotate: false
-  xy: 741, 131
+  xy: 1162, 310
   size: 84, 84
   orig: 96, 96
   offset: 8, 8
   index: -1
 sprites/blueprints/belt_crossing-corner
   rotate: false
-  xy: 1162, 311
+  xy: 1248, 310
   size: 84, 83
   orig: 96, 96
   offset: 8, 9
@@ -125,14 +125,14 @@ sprites/blueprints/hyperlink-hyperlink_exit
   index: -1
 sprites/blueprints/hyperlink_left
   rotate: false
-  xy: 871, 156
+  xy: 1438, 246
   size: 60, 67
   orig: 96, 96
   offset: 3, 3
   index: -1
 sprites/blueprints/hyperlink_right
   rotate: false
-  xy: 871, 87
+  xy: 696, 148
   size: 60, 67
   orig: 96, 96
   offset: 33, 3
@@ -167,49 +167,49 @@ sprites/blueprints/storage-mini
   index: -1
 sprites/blueprints/underground_belt_entry-smart_0
   rotate: false
-  xy: 657, 132
+  xy: 1078, 306
   size: 82, 87
   orig: 96, 96
   offset: 10, 0
   index: -1
 sprites/blueprints/underground_belt_entry-smart_2
   rotate: false
-  xy: 564, 119
+  xy: 653, 217
   size: 91, 87
   orig: 96, 96
   offset: 1, 0
   index: -1
 sprites/blueprints/underground_belt_entry-smart_4
   rotate: false
-  xy: 941, 302
+  xy: 848, 302
   size: 91, 87
   orig: 96, 96
   offset: 4, 0
   index: -1
 sprites/blueprints/underground_belt_exit-smart_1
   rotate: false
-  xy: 1115, 217
+  xy: 1110, 216
   size: 78, 88
   orig: 96, 96
   offset: 10, 8
   index: -1
 sprites/blueprints/underground_belt_exit-smart_3
   rotate: false
-  xy: 940, 221
+  xy: 935, 221
   size: 88, 79
   orig: 96, 96
   offset: 0, 8
   index: -1
 sprites/blueprints/underground_belt_exit-smart_5
   rotate: false
-  xy: 1248, 314
+  xy: 1334, 314
   size: 88, 79
   orig: 96, 96
   offset: 8, 8
   index: -1
 sprites/blueprints/underground_belt_exit-tier2
   rotate: false
-  xy: 844, 225
+  xy: 839, 225
   size: 94, 75
   orig: 96, 96
   offset: 2, 21
@@ -223,7 +223,7 @@ sprites/buildings/balancer-merger-triple_all
   index: -1
 sprites/buildings/balancer-merger-triple_both
   rotate: false
-  xy: 652, 306
+  xy: 563, 25
   size: 96, 83
   orig: 96, 96
   offset: 0, 11
@@ -258,7 +258,7 @@ sprites/buildings/balancer-splitter-triple_all
   index: -1
 sprites/buildings/balancer-splitter-triple_both
   rotate: false
-  xy: 653, 221
+  xy: 750, 306
   size: 96, 83
   orig: 96, 96
   offset: 0, 3
@@ -286,14 +286,14 @@ sprites/buildings/balancer-splitter-triple_right
   index: -1
 sprites/buildings/belt_crossing
   rotate: false
-  xy: 1030, 214
+  xy: 1025, 214
   size: 83, 83
   orig: 96, 96
   offset: 8, 8
   index: -1
 sprites/buildings/belt_crossing-corner
   rotate: false
-  xy: 1275, 230
+  xy: 1354, 230
   size: 82, 82
   orig: 96, 96
   offset: 9, 9
@@ -314,7 +314,7 @@ sprites/buildings/cutter-laser
   index: -1
 sprites/buildings/hyperlink
   rotate: false
-  xy: 827, 125
+  xy: 652, 116
   size: 42, 90
   orig: 96, 96
   offset: 27, 3
@@ -335,14 +335,14 @@ sprites/buildings/hyperlink-hyperlink_exit
   index: -1
 sprites/buildings/hyperlink_left
   rotate: false
-  xy: 933, 153
+  xy: 758, 149
   size: 60, 66
   orig: 96, 96
   offset: 3, 3
   index: -1
 sprites/buildings/hyperlink_right
   rotate: false
-  xy: 933, 85
+  xy: 661, 48
   size: 60, 66
   orig: 96, 96
   offset: 33, 3
@@ -368,44 +368,51 @@ sprites/buildings/stacker-smart
   orig: 288, 96
   offset: 7, 1
   index: -1
+sprites/buildings/storage-mini
+  rotate: false
+  xy: 564, 110
+  size: 86, 96
+  orig: 96, 96
+  offset: 10, 0
+  index: -1
 sprites/buildings/underground_belt_entry-smart_0
   rotate: false
-  xy: 1078, 307
+  xy: 1190, 222
   size: 82, 86
   orig: 96, 96
   offset: 10, 0
   index: -1
 sprites/buildings/underground_belt_entry-smart_2
   rotate: false
-  xy: 848, 302
+  xy: 746, 217
   size: 91, 87
   orig: 96, 96
   offset: 1, 0
   index: -1
 sprites/buildings/underground_belt_entry-smart_4
   rotate: false
-  xy: 751, 217
+  xy: 941, 302
   size: 91, 87
   orig: 96, 96
   offset: 4, 0
   index: -1
 sprites/buildings/underground_belt_exit-smart_1
   rotate: false
-  xy: 1195, 221
+  xy: 1274, 220
   size: 78, 88
   orig: 96, 96
   offset: 10, 8
   index: -1
 sprites/buildings/underground_belt_exit-smart_3
   rotate: false
-  xy: 1338, 315
+  xy: 1424, 315
   size: 88, 78
   orig: 96, 96
   offset: 0, 8
   index: -1
 sprites/buildings/underground_belt_exit-smart_5
   rotate: false
-  xy: 1359, 235
+  xy: 1514, 316
   size: 88, 78
   orig: 96, 96
   offset: 8, 8

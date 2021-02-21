@@ -1,0 +1,31 @@
+$buildingsAndVariants: belt_crossing,
+belt_crossing-corner,
+belt_crossing-switcher,
+hyperlink,
+miner-deep,
+cutter-laser,
+shape_combiner,
+stacker-smart,
+underground_belt-smart;
+@each $building in $buildingsAndVariants {
+    [data-icon="building_tutorials/#{$building}.png"] {
+        /* @load-async */
+        background-image: url("**{icons_building_tutorials_#{$building}}**") !important;
+    }
+}
+
+[data-icon="building_tutorials/hyperlink-hyperlink_exit.png"],
+[data-icon="building_tutorials/hyperlink-hyperlink_entrance.png"] {
+    /* @load-async */
+    background-image: url("**{icons_building_tutorials_hyperlink}**") !important;
+}
+
+[data-icon="building_tutorials/balancer-splitter-triple.png"] {
+    /* @load-async */
+    background-image: url("**{icons_building_tutorials_balancer-splitter-triple}**") !important;
+}
+
+[data-icon="building_tutorials/balancer-merger-triple.png"] {
+    /* @load-async */
+    background-image: url("**{icons_building_tutorials_balancer-merger-triple}**") !important;
+}

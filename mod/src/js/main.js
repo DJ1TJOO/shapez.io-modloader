@@ -1,11 +1,17 @@
 import { MetaBeltCrossingBuilding } from "./buildings/belt_crossing";
+import { addMinerVariant } from "./buildings/miner";
 import { MetaShapeCombinerBuilding } from "./buildings/shape_combiner";
+import { addStackerVariant } from "./buildings/stacker";
+import { addStorageVariant } from "./buildings/storage";
 import { BeltCrossingComponent } from "./components/belt_crossing";
+import { MinerDeepComponent } from "./components/miner_deep";
 import { SIGameMode } from "./modes/SI";
 import { modId } from "./modId";
 import { addShapes } from "./shapes";
 import { BeltCrossingSystem } from "./systems/belt_crossing";
 import { addHandlers, setupItemProcessor } from "./systems/item_processor";
+import { MinerDeepSystem } from "./systems/miner_deep";
+import { updateStorageSystem } from "./systems/storage";
 const enumHubGoalRewards = shapezAPI.exports.enumHubGoalRewards;
 
 registerMod({
@@ -44,6 +50,63 @@ registerMod({
                         description: "Crosses the items on two adjacent belts.",
                     },
                 },
+                storage: {
+                    mini: {
+                        name: "Storage (Mini)",
+                        description: "Stores excess items, up to a given capacity. Prioritizes the top output and can be used as an overflow gate.",
+                    },
+                },
+                miner: {
+                    deep: {
+                        name: "Extractor (Deep)",
+                        description: "Place over a shape or color to extract it. Extracts more than a normal extractor.",
+                    },
+                },
+
+                stacker: {
+                    smart: {
+                        name: "Smart Stacker",
+                        description: "Combines its inputs, stacking the 3 bottom inputs onto the primary left input.",
+                    },
+                },
+                cutter: {
+                    laser: {
+                        name: "Smart Cutter",
+                        description: "Cuts a shape, removing the corners indicated on the wires layer.",
+                    },
+                },
+                balancer: {
+                    "splitter-triple": {
+                        name: "Smart Splitter",
+                        description: "Splits one conveyor belt into up to three outputs.",
+                    },
+
+                    "merger-triple": {
+                        name: "Smart Merger",
+                        description: "Merges up to three conveyor belts into one.",
+                    },
+                },
+                underground_belt: {
+                    smart: {
+                        name: "Smart Tunnel",
+                        description: "Allows you to tunnel resources under buildings and belts, and can also have inputs and outputs from the sides.",
+                    },
+                },
+                hyperlink: {
+                    default: {
+                        name: "Hyperlink",
+                        description: "Transports up to five belts of items at superfast speed, hold and drag to place multiple.",
+                    },
+
+                    hyperlink_entrance: {
+                        name: "Hyperlink Entry",
+                        description: "Inputs three belts of items onto a hyperlink.",
+                    },
+                    hyperlink_exit: {
+                        name: "Hyperlink Exit",
+                        description: "Recieves items from a hyperlink and outputs them onto three belts.",
+                    },
+                },
             },
             storyRewards: {
                 reward_shape_combiner: {
@@ -61,9 +124,48 @@ registerMod({
                 },
                 no_reward_upgrades: {
                     title: "Research",
-                    desc: `
-                        You can now research speed upgrades! <br><br>
+                    desc: `You can now research speed upgrades! <br><br>
                         Remember that to keep building ratios accurate you need to have all four kinds of research on the same tier!`,
+                },
+                reward_research_level: {
+                    title: "Research Tier <x>",
+                    desc: `New research Level Unlocked!`,
+                },
+                reward_hyperlink: {
+                    title: "Hyperlink",
+                    desc: `You unlocked the <strong> Hyperlink </strong>! <br><br>
+                            The hyperlink transport up to 3 belts of items at superfast speed! < br > < br >
+                            You can use the hyperlink entrance and exit to move items around via the hyperlink.`,
+                },
+                reward_underground_belt_tier_3: {
+                    title: "Smart Tunnel",
+                    desc: `You unlocked the <strong> Smart Tunnel </strong>! <br><br>
+                            The smart tunnel does not connect to the other variants,
+                            and can also have inputs and outputs from the sides
+                            for EXTREME compactness.`,
+                },
+                reward_smart_cutter: {
+                    title: "Smart Cutter",
+                    desc: `You unlocked the <strong> Smart Cutter </strong>! <br><br>
+                            It accepts wire inputs
+                            for each corner and cuts off the indicated corners.`,
+                },
+                reward_deep_miner: {
+                    title: "Deep Miner",
+                    desc: `You unlocked the <strong> Deep Miner </strong>! <br><br>
+                    Yes, you can 't chain it, BUT it outputs much more than a normal miner, making it possible to get more than before out of a deposit.`,
+                },
+                reward_smart_stacker: {
+                    title: "Smart Stacker",
+                    desc: `You unlocked the <strong> Smart Stacker </strong>! <br><br>
+                            It accepts four inputs to be stacked,
+                            but it does not need all four to
+
+                            function. <br> <br>
+                            So long as you have the primary left input,
+                            it will stack all the other inputs on top. <br>
+                            Be sure to use the right ratios,
+                            otherwise some stcakers will not recieve part of the shapes you want them to stack!`,
                 },
             },
             keybindings: {
@@ -84,22 +186,21 @@ registerMod({
     main: (config) => {
         //TODO:
         // Shapez Industries:
-        // - Resources: add tutorials
         // - Remove default splitter and merger
         // - Add building speeds to config and add new underground belt tier (smart)
         // - Add smart merger and splitter
         // - Add hyperlink
         // - Add smart cutter (laser?)
-        // - Add new miner variant deep
-        // - Add smart stacker
-        // - Add small storage
-        // - Add tutorial goal mappings
         //DONE:
+        // - Add new miner variant deep
         // - Add belt crossing
         // - Add shape combiner
         // - Add SI gamemode
         // - Add new shapez
-
+        // - Add small storage
+        // - Add smart stacker
+        // - Resources: add tutorials
+        // - Add tutorial goal mappings
         shapezAPI.injectCss("**{css}**", modId);
         shapezAPI.registerAtlases("**{atlas_atlas0_hq}**", "**{atlas_atlas0_mq}**", "**{atlas_atlas0_lq}**");
         shapezAPI.ingame.gamemodes[SIGameMode.getId()] = SIGameMode;
@@ -116,5 +217,38 @@ registerMod({
         shapezAPI.ingame.systems.push(BeltCrossingSystem);
         shapezAPI.registerBuilding(MetaBeltCrossingBuilding, "**{icons_building_icon_belt_crossing}**", "K");
         shapezAPI.toolbars.buildings.primaryBuildings.splice(shapezAPI.toolbars.buildings.primaryBuildings.indexOf(shapezAPI.ingame.buildings.underground_belt) + 1, 0, MetaBeltCrossingBuilding);
+
+        addStorageVariant();
+        updateStorageSystem();
+
+        enumHubGoalRewards.reward_deep_miner = "reward_deep_miner";
+        shapezAPI.ingame.components[MinerDeepComponent.getId()] = MinerDeepComponent;
+        shapezAPI.ingame.systems.push(MinerDeepSystem);
+        shapezAPI.ingame["systemsRenderOrderDynamic"].push(MinerDeepSystem);
+        addMinerVariant();
+
+        enumHubGoalRewards.reward_smart_stacker = "reward_smart_stacker";
+        addStackerVariant();
+
+        const typed = (x) => x;
+        shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_belt_crossing] = typed([
+            [MetaBeltCrossingBuilding, shapezAPI.exports.defaultBuildingVariant]
+        ]);
+        shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_shape_combiner] = typed([
+            [MetaShapeCombinerBuilding, shapezAPI.exports.defaultBuildingVariant]
+        ]);
+        shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_deep_miner] = typed([
+            [shapezAPI.exports.MetaMinerBuilding, shapezAPI.ingame.buildings.miner.variants.deep]
+        ]);
+        shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_smart_stacker] = typed([
+            [shapezAPI.exports.MetaStackerBuilding, shapezAPI.ingame.buildings.stacker.variants.smart]
+        ]);
+        shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.no_reward_upgrades] = null;
+        shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_research_level] = null;
+        // shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_hyperlink]= typed([[MetaHyperlinkBuilding, defaultBuildingVariant]]);
+        // shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_underground_belt_tier_3]= typed([[shapezAPI.exports.MetaUndergroundBeltBuilding, shapezAPI.ingame.buildings.underground_belt.variants.smart]]);
+        // shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_smart_cutter]= typed([[shapezAPI.exports.MetaCutterBuilding, shapezAPI.ingame.buildings.cutter.variants.laser]]);
+        // shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_splitter]= typed([[shapezAPI.exports.MetaBalancerBuilding, shapezAPI.ingame.buildings.balancer.variants.splitterTriple]]);
+        // shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_merger]= typed([[shapezAPI.exports.MetaBalancerBuilding, shapezAPI.ingame.buildings.balancer.variants.mergerTriple]]);
     },
 });
