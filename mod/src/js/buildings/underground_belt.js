@@ -250,7 +250,7 @@ export const addUndergroundBeltVariant = () => {
     const name = "smart";
     if (!undergroundBelt.variants) undergroundBelt.variants = {};
     undergroundBelt.variants[name] = name;
-    undergroundBelt.avaibleVariants[name] = (root) => true; //root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_underground_belt_tier_3);
+    undergroundBelt.avaibleVariants[name] = (root) => root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_underground_belt_tier_3);
     undergroundBelt.dimensions[name] = () => new Vector(1, 1);
     undergroundBelt.isRemovable[name] = () => true;
     undergroundBelt.isRotateable[name] = () => true;

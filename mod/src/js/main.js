@@ -1,3 +1,4 @@
+import { addBalancerVariants } from "./buildings/balancer";
 import { MetaBeltCrossingBuilding } from "./buildings/belt_crossing";
 import { addCutterVariant } from "./buildings/cutter";
 import { addMinerVariant } from "./buildings/miner";
@@ -7,14 +8,20 @@ import { addStorageVariant } from "./buildings/storage";
 import { addUndergroundBeltVariant } from "./buildings/underground_belt";
 import { BeltCrossingComponent } from "./components/belt_crossing";
 import { MinerDeepComponent } from "./components/miner_deep";
+import { SmartBalancerComponent } from "./components/smart_balancer";
 import { SIGameMode } from "./modes/SI";
 import { modId } from "./modId";
 import { addShapes } from "./shapes";
 import { BeltCrossingSystem } from "./systems/belt_crossing";
 import { addHandlers, setupItemProcessor } from "./systems/item_processor";
 import { MinerDeepSystem } from "./systems/miner_deep";
+import { SmartBalancerSystem } from "./systems/smart_balancer";
 import { updateStorageSystem } from "./systems/storage";
 const enumHubGoalRewards = shapezAPI.exports.enumHubGoalRewards;
+const gMetaBuildingRegistry = shapezAPI.exports.gMetaBuildingRegistry;
+const Vector = shapezAPI.exports.Vector;
+const getCodeFromBuildingData = shapezAPI.exports.getCodeFromBuildingData;
+const MetaUndergroundBeltBuilding = shapezAPI.ingame.buildings.underground_belt;
 
 registerMod({
     title: "What a title?",
@@ -193,9 +200,6 @@ registerMod({
     main: (config) => {
         //TODO:
         // Shapez Industries:
-        // - Remove default splitter and merger
-        // - Add new underground belt tier (smart)
-        // - Add smart merger and splitter
         // - Add hyperlink
         //DONE:
         // - Add building speeds to config and
@@ -208,7 +212,10 @@ registerMod({
         // - Add smart stacker
         // - Resources: add tutorials
         // - Add tutorial goal mappings
+        // - Add new underground belt tier (smart)
         // - Add smart cutter (laser?)
+        // - Remove default splitter and merger
+        // - Add smart merger and splitter
         shapezAPI.injectCss("**{css}**", modId);
         shapezAPI.registerAtlases("**{atlas_atlas0_hq}**", "**{atlas_atlas0_mq}**", "**{atlas_atlas0_lq}**");
         shapezAPI.ingame.gamemodes[SIGameMode.getId()] = SIGameMode;
@@ -244,6 +251,10 @@ registerMod({
         enumHubGoalRewards.reward_underground_belt_tier_3 = "reward_underground_belt_tier_3";
         addUndergroundBeltVariant();
 
+        shapezAPI.ingame.components[SmartBalancerComponent.getId()] = SmartBalancerComponent;
+        shapezAPI.ingame.systems.push(SmartBalancerSystem);
+        addBalancerVariants();
+
         const typed = (x) => x;
         shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_belt_crossing] = typed([
             [MetaBeltCrossingBuilding, shapezAPI.exports.defaultBuildingVariant]
@@ -270,11 +281,6 @@ registerMod({
         // shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_merger]= typed([[shapezAPI.exports.MetaBalancerBuilding, shapezAPI.ingame.buildings.balancer.variants.mergerTriple]]);
     },
 });
-
-const gMetaBuildingRegistry = shapezAPI.exports.gMetaBuildingRegistry;
-const Vector = shapezAPI.exports.Vector;
-const getCodeFromBuildingData = shapezAPI.exports.getCodeFromBuildingData;
-const MetaUndergroundBeltBuilding = shapezAPI.ingame.buildings.underground_belt;
 
 /**
  * @this {any}
