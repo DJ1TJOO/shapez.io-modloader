@@ -75,10 +75,10 @@ function copy(source, deep) {
 }
 
 registerMod({
-    title: "What a title?",
+    title: "Shapez Industries",
     id: modId,
-    description: "A miniscule description",
-    authors: ["No authors here"],
+    description: "The mod that makes you play more shapez.io",
+    authors: ["Sense_101", "DJ1TJOO"],
     version: "1.0.0",
     gameVersion: "ML01",
     dependencies: [],
@@ -87,7 +87,7 @@ registerMod({
     translations: {
         en: {
             [modId]: {
-                description: "A miniscule description",
+                description: "The mod that makes you play more shapez.io",
             },
             buildings: {
                 shape_combiner: {
