@@ -1,7 +1,16 @@
+const enumHubGoalRewards = shapezAPI.exports.enumHubGoalRewards;
+enumHubGoalRewards.reward_research_level = "reward_research_level";
+enumHubGoalRewards.no_reward_upgrades = "no_reward_upgrades";
+enumHubGoalRewards.reward_shape_combiner = "reward_shape_combiner";
+enumHubGoalRewards.reward_belt_crossing = "reward_belt_crossing";
+enumHubGoalRewards.reward_hyperlink = "reward_hyperlink";
+enumHubGoalRewards.reward_deep_miner = "reward_deep_miner";
+enumHubGoalRewards.reward_smart_stacker = "reward_smart_stacker";
+enumHubGoalRewards.reward_smart_cutter = "reward_smart_cutter";
+enumHubGoalRewards.reward_underground_belt_tier_3 = "reward_underground_belt_tier_3";
+
 const findNiceIntegerValue = shapezAPI.exports.findNiceIntegerValue;
 const GameMode = shapezAPI.exports.GameMode;
-const enumHubGoalRewards = shapezAPI.exports.enumHubGoalRewards;
-enumHubGoalRewards.no_reward_upgrades = "no_reward_upgrades";
 
 const rocketShape = "Sb------:--Cb--Cb:3u------:----3r--";
 const finalGameShape = "Ru1w--1w:--1w--1w:----Ru--";

@@ -14,112 +14,97 @@ function isTruthyItem(item) {
     return true;
 }
 export function setupItemProcessor() {
-    // ItemProcessorSystem.prototype.update = function() {
-    //     for (let i = 0; i < this.allEntities.length; ++i) {
-    //         const entity = this.allEntities[i];
-    //         const processorComp = entity.components.ItemProcessor;
-    //         let ejectorComp = entity.components.HyperlinkEjector;
-    //         if (!ejectorComp) {
-    //             ejectorComp = entity.components.ItemEjector;
-    //         }
+    ItemProcessorSystem.prototype.update = function() {
+        for (let i = 0; i < this.allEntities.length; ++i) {
+            const entity = this.allEntities[i];
+            const processorComp = entity.components.ItemProcessor;
+            let ejectorComp = entity.components.HyperlinkEjector;
+            if (!ejectorComp) {
+                ejectorComp = entity.components.ItemEjector;
+            }
+            for (let chargeIndex = 0;; chargeIndex++) {
+                // Check if we have an open queue spot and can start a new charge
+                if (this.canProcess(entity)) {
+                    if (processorComp.ongoingCharges.length < shapezAPI.exports.MAX_QUEUED_CHARGES) {
+                        this.startNewCharge(entity);
+                    }
+                }
 
-    //         for (let chargeIndex = 0;; chargeIndex++) {
-    //             // Check if we have an open queue spot and can start a new charge
-    //             if (this.canProcess(entity)) {
-    //                 if (!processorComp.makeCharges && processorComp.inputSlots[0]) {
-    //                     for (let i = 0; i < processorComp.inputSlots.length; ++i) {
-    //                         const slot = processorComp.inputSlots[i].sourceSlot;
-    //                         const item = processorComp.inputSlots[i].item;
-    //                         const isOnMap = this.root.camera.getIsMapOverlayActive();
-    //                         const isOffWindow = this.root.app.unloaded || !this.root.app.pageVisible;
-    //                         if (ejectorComp.canEjectOnSlot(slot) && (this.isAcceptorSlotFree(entity, slot) || isOnMap || isOffWindow)) {
-    //                             if (ejectorComp.tryEject(slot, item)) {
-    //                                 processorComp.inputSlots.splice(i, 1);
-    //                             }
-    //                         }
-    //                     }
-    //                 } else if (processorComp.ongoingCharges.length < shapezAPI.exports.MAX_QUEUED_CHARGES) {
-    //                     this.startNewCharge(entity);
-    //                 }
-    //             }
+                if (chargeIndex >= 1 || processorComp.ongoingCharges.length == 0) {
+                    break;
+                }
 
-    //             if (chargeIndex >= 1 || processorComp.ongoingCharges.length == 0) {
-    //                 break;
-    //             }
+                const currentCharge = processorComp.ongoingCharges[chargeIndex];
+                // Process next charge
+                if (currentCharge.remainingTime > 0.0) {
+                    const deltaTime = this.root.dynamicTickrate.deltaSeconds + processorComp.bonusTime;
+                    currentCharge.remainingTime -= deltaTime;
+                    processorComp.bonusTime = 0;
+                    if (currentCharge.remainingTime > 0.0) {
+                        // This charge is not finished, so don't process the next one
+                        break;
+                    }
+                    if (currentCharge.remainingTime < 0.0) {
+                        // Add bonus time, this is the time we spent too much
+                        processorComp.bonusTime += -currentCharge.remainingTime;
+                    }
+                }
+                // Check if it finished
+                if (currentCharge.remainingTime <= 0.0) {
+                    if (!currentCharge.items) {
+                        this.processCharge(entity);
+                    }
+                    const itemsToEject = currentCharge.items;
+                    // Go over all items and try to eject them
+                    for (let j = 0; j < itemsToEject.length; ++j) {
+                        const { item, requiredSlot, preferredSlot } = itemsToEject[j];
 
-    //             const currentCharge = processorComp.ongoingCharges[chargeIndex];
+                        let slot = null;
 
-    //             // Process next charge
-    //             if (currentCharge.remainingTime > 0.0) {
-    //                 const deltaTime = this.root.dynamicTickrate.deltaSeconds + processorComp.bonusTime;
-    //                 currentCharge.remainingTime -= deltaTime;
-    //                 processorComp.bonusTime = 0;
-    //                 if (currentCharge.remainingTime > 0.0) {
-    //                     // This charge is not finished, so don't process the next one
-    //                     break;
-    //                 }
-    //                 if (currentCharge.remainingTime < 0.0) {
-    //                     // Add bonus time, this is the time we spent too much
-    //                     processorComp.bonusTime += -currentCharge.remainingTime;
-    //                 }
-    //             }
-    //             // Check if it finished
-    //             if (currentCharge.remainingTime <= 0.0) {
-    //                 if (!currentCharge.items) {
-    //                     this.processCharge(entity);
-    //                 }
-    //                 const itemsToEject = currentCharge.items;
-    //                 // Go over all items and try to eject them
-    //                 for (let j = 0; j < itemsToEject.length; ++j) {
-    //                     const { item, requiredSlot, preferredSlot } = itemsToEject[j];
+                        if (requiredSlot !== null && requiredSlot !== undefined) {
+                            // We have a slot override, check if that is free
+                            if (ejectorComp.canEjectOnSlot(requiredSlot)) {
+                                slot = requiredSlot;
+                            }
+                        } else if (preferredSlot !== null && preferredSlot !== undefined) {
+                            // We have a slot preference, try using it but otherwise use a free slot
 
-    //                     let slot = null;
+                            if (ejectorComp.canEjectOnSlot(preferredSlot) && preferredSlot !== ejectorComp.lastUsedSlot) {
+                                slot = preferredSlot;
+                                ejectorComp.lastUsedSlot = slot;
+                            } else {
+                                if (!entity.components.HyperlinkAcceptor && ejectorComp.slots[2]) {
+                                    slot = ejectorComp.getNextFreeSlotForTriple(preferredSlot, ejectorComp.lastUsedSlot);
+                                    if (slot !== null) {
+                                        ejectorComp.lastUsedSlot = slot;
+                                    }
+                                } else {
+                                    slot = ejectorComp.getFirstFreeSlot();
+                                }
+                            }
+                        } else {
+                            // We can eject on any slot
+                            slot = ejectorComp.getFirstFreeSlot();
+                        }
+                        if (slot !== null) {
+                            // Alright, we can actually eject
+                            if (!ejectorComp.tryEject(slot, item)) {
+                                assert(false, "Failed to eject");
+                            } else {
+                                itemsToEject.splice(j, 1);
+                                j -= 1;
+                            }
+                        }
+                    }
 
-    //                     if (requiredSlot !== null && requiredSlot !== undefined) {
-    //                         // We have a slot override, check if that is free
-    //                         if (ejectorComp.canEjectOnSlot(requiredSlot)) {
-    //                             slot = requiredSlot;
-    //                         }
-    //                     } else if (preferredSlot !== null && preferredSlot !== undefined) {
-    //                         // We have a slot preference, try using it but otherwise use a free slot
-
-    //                         if (ejectorComp.canEjectOnSlot(preferredSlot) && preferredSlot !== ejectorComp.lastUsedSlot) {
-    //                             slot = preferredSlot;
-    //                             ejectorComp.lastUsedSlot = slot;
-    //                         } else {
-    //                             if (!entity.components.HyperlinkAcceptor && ejectorComp.slots[2]) {
-    //                                 slot = ejectorComp.getNextFreeSlotForTriple(preferredSlot, ejectorComp.lastUsedSlot);
-    //                                 if (slot !== null) {
-    //                                     ejectorComp.lastUsedSlot = slot;
-    //                                 }
-    //                             } else {
-    //                                 slot = ejectorComp.getFirstFreeSlot();
-    //                             }
-    //                         }
-    //                     } else {
-    //                         // We can eject on any slot
-    //                         slot = ejectorComp.getFirstFreeSlot();
-    //                     }
-    //                     if (slot !== null) {
-    //                         // Alright, we can actually eject
-    //                         if (!ejectorComp.tryEject(slot, item)) {
-    //                             assert(false, "Failed to eject");
-    //                         } else {
-    //                             itemsToEject.splice(j, 1);
-    //                             j -= 1;
-    //                         }
-    //                     }
-    //                 }
-
-    //                 // If the charge was entirely emptied to the outputs, start the next charge
-    //                 if (itemsToEject.length === 0) {
-    //                     processorComp.ongoingCharges.shift();
-    //                     chargeIndex--;
-    //                 }
-    //             }
-    //         }
-    //     }
-    // };
+                    // If the charge was entirely emptied to the outputs, start the next charge
+                    if (itemsToEject.length === 0) {
+                        processorComp.ongoingCharges.shift();
+                    }
+                }
+            }
+        }
+    };
 
     //Add process types
     shapezAPI.exports.enumItemProcessorTypes["hyperlink"] = "hyperlink";

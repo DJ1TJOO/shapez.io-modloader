@@ -1,18 +1,25 @@
 import { addBalancerVariants } from "./buildings/balancer";
 import { MetaBeltCrossingBuilding } from "./buildings/belt_crossing";
 import { addCutterVariant } from "./buildings/cutter";
+import { MetaHyperlinkBuilding } from "./buildings/hyperlink";
 import { addMinerVariant } from "./buildings/miner";
 import { MetaShapeCombinerBuilding } from "./buildings/shape_combiner";
 import { addStackerVariant } from "./buildings/stacker";
 import { addStorageVariant } from "./buildings/storage";
 import { addUndergroundBeltVariant } from "./buildings/underground_belt";
 import { BeltCrossingComponent } from "./components/belt_crossing";
+import { HyperlinkComponent } from "./components/hyperlink";
+import { HyperlinkAcceptorComponent } from "./components/hyperlink_acceptor";
+import { HyperlinkEjectorComponent } from "./components/hyperlink_ejector";
 import { MinerDeepComponent } from "./components/miner_deep";
 import { SmartBalancerComponent } from "./components/smart_balancer";
 import { SIGameMode } from "./modes/SI";
 import { modId } from "./modId";
 import { addShapes } from "./shapes";
 import { BeltCrossingSystem } from "./systems/belt_crossing";
+import { HyperlinkSystem } from "./systems/hyperlink";
+import { HyperlinkAcceptorSystem } from "./systems/hyperlink_acceptor";
+import { HyperlinkEjectorSystem } from "./systems/hyperlink_ejector";
 import { addHandlers, setupItemProcessor } from "./systems/item_processor";
 import { MinerDeepSystem } from "./systems/miner_deep";
 import { SmartBalancerSystem } from "./systems/smart_balancer";
@@ -22,6 +29,50 @@ const gMetaBuildingRegistry = shapezAPI.exports.gMetaBuildingRegistry;
 const Vector = shapezAPI.exports.Vector;
 const getCodeFromBuildingData = shapezAPI.exports.getCodeFromBuildingData;
 const MetaUndergroundBeltBuilding = shapezAPI.ingame.buildings.underground_belt;
+let orginalTranslations = {};
+
+function matchOverwriteRecursive(dest, src) {
+    if (typeof dest !== "object" || typeof src !== "object") {
+        return;
+    }
+
+    for (const key in src) {
+        //console.log("copy", key);
+        const data = src[key];
+        if (typeof data === "object") {
+            if (!dest[key]) dest[key] = {};
+            matchOverwriteRecursive(dest[key], src[key]);
+        } else if (typeof data === "string" || typeof data === "number") {
+            // console.log("match string", key);
+            dest[key] = src[key];
+        }
+    }
+}
+
+function copy(source, deep) {
+    var o, prop, type;
+
+    if (typeof source != "object" || source === null) {
+        // What do to with functions, throw an error?
+        o = source;
+        return o;
+    }
+
+    o = new source.constructor();
+
+    for (prop in source) {
+        if (source.hasOwnProperty(prop)) {
+            type = typeof source[prop];
+
+            if (deep && type == "object" && source[prop] !== null) {
+                o[prop] = copy(source[prop]);
+            } else {
+                o[prop] = source[prop];
+            }
+        }
+    }
+    return o;
+}
 
 registerMod({
     title: "What a title?",
@@ -181,26 +232,176 @@ registerMod({
                 mappings: {
                     shape_combiner: "Shape Combiner",
                     belt_crossing: "Belt Crossing",
+                    hyperlink: "Hyperlink",
                 },
             },
         },
     },
     updateStaticSettings: () => {},
     updateStaticTranslations: (id) => {},
-    gameInitializedRootClasses: (root) => {},
+    gameInitializedRootClasses: (root) => {
+        if (root.gameMode.constructor.getId() === SIGameMode.getId()) {
+            orginalTranslations = {
+                dialogs: {
+                    buttons: {
+                        showUpgrades: shapezAPI.translations.dialogs.buttons.showUpgrades,
+                    },
+
+                    upgradesIntroduction: {
+                        title: shapezAPI.translations.dialogs.upgradesIntroduction.title,
+                        desc: shapezAPI.translations.dialogs.upgradesIntroduction.desc,
+                    },
+
+                    blueprintsNotUnlocked: { desc: shapezAPI.translations.dialogs.blueprintsNotUnlocked },
+                },
+                ingame: {
+                    keybindingsOverlay: {
+                        pasteLastBlueprint: shapezAPI.translations.ingame.keybindingsOverlay.pasteLastBlueprint,
+                    },
+                    notifications: {
+                        researchComplete: shapezAPI.translations.ingame.notifications.researchComplete,
+                    },
+                    shop: {
+                        title: shapezAPI.translations.ingame.shop.title,
+                        buttonUnlock: shapezAPI.translations.ingame.shop.buttonUnlock,
+                        maximumLevel: shapezAPI.translations.ingame.shop.maximumLevel,
+                    },
+                },
+                keybindings: {
+                    mappings: {
+                        pasteLastBlueprint: shapezAPI.translations.keybindings.mappings.pasteLastBlueprint,
+                    },
+                },
+                storyRewards: {
+                    reward_blueprints: {
+                        title: shapezAPI.translations.storyRewards.reward_blueprints.title,
+                        desc: shapezAPI.translations.storyRewards.reward_blueprints.desc,
+                    },
+                },
+            };
+            orginalTranslations = copy(orginalTranslations, true);
+            matchOverwriteRecursive(shapezAPI.translations, {
+                dialogs: {
+                    buttons: {
+                        showUpgrades: "Show Research",
+                    },
+
+                    upgradesIntroduction: {
+                        title: "Research Upgrades",
+                        desc: `
+                        All shapes you produce can be used to unlock upgrades - <strong>don't destroy your old factories!</strong>
+                        The upgrades tab can be found on the top right corner of the screen.
+                        All shapes you produce can be used to research upgrades - <strong>don't destroy your old factories!</strong>
+                        The research tab can be found on the top right corner of the screen. <br><br>
+                        Deliver shapes to the hub to unlock new tiers of research.`,
+                    },
+
+                    blueprintsNotUnlocked: { desc: "Complete level 20 to unlock Bugprints!" },
+                },
+                ingame: {
+                    keybindingsOverlay: {
+                        pasteLastBlueprint: "Paste last bugprint",
+                    },
+                    notifications: {
+                        researchComplete: "You can now research tier <level> upgrades!",
+                    },
+                    shop: {
+                        title: "Research",
+                        buttonUnlock: "Research",
+                        maximumLevel: "MAX LEVEL (Speed x<currentMult>)",
+                    },
+                },
+                keybindings: {
+                    mappings: {
+                        pasteLastBlueprint: "Paste last bugprint",
+                    },
+                },
+                storyRewards: {
+                    reward_blueprints: {
+                        title: "Bugprints",
+                        desc: `
+            You can now <strong>copy and paste</strong> parts of your factory! Select an area (Hold CTRL, then drag with your mouse), and press 'C' to copy it.<br><br>Pasting it is
+            <strong>not free</strong>, you need to produce <strong>blueprint shapes</strong> to afford it! (Those you just delivered).
+            <strong>not free</strong>, you need to produce <strong>bugprint shapes</strong> to afford it! (Those you just delivered).<br><br>
+            I had to do this, for the memes.`,
+                    },
+                },
+            });
+        } else {
+            matchOverwriteRecursive(shapezAPI.translations, orginalTranslations);
+        }
+    },
     gameInitializedRootManagers: (root) => {
         addHandlers(root);
+        if (root.gameMode.constructor.getId() === SIGameMode.getId()) {
+            /**
+             * @this {any}
+             */
+            root.hubGoals.computeNextGoal = function() {
+                const storyIndex = this.level - 1;
+                const levels = this.root.gameMode.getLevelDefinitions();
+                if (storyIndex < levels.length) {
+                    const { shape, required, reward, throughputOnly } = levels[storyIndex];
+                    this.currentGoal = {
+                        definition: this.root.shapeDefinitionMgr.getShapeFromShortKey(shape),
+                        required,
+                        reward,
+                        throughputOnly,
+                    };
+                    return;
+                }
+
+                //Floor Required amount to remove confusion
+                const required = Math.min(200, Math.floor(4 + (this.level - 40) * 0.25));
+                this.currentGoal = {
+                    definition: this.computeFreeplayShape(this.level),
+                    required,
+                    reward: this.level % 5 == 0 ? enumHubGoalRewards.reward_research_level : enumHubGoalRewards.no_reward,
+                    throughputOnly: true,
+                };
+            };
+
+            root.hubGoals.canUnlockUpgrade = function(upgradeId) {
+                const tiers = this.root.gameMode.getUpgrades()[upgradeId];
+                const currentLevel = this.getUpgradeLevel(upgradeId);
+                //6 + ((this.level - 40)/5) = research level
+                if (currentLevel >= tiers.length && currentLevel >= 6 + (this.level - 40) / 5) {
+                    // Max level
+                    return false;
+                }
+
+                const tierData = tiers[currentLevel];
+
+                for (let i = 0; i < tierData.required.length; ++i) {
+                    const requirement = tierData.required[i];
+                    if ((this.storedShapes[requirement.shape] || 0) < requirement.amount) {
+                        return false;
+                    }
+                }
+                return true;
+            };
+        }
     },
     gameBeforeFirstUpdate: (root) => {
         root.signals.entityDestroyed.add(updateSmartUndergroundBeltVariant, root);
 
         // Notice: These must come *after* the entity destroyed signals
         root.signals.entityAdded.add(updateSmartUndergroundBeltVariant, root);
+
+        if (root.gameMode.constructor.getId() === SIGameMode.getId()) {
+            var changeIcon = setInterval(function() {
+                const shop = document.getElementById("ingame_HUD_GameMenu").getElementsByClassName("shop")[0];
+                if (shop) {
+                    shop.classList.remove("shop");
+                    shop.classList.add("research");
+                    clearInterval(changeIcon);
+                }
+            }, 100);
+        }
     },
     main: (config) => {
         //TODO:
         // Shapez Industries:
-        // - Add hyperlink
         //DONE:
         // - Add building speeds to config and
         // - Add new miner variant deep
@@ -216,44 +417,49 @@ registerMod({
         // - Add smart cutter (laser?)
         // - Remove default splitter and merger
         // - Add smart merger and splitter
+        // - Add hyperlink
         shapezAPI.injectCss("**{css}**", modId);
         shapezAPI.registerAtlases("**{atlas_atlas0_hq}**", "**{atlas_atlas0_mq}**", "**{atlas_atlas0_lq}**");
-        shapezAPI.ingame.gamemodes[SIGameMode.getId()] = SIGameMode;
 
         setupItemProcessor();
         addShapes();
 
-        enumHubGoalRewards.reward_shape_combiner = "reward_shape_combiner";
         shapezAPI.registerBuilding(MetaShapeCombinerBuilding, "**{icons_building_icon_shape_combiner}**", "M");
         shapezAPI.toolbars.buildings.secondaryBuildings.push(MetaShapeCombinerBuilding);
 
-        enumHubGoalRewards.reward_belt_crossing = "reward_belt_crossing";
         shapezAPI.ingame.components[BeltCrossingComponent.getId()] = BeltCrossingComponent;
         shapezAPI.ingame.systems.push(BeltCrossingSystem);
         shapezAPI.registerBuilding(MetaBeltCrossingBuilding, "**{icons_building_icon_belt_crossing}**", "K");
         shapezAPI.toolbars.buildings.primaryBuildings.splice(shapezAPI.toolbars.buildings.primaryBuildings.indexOf(shapezAPI.ingame.buildings.underground_belt) + 1, 0, MetaBeltCrossingBuilding);
 
+        shapezAPI.ingame.components[HyperlinkAcceptorComponent.getId()] = HyperlinkAcceptorComponent;
+        shapezAPI.ingame.components[HyperlinkComponent.getId()] = HyperlinkComponent;
+        shapezAPI.ingame.components[HyperlinkEjectorComponent.getId()] = HyperlinkEjectorComponent;
+        shapezAPI.ingame.systems.push(HyperlinkAcceptorSystem);
+        shapezAPI.ingame.systems.push(HyperlinkEjectorSystem);
+        shapezAPI.ingame.systems.push(HyperlinkSystem);
+        shapezAPI.registerBuilding(MetaHyperlinkBuilding, "**{icons_building_icon_hyperlink}**", "H");
+        shapezAPI.toolbars.buildings.secondaryBuildings.unshift(MetaHyperlinkBuilding);
+
         addStorageVariant();
         updateStorageSystem();
 
-        enumHubGoalRewards.reward_deep_miner = "reward_deep_miner";
         shapezAPI.ingame.components[MinerDeepComponent.getId()] = MinerDeepComponent;
         shapezAPI.ingame.systems.push(MinerDeepSystem);
         shapezAPI.ingame["systemsRenderOrderDynamic"].push(MinerDeepSystem);
         addMinerVariant();
 
-        enumHubGoalRewards.reward_smart_stacker = "reward_smart_stacker";
         addStackerVariant();
 
-        enumHubGoalRewards.reward_smart_cutter = "reward_smart_cutter";
         addCutterVariant();
 
-        enumHubGoalRewards.reward_underground_belt_tier_3 = "reward_underground_belt_tier_3";
         addUndergroundBeltVariant();
 
         shapezAPI.ingame.components[SmartBalancerComponent.getId()] = SmartBalancerComponent;
         shapezAPI.ingame.systems.push(SmartBalancerSystem);
         addBalancerVariants();
+
+        shapezAPI.ingame.buildings.display.avaibleVariants[shapezAPI.exports.defaultBuildingVariant] = (root) => root.hubGoals.isRewardUnlocked(enumHubGoalRewards.reward_virtual_processing);
 
         const typed = (x) => x;
         shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_belt_crossing] = typed([
@@ -263,22 +469,30 @@ registerMod({
             [MetaShapeCombinerBuilding, shapezAPI.exports.defaultBuildingVariant]
         ]);
         shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_deep_miner] = typed([
-            [shapezAPI.exports.MetaMinerBuilding, shapezAPI.ingame.buildings.miner.variants.deep]
+            [shapezAPI.ingame.buildings.miner, shapezAPI.ingame.buildings.miner.variants.deep]
         ]);
         shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_smart_stacker] = typed([
-            [shapezAPI.exports.MetaStackerBuilding, shapezAPI.ingame.buildings.stacker.variants.smart]
+            [shapezAPI.ingame.buildings.stacker, shapezAPI.ingame.buildings.stacker.variants.smart]
         ]);
         shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.no_reward_upgrades] = null;
         shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_research_level] = null;
-        // shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_hyperlink]= typed([[MetaHyperlinkBuilding, defaultBuildingVariant]]);
+        shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_hyperlink] = typed([
+            [MetaHyperlinkBuilding, shapezAPI.exports.defaultBuildingVariant]
+        ]);
         shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_underground_belt_tier_3] = typed([
-            [shapezAPI.exports.MetaUndergroundBeltBuilding, shapezAPI.ingame.buildings.underground_belt.variants.smart]
+            [shapezAPI.ingame.buildings.underground_belt, shapezAPI.ingame.buildings.underground_belt.variants.smart]
         ]);
         shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_smart_cutter] = typed([
-            [shapezAPI.exports.MetaCutterBuilding, shapezAPI.ingame.buildings.cutter.variants.laser]
+            [shapezAPI.ingame.buildings.cutter, shapezAPI.ingame.buildings.cutter.variants.laser]
         ]);
-        // shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_splitter]= typed([[shapezAPI.exports.MetaBalancerBuilding, shapezAPI.ingame.buildings.balancer.variants.splitterTriple]]);
-        // shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_merger]= typed([[shapezAPI.exports.MetaBalancerBuilding, shapezAPI.ingame.buildings.balancer.variants.mergerTriple]]);
+        shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_splitter] = typed([
+            [shapezAPI.ingame.buildings.balancer, shapezAPI.ingame.buildings.balancer.variants.splitterTriple]
+        ]);
+        shapezAPI.exports.enumHubGoalRewardsToContentUnlocked[enumHubGoalRewards.reward_merger] = typed([
+            [shapezAPI.ingame.buildings.balancer, shapezAPI.ingame.buildings.balancer.variants.mergerTriple]
+        ]);
+
+        shapezAPI.ingame.gamemodes[SIGameMode.getId()] = SIGameMode;
     },
 });
 

@@ -122,6 +122,7 @@ export class HubSystem extends GameSystemWithFilter {
         }
 
         // Reward
+        console.log(goals);
         const rewardText = T.storyRewards[goals.reward].title.toUpperCase();
         if (rewardText.length > 12) {
             context.font = "bold 8px GameFont";

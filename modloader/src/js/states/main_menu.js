@@ -586,7 +586,7 @@ export class MainMenuState extends GameState {
                 gamemode = value;
                 this.app.analytics.trackUiClick("startgame");
                 this.app.adProvider.showVideoAd().then(() => {
-                    const savegame = this.app.savegameMgr.createNewSavegame(gamemode);
+                    const savegame = this.app.savegameMgr.createNewSavegame(value);
 
                     this.moveToState("InGameState", {
                         savegame,
