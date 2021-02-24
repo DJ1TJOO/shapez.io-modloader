@@ -497,7 +497,7 @@ export class HubGoals extends BasicSerializableObject {
      */
     getProcessorBaseSpeed(processorType) {
         if (HubGoals.getProcessorBaseSpeed[processorType])
-            return HubGoals.getProcessorBaseSpeed[processorType](processorType).bind(this);
+            return HubGoals.getProcessorBaseSpeed[processorType].bind(this)(processorType);
         else assertAlways(false, "invalid processor type: " + processorType);
 
         return 1 / globalConfig.beltSpeedItemsPerSecond;
