@@ -45,6 +45,12 @@ export class MultiplayerHUDNotifications extends shapezAPI.exports.BaseHUDPart {
     constructor(root) {
         super(root);
     }
+    blurAll() {
+        var tmp = document.createElement("input");
+        document.body.appendChild(tmp);
+        tmp.focus();
+        document.body.removeChild(tmp);
+    }
 
     createElements(parent) {
         if (!document.getElementById("ingame_HUD_Notifications")) this.element = makeDiv(parent, "ingame_HUD_Notifications", [], ``);
@@ -58,12 +64,22 @@ export class MultiplayerHUDNotifications extends shapezAPI.exports.BaseHUDPart {
             `
         );
 
-        this.inputElement.addEventListener("mouseenter", (e) => {
+        this.inputElement.addEventListener("focusin", (e) => {
             this.root.app.inputMgr.makeSureAttachedAndOnTop(this.inputReciever);
         });
 
-        this.inputElement.addEventListener("mouseleave", (e) => {
+        this.inputElement.addEventListener("focusout", (e) => {
             this.root.app.inputMgr.makeSureDetached(this.inputReciever);
+        });
+
+        this.inputElement.addEventListener("blur", (e) => {
+            this.root.app.inputMgr.makeSureDetached(this.inputReciever);
+        });
+
+        this.element.addEventListener("mouseleave", (e) => {
+            this.root.app.inputMgr.makeSureDetached(this.inputReciever);
+            this.inputElement.blur();
+            this.blurAll();
         });
     }
 
