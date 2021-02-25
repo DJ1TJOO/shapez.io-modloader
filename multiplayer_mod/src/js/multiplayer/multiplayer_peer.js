@@ -232,8 +232,9 @@ export class MultiplayerPeer {
 
                 if (this.host) {
                     for (let i = 0; i < this.connections.length; i++) {
-                        if (this.connections[i].peerId === peerId) continue;
-
+                        // if (this.connections[i].peerId === peerId) continue;
+                        // if (packet.signal === SignalPacketSignals.entityAdded && getBuildingDataFromCode(packet.args[0].components.StaticMapEntity.code).metaClass === shapezAPI.ingame.buildings.belt) continue;
+                        // if (packet.signal === SignalPacketSignals.entityAdded && getBuildingDataFromCode(packet.args[0].components.StaticMapEntity.code).metaClass === shapezAPI.ingame.buildings.wire) continue;
                         MultiplayerPacket.sendPacket(this.connections[i].peer, new SignalPacket(packet.signal, packet.args), this.connections);
                     }
                 }

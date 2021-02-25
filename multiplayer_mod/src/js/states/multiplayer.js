@@ -434,163 +434,189 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
 	}
 
 	onJoinButtonClicked() {
-		//host regex
-		const host = /wss:\/\/[a-z]{2,}\.[a-z]{2,}?:[0-9]{4,5}\/?/i;
+		const getHost = () => {
+			//host regex
+			const host = /wss:\/\/[a-z]{2,}\.[a-z]{2,}?:[0-9]{4,5}\/?/i;
 
-		const hostInput = new FormElementInput({
-			id: "hostInput",
-			label: null,
-			placeholder: "",
-			defaultValue: "",
-			validator: (val) => trim(val).length > 0,
-		});
-		const hostDialog = new DialogWithForm({
-			app: this.app,
-			title: shapezAPI.translations.multiplayer.joinMultiplayerGameHost.title,
-			desc: shapezAPI.translations.multiplayer.joinMultiplayerGameHost.desc,
-			formElements: [hostInput],
-			buttons: ["cancel:bad:escape", "ok:good:enter"],
-		});
-		this.dialogs.internalShowDialog(hostDialog);
-
-		// When confirmed, create connection
-		hostDialog.buttonSignals.ok.add(() => {
-			var host = trim(hostInput.getValue());
-
-			//UUID v4 regex
-			const uuid = /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
-
-			const connectIdInput = new FormElementInput({
-				id: "connectIdInput",
+			const hostInput = new FormElementInput({
+				id: "hostInput",
 				label: null,
 				placeholder: "",
 				defaultValue: "",
-				validator: (val) => val.match(uuid) && trim(val).length > 0,
+				validator: (val) => trim(val).length > 0,
 			});
-			const dialog = new DialogWithForm({
+			const hostDialog = new DialogWithForm({
 				app: this.app,
-				title: shapezAPI.translations.multiplayer.joinMultiplayerGame.title,
-				desc: shapezAPI.translations.multiplayer.joinMultiplayerGame.desc,
-				formElements: [connectIdInput],
+				title: shapezAPI.translations.multiplayer.joinMultiplayerGameHost.title,
+				desc: shapezAPI.translations.multiplayer.joinMultiplayerGameHost.desc,
+				formElements: [hostInput],
 				buttons: ["cancel:bad:escape", "ok:good:enter"],
 			});
-			this.dialogs.internalShowDialog(dialog);
+			this.dialogs.internalShowDialog(hostDialog);
 
 			// When confirmed, create connection
-			dialog.buttonSignals.ok.add(() => {
-				let connectionId = trim(connectIdInput.getValue());
+			hostDialog.buttonSignals.ok.add(() => {
+				var host = trim(hostInput.getValue());
 
-				// @ts-ignore
-				var socket = io(host, { transport: ["websocket"] });
-				var socketId = undefined;
-				var socketConnectionId = undefined;
-				var peerId = undefined;
+				//UUID v4 regex
+				const uuid = /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
 
-				socket.on("connect", () => {
-					console.log("Connected to the signalling server");
-					socket.on("id", (id) => {
-						socketId = id;
-						console.log("Got id: " + id);
-						socket.emit("joinRoom", connectionId, socketId);
-					});
-					socket.on("error", () => {
-						this.dialogs.showWarning(shapezAPI.translations.multiplayer.multiplayerGameError.title, shapezAPI.translations.multiplayer.multiplayerGameError.desc + "<br><br>");
-					});
+				const connectIdInput = new FormElementInput({
+					id: "connectIdInput",
+					label: null,
+					placeholder: "",
+					defaultValue: "",
+					validator: (val) => val.match(uuid) && trim(val).length > 0,
+				});
+				const dialog = new DialogWithForm({
+					app: this.app,
+					title: shapezAPI.translations.multiplayer.joinMultiplayerGame.title,
+					desc: shapezAPI.translations.multiplayer.joinMultiplayerGame.desc,
+					formElements: [connectIdInput],
+					buttons: ["cancel:bad:escape", "ok:good:enter"],
+				});
+				this.dialogs.internalShowDialog(dialog);
 
-					const config = {
-						iceServers: [
-							{
-								urls: "stun:stun.1.google.com:19302",
-							},
-							{
-								url: "turn:numb.viagenie.ca",
-								credential: "muazkh",
-								username: "webrtc@live.com",
-							},
-						],
-					};
-					const pc = new Peer({ initiator: false, wrtc: wrtc, config: config });
-					socket.on("signal", (signalData) => {
-						if (socketId !== signalData.receiverId) return;
-						console.log("Received signal");
-						console.log(signalData);
+				// When confirmed, create connection
+				dialog.buttonSignals.ok.add(() => {
+					let connectionId = trim(connectIdInput.getValue());
 
-						peerId = signalData.peerId;
-						socketConnectionId = signalData.senderId;
-						pc.signal(signalData.signal);
-					});
-					pc.on("signal", (signalData) => {
-						console.log("Send signal");
-						console.log({
-							receiverId: socketConnectionId,
-							peerId: peerId,
-							signal: signalData,
-							senderId: socketId,
+					// @ts-ignore
+					var socket = io(host, { transport: ["websocket"] });
+					var socketId = undefined;
+					var socketConnectionId = undefined;
+					var peerId = undefined;
+
+					socket.on("connect", () => {
+						console.log("Connected to the signalling server");
+						socket.on("id", (id) => {
+							socketId = id;
+							console.log("Got id: " + id);
+							socket.emit("joinRoom", connectionId, socketId);
 						});
-						socket.emit("signal", {
-							receiverId: socketConnectionId,
-							peerId: peerId,
-							signal: signalData,
-							senderId: socketId,
+						socket.on("error", () => {
+							this.dialogs.showWarning(shapezAPI.translations.multiplayer.multiplayerGameError.title, shapezAPI.translations.multiplayer.multiplayerGameError.desc + "<br><br>");
 						});
-					});
 
-					var gameDataState = -1;
-					var gameData = "";
+						const config = {
+							iceServers: [
+								{
+									urls: "stun:stun.1.google.com:19302",
+								},
+								{
+									url: "turn:numb.viagenie.ca",
+									credential: "muazkh",
+									username: "webrtc@live.com",
+								},
+							],
+						};
+						const pc = new Peer({ initiator: false, wrtc: wrtc, config: config });
+						socket.on("signal", (signalData) => {
+							if (socketId !== signalData.receiverId) return;
+							console.log("Received signal");
+							console.log(signalData);
 
-					var canceled = (title, description) => {
-						pc.destroy();
-						this.loadingOverlay.removeIfAttached();
-						//Show uuid of room
-						let dialog = new Dialog({
-							app: this.app,
-							title: title,
-							contentHTML: description,
-							buttons: ["ok:good"],
+							peerId = signalData.peerId;
+							socketConnectionId = signalData.senderId;
+							pc.signal(signalData.signal);
 						});
-						this.dialogs.internalShowDialog(dialog);
-					};
-
-					var onMessage = (data) => {
-						var packet = JSON.parse(data);
-
-						//When data ends
-						if (packet.type === MultiplayerPacketTypes.FLAG && packet.flag === FlagPacketFlags.ENDDATA) {
-							gameDataState = 1;
-							let gameDataJson = JSON.parse(gameData);
-							console.log(gameDataJson);
-
-							for (let i = 0; i < shapezAPI.modOrder.length; i++) {
-								const modId = shapezAPI.modOrder[i];
-								if (!gameDataJson.mods.includes(modId)) return canceled(shapezAPI.translations.multiplayer.notSameMods.title, shapezAPI.translations.multiplayer.notSameMods.desc);
-							}
-							for (let i = 0; i < gameDataJson.mods.length; i++) {
-								const modId = gameDataJson.mods[i];
-								if (!shapezAPI.modOrder.includes(modId)) return canceled(shapezAPI.translations.multiplayer.notSameMods.title, shapezAPI.translations.multiplayer.notSameMods.desc);
-							}
-
-							var connection = new MultiplayerConnection(pc, gameDataJson);
-							this.moveToState("InMultiplayerGameState", {
-								connection,
-								connectionId,
+						pc.on("signal", (signalData) => {
+							console.log("Send signal");
+							console.log({
+								receiverId: socketConnectionId,
+								peerId: peerId,
+								signal: signalData,
+								senderId: socketId,
 							});
-						}
+							socket.emit("signal", {
+								receiverId: socketConnectionId,
+								peerId: peerId,
+								signal: signalData,
+								senderId: socketId,
+							});
+						});
 
-						//When data recieved
-						if (packet.type === MultiplayerPacketTypes.DATA && gameDataState === 0) gameData = gameData + packet.data;
+						var gameDataState = -1;
+						var gameData = "";
 
-						//When start data
-						if (packet.type === MultiplayerPacketTypes.FLAG && packet.flag === FlagPacketFlags.STARTDATA) {
-							gameDataState = 0;
-							this.loadingOverlay = new GameLoadingOverlay(this.app, this.getDivElement());
-							this.loadingOverlay.showBasic();
-						}
-					};
+						var canceled = (title, description) => {
+							pc.destroy();
+							this.loadingOverlay.removeIfAttached();
+							//Show uuid of room
+							let dialog = new Dialog({
+								app: this.app,
+								title: title,
+								contentHTML: description,
+								buttons: ["ok:good"],
+							});
+							this.dialogs.internalShowDialog(dialog);
+						};
 
-					pc.on("data", onMessage);
+						var onMessage = (data) => {
+							var packet = JSON.parse(data);
+
+							//When data ends
+							if (packet.type === MultiplayerPacketTypes.FLAG && packet.flag === FlagPacketFlags.ENDDATA) {
+								gameDataState = 1;
+								let gameDataJson = JSON.parse(gameData);
+								console.log(gameDataJson);
+
+								for (let i = 0; i < shapezAPI.modOrder.length; i++) {
+									const modId = shapezAPI.modOrder[i];
+									if (!gameDataJson.mods.includes(modId)) return canceled(shapezAPI.translations.multiplayer.notSameMods.title, shapezAPI.translations.multiplayer.notSameMods.desc);
+								}
+								for (let i = 0; i < gameDataJson.mods.length; i++) {
+									const modId = gameDataJson.mods[i];
+									if (!shapezAPI.modOrder.includes(modId)) return canceled(shapezAPI.translations.multiplayer.notSameMods.title, shapezAPI.translations.multiplayer.notSameMods.desc);
+								}
+
+								var connection = new MultiplayerConnection(pc, gameDataJson);
+								this.moveToState("InMultiplayerGameState", {
+									connection,
+									connectionId,
+								});
+							}
+
+							//When data recieved
+							if (packet.type === MultiplayerPacketTypes.DATA && gameDataState === 0) gameData = gameData + packet.data;
+
+							//When start data
+							if (packet.type === MultiplayerPacketTypes.FLAG && packet.flag === FlagPacketFlags.STARTDATA) {
+								gameDataState = 0;
+								this.loadingOverlay = new GameLoadingOverlay(this.app, this.getDivElement());
+								this.loadingOverlay.showBasic();
+							}
+						};
+
+						pc.on("data", onMessage);
+					});
 				});
 			});
-		});
+		};
+		if (!shapezAPI.user || !shapezAPI.user.username) {
+			const userInput = new FormElementInput({
+				id: "userInput",
+				label: null,
+				placeholder: "",
+				defaultValue: "",
+				validator: (val) => trim(val).length > 0,
+			});
+			const userDialog = new DialogWithForm({
+				app: this.app,
+				title: shapezAPI.translations.multiplayer.username.title,
+				desc: shapezAPI.translations.multiplayer.username.desc,
+				formElements: [userInput],
+				buttons: ["cancel:bad:escape", "ok:good:enter"],
+			});
+			this.dialogs.internalShowDialog(userDialog);
+			userDialog.buttonSignals.ok.add(() => {
+				if (!shapezAPI.user) shapezAPI.user = {};
+				shapezAPI.user.username = userInput.value.trim();
+				getHost();
+			});
+		} else {
+			getHost();
+		}
 	}
 
 	onPlayButtonClicked() {

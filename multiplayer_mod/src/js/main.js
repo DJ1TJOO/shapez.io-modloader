@@ -13,7 +13,7 @@ registerMod({
     id: modId,
     description: "A mod that adds multiplayer to shapez.io",
     authors: ["DJ1TJOO"],
-    version: "0.0.5",
+    version: "0.0.6",
     gameVersion: "ML01",
     dependencies: [],
     incompatible: [],
@@ -66,6 +66,10 @@ registerMod({
                     disconnected: "<username> has disconnected",
                     joined: "<username> has joined the game",
                 },
+                username: {
+                    title: "Multiplayer Game",
+                    desc: "Enter an username.",
+                },
 
                 shareCode: "Share the code with your friends",
                 hostOnly: "Only the host can get the game code",
@@ -109,6 +113,10 @@ registerMod({
                 user: {
                     disconnected: "<username> heeft het spel verlaten",
                     joined: "<username> heeft zich aangesloten",
+                },
+                username: {
+                    title: "Multiplayer Spel",
+                    desc: "Voer een gebruikers naam in.",
                 },
 
                 shareCode: "Deel de code met je vrienden",
