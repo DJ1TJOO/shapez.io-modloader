@@ -488,7 +488,10 @@ export class MainMenuState extends GameState {
 
         optionSelected.add(value => {
             savegame.currentData.gamemode = value;
-            savegame.writeSavegameAndMetadata();
+            savegame
+                .writeSavegameAndMetadata()
+                .then(() => this.app.savegameMgr.updateAfterSavegamesChanged());
+            this.renderSavegames();
         });
     }
 
