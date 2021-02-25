@@ -341,41 +341,67 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
 	 * @param {SavegameMetadata} game
 	 */
 	resumeGame(game) {
-		const hostInput = new FormElementInput({
-			id: "hostInput",
-			label: null,
-			placeholder: "",
-			defaultValue: "",
-			validator: (val) => trim(val).length > 0,
-		});
-		const hostDialog = new DialogWithForm({
-			app: this.app,
-			title: shapezAPI.translations.multiplayer.createMultiplayerGameHost.title,
-			desc: shapezAPI.translations.multiplayer.createMultiplayerGameHost.desc,
-			formElements: [hostInput],
-			buttons: ["cancel:bad:escape", "ok:good:enter"],
-		});
-		this.dialogs.internalShowDialog(hostDialog);
-		hostDialog.buttonSignals.ok.add(() => {
-			this.app.analytics.trackUiClick("resume_game");
-
-			this.app.adProvider.showVideoAd().then(() => {
-				this.app.analytics.trackUiClick("resume_game_adcomplete");
-				const host = trim(hostInput.getValue());
-				const savegame = this.app.savegameMgr.getSavegameById(game.internalId);
-				savegame
-					.readAsync()
-					.then(() => {
-						this.moveToState("InMultiplayerGameState", {
-							savegame,
-							host: host,
-						});
-					})
-					.catch((err) => {
-						this.dialogs.showWarning(shapezAPI.translations.dialogs.gameLoadFailure.title, shapezAPI.translations.dialogs.gameLoadFailure.text + "<br><br>" + err);
-					});
+		const join = () => {
+			const hostInput = new FormElementInput({
+				id: "hostInput",
+				label: null,
+				placeholder: "",
+				defaultValue: "",
+				validator: (val) => trim(val).length > 0,
 			});
-		});
+			const hostDialog = new DialogWithForm({
+				app: this.app,
+				title: shapezAPI.translations.multiplayer.createMultiplayerGameHost.title,
+				desc: shapezAPI.translations.multiplayer.createMultiplayerGameHost.desc,
+				formElements: [hostInput],
+				buttons: ["cancel:bad:escape", "ok:good:enter"],
+			});
+			this.dialogs.internalShowDialog(hostDialog);
+			hostDialog.buttonSignals.ok.add(() => {
+				this.app.analytics.trackUiClick("resume_game");
+
+				this.app.adProvider.showVideoAd().then(() => {
+					this.app.analytics.trackUiClick("resume_game_adcomplete");
+					const host = trim(hostInput.getValue());
+					const savegame = this.app.savegameMgr.getSavegameById(game.internalId);
+					savegame
+						.readAsync()
+						.then(() => {
+							this.moveToState("InMultiplayerGameState", {
+								savegame,
+								host: host,
+							});
+						})
+						.catch((err) => {
+							this.dialogs.showWarning(shapezAPI.translations.dialogs.gameLoadFailure.title, shapezAPI.translations.dialogs.gameLoadFailure.text + "<br><br>" + err);
+						});
+				});
+			});
+		};
+		if (!shapezAPI.user || !shapezAPI.user.username) {
+			const userInput = new FormElementInput({
+				id: "userInput",
+				label: null,
+				placeholder: "",
+				defaultValue: "",
+				validator: (val) => trim(val).length > 0,
+			});
+			const userDialog = new DialogWithForm({
+				app: this.app,
+				title: shapezAPI.translations.multiplayer.username.title,
+				desc: shapezAPI.translations.multiplayer.username.desc,
+				formElements: [userInput],
+				buttons: ["cancel:bad:escape", "ok:good:enter"],
+			});
+			this.dialogs.internalShowDialog(userDialog);
+			userDialog.buttonSignals.ok.add(() => {
+				if (!shapezAPI.user) shapezAPI.user = {};
+				shapezAPI.user.username = userInput.value.trim();
+				join();
+			});
+		} else {
+			join();
+		}
 	}
 
 	/**
@@ -626,15 +652,41 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
 			return;
 		}
 
-		this.app.analytics.trackUiClick("startgame");
-		this.app.adProvider.showVideoAd().then(() => {
-			const savegame = this.app.savegameMgr.createNewSavegame();
+		const join = () => {
+			this.app.analytics.trackUiClick("startgame");
+			this.app.adProvider.showVideoAd().then(() => {
+				const savegame = this.app.savegameMgr.createNewSavegame();
 
-			this.moveToState("InMultiplayerGameState", {
-				savegame,
+				this.moveToState("InMultiplayerGameState", {
+					savegame,
+				});
+				this.app.analytics.trackUiClick("startgame_adcomplete");
 			});
-			this.app.analytics.trackUiClick("startgame_adcomplete");
-		});
+		};
+		if (!shapezAPI.user || !shapezAPI.user.username) {
+			const userInput = new FormElementInput({
+				id: "userInput",
+				label: null,
+				placeholder: "",
+				defaultValue: "",
+				validator: (val) => trim(val).length > 0,
+			});
+			const userDialog = new DialogWithForm({
+				app: this.app,
+				title: shapezAPI.translations.multiplayer.username.title,
+				desc: shapezAPI.translations.multiplayer.username.desc,
+				formElements: [userInput],
+				buttons: ["cancel:bad:escape", "ok:good:enter"],
+			});
+			this.dialogs.internalShowDialog(userDialog);
+			userDialog.buttonSignals.ok.add(() => {
+				if (!shapezAPI.user) shapezAPI.user = {};
+				shapezAPI.user.username = userInput.value.trim();
+				join();
+			});
+		} else {
+			join();
+		}
 	}
 
 	onBackButtonClicked() {
@@ -650,13 +702,38 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
 				latestInternalId = saveGame.internalId;
 			}
 		});
-
-		const savegame = this.app.savegameMgr.getSavegameById(latestInternalId);
-		savegame.readAsync().then(() => {
-			this.moveToState("InMultiplayerGameState", {
-				savegame,
+		const join = () => {
+			const savegame = this.app.savegameMgr.getSavegameById(latestInternalId);
+			savegame.readAsync().then(() => {
+				this.moveToState("InMultiplayerGameState", {
+					savegame,
+				});
 			});
-		});
+		};
+		if (!shapezAPI.user || !shapezAPI.user.username) {
+			const userInput = new FormElementInput({
+				id: "userInput",
+				label: null,
+				placeholder: "",
+				defaultValue: "",
+				validator: (val) => trim(val).length > 0,
+			});
+			const userDialog = new DialogWithForm({
+				app: this.app,
+				title: shapezAPI.translations.multiplayer.username.title,
+				desc: shapezAPI.translations.multiplayer.username.desc,
+				formElements: [userInput],
+				buttons: ["cancel:bad:escape", "ok:good:enter"],
+			});
+			this.dialogs.internalShowDialog(userDialog);
+			userDialog.buttonSignals.ok.add(() => {
+				if (!shapezAPI.user) shapezAPI.user = {};
+				shapezAPI.user.username = userInput.value.trim();
+				join();
+			});
+		} else {
+			join();
+		}
 	}
 
 	onLeave() {
