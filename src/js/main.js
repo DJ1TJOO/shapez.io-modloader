@@ -13,8 +13,9 @@ import { addVanillaGameSpeedToAPI, initGameSpeedRegistry } from "./game/game_spe
 import { ModManager } from "./modloader/modmanager";
 import { addVanillaSystemsToAPI } from "./game/game_system_manager";
 import { addVanillaGameModesToAPI } from "./game/game_mode_registry";
+import { getIPCRenderer } from "./core/utils";
 const logger = createLogger("main");
-(async() => {
+window.onload = async() => {
     if (window.coreThreadLoadedCb) {
         logger.log("Javascript parsed, calling html thread");
         window.coreThreadLoadedCb();
@@ -130,9 +131,25 @@ const logger = createLogger("main");
     //         // },
     //     ],
     // };
-
-    let user = JSON.parse(localStorage.getItem("user"));
-    let instance = JSON.parse(localStorage.getItem("instance"));
+    let user = undefined;
+    let instance = undefined;
+    let modFolderContents = [];
+    if (G_IS_STANDALONE) {
+        modFolderContents = getIPCRenderer().sendSync("fs-sync-job", {
+            mods: true,
+            type: "get",
+        }).data;
+        if (modFolderContents.includes("modpack.json")) {
+            instance = getIPCRenderer().sendSync("fs-sync-job", {
+                mods: true,
+                type: "read",
+                filename: "modpack.json",
+            });
+        }
+    } else {
+        user = JSON.parse(localStorage.getItem("user"));
+        instance = JSON.parse(localStorage.getItem("instance"));
+    }
     var modMgr = new ModManager(user, instance);
     addVanillaBuildingsToAPI();
     addVanillaComponentsToAPI();
@@ -140,13 +157,13 @@ const logger = createLogger("main");
     addVanillaItemsToAPI();
     addVanillaGameModesToAPI();
     addVanillaGameSpeedToAPI();
-    // await modMgr.addMods([
-    //     // "http://thomasbrants.nl:3000/mods/test_mods/mod1/bundle.js",
-    //     // "http://thomasbrants.nl:3000/mods/test_mods/test_mod2.js",
-    //     // "http://thomasbrants.nl:3000/mods/test_mods/test_mod3.js",
-    //     "http://localhost:3006/mod",
-    // ]);
-    await modMgr.addModPackMods();
+    if (G_IS_STANDALONE) {
+        for (let i = 0; i < modFolderContents.length; i++) {
+            const mod = modFolderContents[i];
+            if (mod.split(".").pop() !== "js") continue;
+            modMgr.addMod(mod, true);
+        }
+    } else await modMgr.addModPackMods();
     modMgr.loadMods();
 
     initDrawUtils();
@@ -163,4 +180,4 @@ const logger = createLogger("main");
         app.boot();
     }
     bootApp();
-})();
+};

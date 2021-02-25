@@ -565,6 +565,18 @@ export class ShapezAPI {
             gItemRegistry,
             GLOBAL_APP,
             Loader,
+            G_TRACKING_ENDPOINT: G_TRACKING_ENDPOINT,
+            G_IS_STANDALONE: G_IS_STANDALONE,
+            G_IS_RELEASE: G_IS_RELEASE,
+            G_IS_MOBILE_APP: G_IS_MOBILE_APP,
+            G_IS_DEV: G_IS_DEV,
+            G_IS_BROWSER: G_IS_BROWSER,
+            G_HAVE_ASSERT: G_HAVE_ASSERT,
+            G_BUILD_VERSION: G_BUILD_VERSION,
+            G_BUILD_TIME: G_BUILD_TIME,
+            G_BUILD_COMMIT_HASH: G_BUILD_COMMIT_HASH,
+            G_APP_ENVIRONMENT: G_APP_ENVIRONMENT,
+            G_ALL_UI_IMAGES: G_ALL_UI_IMAGES,
 
             //Platform
             AdinplayAdProvider,

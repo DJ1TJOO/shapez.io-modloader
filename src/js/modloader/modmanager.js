@@ -1,3 +1,4 @@
+import { getIPCRenderer } from "../core/utils";
 import { matchOverwriteRecursive } from "../translations";
 import { ShapezAPI } from "./mod";
 import { matchOverwriteRecursiveSettings } from "./overwrite";
@@ -88,50 +89,70 @@ export class ModManager {
      * @param {String} url
      * @returns {Promise}
      */
-    addMod(url) {
-        //TODO: check if is mods website
-        return Promise.race([
-                new Promise((resolve, reject) => {
-                    setTimeout(reject, 60 * 1000);
-                }),
-                fetch(url, {
-                    method: "GET",
-                    cache: "no-cache",
-                }),
-            ])
-            .then(res => res.text())
-            .catch(err => {
-                assert(this, "Failed to load mod:", err);
-                return Promise.reject("Downloading from '" + url + "' timed out");
-            })
-            .then(modCode => {
-                return Promise.race([
+    addMod(url, fromFile = false) {
+        if (fromFile && G_IS_STANDALONE) {
+            return new Promise((resolve, reject) => {
+                const modCode = getIPCRenderer().sendSync("fs-sync-job", {
+                    mods: true,
+                    type: "read",
+                    filename: url,
+                }).data;
+                const modScript = document.createElement("script");
+                modScript.textContent = modCode;
+                modScript.type = "text/javascript";
+                try {
+                    document.head.appendChild(modScript);
+                    resolve();
+                } catch (ex) {
+                    console.error("Failed to insert mod, bad js:", ex);
+                    this.nextModResolver = null;
+                    this.nextModRejector = null;
+                    reject("Mod is invalid");
+                }
+            });
+        } else
+            return Promise.race([
                     new Promise((resolve, reject) => {
                         setTimeout(reject, 60 * 1000);
                     }),
-                    new Promise((resolve, reject) => {
-                        this.nextModResolver = resolve;
-                        this.nextModRejector = reject;
-
-                        const modScript = document.createElement("script");
-                        modScript.textContent = modCode;
-                        modScript.type = "text/javascript";
-                        try {
-                            document.head.appendChild(modScript);
-                            resolve();
-                        } catch (ex) {
-                            console.error("Failed to insert mod, bad js:", ex);
-                            this.nextModResolver = null;
-                            this.nextModRejector = null;
-                            reject("Mod is invalid");
-                        }
+                    fetch(url, {
+                        method: "GET",
+                        cache: "no-cache",
                     }),
-                ]);
-            })
-            .catch(err => {
-                assert(this, "Failed to initializing mod:", err);
-                return Promise.reject("Initializing mod failed: " + err);
-            });
+                ])
+                .then(res => res.text())
+                .catch(err => {
+                    assert(this, "Failed to load mod:", err);
+                    return Promise.reject("Downloading from '" + url + "' timed out");
+                })
+                .then(modCode => {
+                    return Promise.race([
+                        new Promise((resolve, reject) => {
+                            setTimeout(reject, 60 * 1000);
+                        }),
+                        new Promise((resolve, reject) => {
+                            this.nextModResolver = resolve;
+                            this.nextModRejector = reject;
+
+                            const modScript = document.createElement("script");
+                            modScript.textContent = modCode;
+                            modScript.type = "text/javascript";
+                            try {
+                                document.head.appendChild(modScript);
+                                resolve();
+                            } catch (ex) {
+                                console.error("Failed to insert mod, bad js:", ex);
+                                this.nextModResolver = null;
+                                this.nextModRejector = null;
+                                reject("Mod is invalid");
+                            }
+                        }),
+                    ]);
+                })
+                .catch(err => {
+                    assert(this, "Failed to initializing mod:", err);
+                    return Promise.reject("Initializing mod failed: " + err);
+                });
     }
 
     addModPackMods() {
@@ -228,9 +249,11 @@ export class ModManager {
             matchOverwriteRecursive(shapezAPI.translations, language);
         }
 
-        const settings = this.modPack.mods.find(mod => mod.id === id).settings;
-        if (settings) {
-            matchOverwriteRecursiveSettings(mod.settings, settings);
+        if (this.modPack && this.modPack.mods) {
+            const settings = this.modPack.mods.find(mod => mod.id === id).settings;
+            if (settings) {
+                matchOverwriteRecursiveSettings(mod.settings, settings);
+            }
         }
 
         if (this.modPack && this.modPack.mods) mod.main(this.modPack.mods.find(mod => mod.id === id).config);
