@@ -396,7 +396,7 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
 			this.dialogs.internalShowDialog(userDialog);
 			userDialog.buttonSignals.ok.add(() => {
 				if (!shapezAPI.user) shapezAPI.user = {};
-				shapezAPI.user.username = userInput.value.trim();
+				shapezAPI.user.username = trim(userInput.getValue());
 				join();
 			});
 		} else {
@@ -637,7 +637,7 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
 			this.dialogs.internalShowDialog(userDialog);
 			userDialog.buttonSignals.ok.add(() => {
 				if (!shapezAPI.user) shapezAPI.user = {};
-				shapezAPI.user.username = userInput.value.trim();
+				shapezAPI.user.username = trim(userInput.getValue());
 				getHost();
 			});
 		} else {
@@ -681,7 +681,7 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
 			this.dialogs.internalShowDialog(userDialog);
 			userDialog.buttonSignals.ok.add(() => {
 				if (!shapezAPI.user) shapezAPI.user = {};
-				shapezAPI.user.username = userInput.value.trim();
+				shapezAPI.user.username = trim(userInput.getValue());
 				join();
 			});
 		} else {
@@ -728,7 +728,7 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
 			this.dialogs.internalShowDialog(userDialog);
 			userDialog.buttonSignals.ok.add(() => {
 				if (!shapezAPI.user) shapezAPI.user = {};
-				shapezAPI.user.username = userInput.value.trim();
+				shapezAPI.user.username = trim(userInput.getValue());
 				join();
 			});
 		} else {
