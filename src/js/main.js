@@ -148,7 +148,15 @@ window.onload = async() => {
         }
     } else {
         user = JSON.parse(localStorage.getItem("user"));
-        instance = JSON.parse(localStorage.getItem("instance"));
+        // instance = JSON.parse(localStorage.getItem("instance"));
+        instance = {
+            mods: [{
+                url: "http://mods.thomasbrants.nl/static/mods/b89404ac-7cbc-45bf-81b7-7d4d8108faf0/1.0.0.js",
+                id: "b89404ac-7cbc-45bf-81b7-7d4d8108faf0",
+                config: {},
+                settings: {},
+            }, ],
+        };
     }
     var modMgr = new ModManager(user, instance);
     addVanillaBuildingsToAPI();

@@ -478,20 +478,26 @@ export class MainMenuState extends GameState {
      */
     requestGameModeChange(game) {
         let savegame = this.app.savegameMgr.getSavegameById(game.internalId);
-        const { optionSelected } = this.dialogs.showOptionChooser(T.settings.labels.gamemodes.title, {
-            active: savegame.currentData.gamemode,
-            options: Object.keys(shapezAPI.ingame.gamemodes).map(option => ({
-                value: option,
-                text: capitalizeFirstLetter(option.toLowerCase()),
-            })),
-        });
+        savegame.readAsync().then(() => {
+            const { optionSelected } = this.dialogs.showOptionChooser(T.settings.labels.gamemodes.title, {
+                active: savegame.currentData.gamemode,
+                options: Object.keys(shapezAPI.ingame.gamemodes).map(option => ({
+                    value: option,
+                    text: capitalizeFirstLetter(option.toLowerCase()),
+                })),
+            });
 
-        optionSelected.add(value => {
-            savegame.currentData.gamemode = value;
-            savegame
-                .writeSavegameAndMetadata()
-                .then(() => this.app.savegameMgr.updateAfterSavegamesChanged());
-            this.renderSavegames();
+            optionSelected.add(value => {
+                savegame.currentData.gamemode = value;
+                console.log(savegame.currentData);
+                savegame
+                    .writeSavegameAndMetadata()
+                    .then(() => this.app.savegameMgr.updateAfterSavegamesChanged())
+                    .then(() => this.renderSavegames())
+                    .then(() =>
+                        console.log(this.app.savegameMgr.getSavegameById(game.internalId).currentData)
+                    );
+            });
         });
     }
 
