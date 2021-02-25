@@ -123,7 +123,7 @@ export class MultiplayerPeer {
             console.log(peerId + " closed");
             const connection = this.connections.find((x) => x.peerId === peerId);
             if (!connection) return;
-            if (connection.user) {
+            if (connection.user && this.ingameState && this.ingameState.core && this.ingameState.core.root) {
                 for (let i = 0; i < this.connections.length; i++) {
                     if (this.connections[i].peerId === peerId) continue;
                     MultiplayerPacket.sendPacket(this.connections[i].peer, new TextPacket(TextPacketTypes.USER_DISCONNECTED, JSON.stringify(connection.user)), this.connections);
