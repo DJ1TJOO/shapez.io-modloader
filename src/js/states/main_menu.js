@@ -21,6 +21,9 @@ import { RegularGameMode } from "../game/modes/regular";
 import { getApplicationSettingById } from "../profile/application_settings";
 import { T } from "../translations";
 
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
 const trim = require("trim");
 
 export class MainMenuState extends GameState {
@@ -393,13 +396,15 @@ export class MainMenuState extends GameState {
                     formatSecondsToTimeAgo((new Date().getTime() - games[i].lastUpdate) / 1000.0)
                 );
 
-                makeDiv(
+                const level = makeDiv(
                     elem,
                     null,
                     ["level"],
-                    games[i].level
-                        ? T.mainMenu.savegameLevel.replace("<x>", "" + games[i].level)
-                        : T.mainMenu.savegameLevelUnknown
+                    "<span>" +
+                        (games[i].level
+                            ? T.mainMenu.savegameLevel.replace("<x>", "" + games[i].level)
+                            : T.mainMenu.savegameLevelUnknown) +
+                        "</span>"
                 );
 
                 const name = makeDiv(
@@ -421,6 +426,10 @@ export class MainMenuState extends GameState {
                 renameButton.classList.add("styledButton", "renameGame");
                 name.appendChild(renameButton);
 
+                const gamemodeButton = document.createElement("button");
+                gamemodeButton.classList.add("styledButton", "gamemode");
+                level.appendChild(gamemodeButton);
+
                 const resumeButton = document.createElement("button");
                 resumeButton.classList.add("styledButton", "resumeGame");
                 elem.appendChild(resumeButton);
@@ -429,6 +438,7 @@ export class MainMenuState extends GameState {
                 this.trackClicks(downloadButton, () => this.downloadGame(games[i]));
                 this.trackClicks(resumeButton, () => this.resumeGame(games[i]));
                 this.trackClicks(renameButton, () => this.requestRenameSavegame(games[i]));
+                this.trackClicks(gamemodeButton, () => this.requestGameModeChange(games[i]));
             }
         }
     }
@@ -460,6 +470,25 @@ export class MainMenuState extends GameState {
             game.name = trim(nameInput.getValue());
             this.app.savegameMgr.writeAsync();
             this.renderSavegames();
+        });
+    }
+
+    /**
+     * @param {SavegameMetadata} game
+     */
+    requestGameModeChange(game) {
+        let savegame = this.app.savegameMgr.getSavegameById(game.internalId);
+        const { optionSelected } = this.dialogs.showOptionChooser(T.settings.labels.gamemodes.title, {
+            active: savegame.currentData.gamemode,
+            options: Object.keys(shapezAPI.ingame.gamemodes).map(option => ({
+                value: option,
+                text: capitalizeFirstLetter(option.toLowerCase()),
+            })),
+        });
+
+        optionSelected.add(value => {
+            savegame.currentData.gamemode = value;
+            savegame.writeSavegameAndMetadata();
         });
     }
 
@@ -566,10 +595,6 @@ export class MainMenuState extends GameState {
             this.app.analytics.trackUiClick("startgame_slot_limit_show");
             this.showSavegameSlotLimit();
             return;
-        }
-
-        function capitalizeFirstLetter(string) {
-            return string.charAt(0).toUpperCase() + string.slice(1);
         }
 
         let gamemode = RegularGameMode.getId();
