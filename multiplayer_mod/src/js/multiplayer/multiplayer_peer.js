@@ -1,6 +1,17 @@
 import { MultiplayerBuilder } from "./multiplayer_builder";
 import { enumNotificationType } from "./multiplayer_notification_types";
-import { MultiplayerPacket, TextPacket, TextPacketTypes, SignalPacket, SignalPacketSignals, StringSerializable, DataPacket, FlagPacket, FlagPacketFlags, MultiplayerPacketTypes } from "./multiplayer_packets";
+import {
+    MultiplayerPacket,
+    TextPacket,
+    TextPacketTypes,
+    SignalPacket,
+    SignalPacketSignals,
+    StringSerializable,
+    DataPacket,
+    FlagPacket,
+    FlagPacketFlags,
+    MultiplayerPacketTypes,
+} from "./multiplayer_packets";
 
 const { v4: uuidv4 } = require("uuid");
 const wrtc = require("wrtc");
@@ -10,7 +21,8 @@ const getBuildingDataFromCode = shapezAPI.exports.getBuildingDataFromCode;
 const Dialog = shapezAPI.exports.Dialog;
 
 const config = {
-    iceServers: [{
+    iceServers: [
+        {
             urls: "stun:stun.1.google.com:19302",
         },
         {
@@ -57,7 +69,7 @@ export class MultiplayerPeer {
 
         socket.on("connect", () => {
             //Get socket id
-            socket.on("id", (id) => {
+            socket.on("id", id => {
                 socketId = id;
             });
 
@@ -65,7 +77,7 @@ export class MultiplayerPeer {
             socket.emit("createRoom", this.connectionId);
 
             //Create peer
-            socket.on("createPeer", async(data) => {
+            socket.on("createPeer", async data => {
                 this.createPeer(socket, socketId, data);
             });
         });
@@ -90,7 +102,7 @@ export class MultiplayerPeer {
             console.log(this.connectionId + " closed");
             this.ingameState.goBackToMenu();
         });
-        peer.on("error", (err) => {
+        peer.on("error", err => {
             console.error(err);
         });
     }
@@ -101,7 +113,7 @@ export class MultiplayerPeer {
         const peerId = uuidv4();
 
         //Setup peer connection
-        peer.on("signal", (signalData) => {
+        peer.on("signal", signalData => {
             socket.emit("signal", {
                 peerId: peerId,
                 signal: signalData,
@@ -109,7 +121,7 @@ export class MultiplayerPeer {
                 receiverId: data.receiverId,
             });
         });
-        socket.on("signal", (signalData) => {
+        socket.on("signal", signalData => {
             if (socketId !== signalData.receiverId) return;
             if (peerId !== signalData.peerId) return;
 
@@ -121,19 +133,29 @@ export class MultiplayerPeer {
         peer.on("data", this.onMessage(peerId));
         peer.on("close", () => {
             console.log(peerId + " closed");
-            const connection = this.connections.find((x) => x.peerId === peerId);
+            const connection = this.connections.find(x => x.peerId === peerId);
             if (!connection) return;
             if (connection.user && this.ingameState && this.ingameState.core && this.ingameState.core.root) {
                 for (let i = 0; i < this.connections.length; i++) {
                     if (this.connections[i].peerId === peerId) continue;
-                    MultiplayerPacket.sendPacket(this.connections[i].peer, new TextPacket(TextPacketTypes.USER_DISCONNECTED, JSON.stringify(connection.user)), this.connections);
+                    MultiplayerPacket.sendPacket(
+                        this.connections[i].peer,
+                        new TextPacket(TextPacketTypes.USER_DISCONNECTED, JSON.stringify(connection.user)),
+                        this.connections
+                    );
                 }
-                this.ingameState.core.root.hud.parts.notifications.onNotification(shapezAPI.translations.multiplayer.user.disconnected.replaceAll("<username>", connection.user.username), enumNotificationType.success);
+                this.ingameState.core.root.hud.parts.notifications.onNotification(
+                    shapezAPI.translations.multiplayer.user.disconnected.replaceAll(
+                        "<username>",
+                        connection.user.username
+                    ),
+                    enumNotificationType.success
+                );
                 this.users.splice(this.users.indexOf(connection.user), 1);
             }
             this.connections.splice(this.connections.indexOf(connection), 1);
         });
-        peer.on("error", (err) => {
+        peer.on("error", err => {
             console.error(err);
         });
 
@@ -142,10 +164,14 @@ export class MultiplayerPeer {
 
     //Handels events and send packets
     onOpen(peer) {
-        return async(event) => {
-            this.ingameState.core.root.signals.entityAdded.add((entity) => {
-                if (this.multiplayerPlace.includes(entity.uid)) return this.multiplayerPlace.splice(this.multiplayerPlace.indexOf(entity.uid), 1);
-                MultiplayerPacket.sendPacket(peer, new SignalPacket(SignalPacketSignals.entityAdded, [entity]));
+        return async event => {
+            this.ingameState.core.root.signals.entityAdded.add(entity => {
+                if (this.multiplayerPlace.includes(entity.uid))
+                    return this.multiplayerPlace.splice(this.multiplayerPlace.indexOf(entity.uid), 1);
+                MultiplayerPacket.sendPacket(
+                    peer,
+                    new SignalPacket(SignalPacketSignals.entityAdded, [entity])
+                );
 
                 if (entity.components.ConstantSignal) {
                     const constantSignalComponent = entity.components.ConstantSignal;
@@ -161,30 +187,76 @@ export class MultiplayerPeer {
                     entity.components.ConstantSignal = component;
                 }
             });
-            this.ingameState.core.root.signals.entityDestroyed.add((entity) => {
-                if (this.multiplayerDestroy.includes(entity.uid)) return this.multiplayerDestroy.splice(this.multiplayerDestroy.indexOf(entity.uid), 1);
+            if (!this.host)
+                this.ingameState.core.root.signals.prePlacementCheck.add((entity, offset, blueprint) => {
+                    MultiplayerPacket.sendPacket(
+                        peer,
+                        new SignalPacket(SignalPacketSignals.entityAdded, [entity])
+                    );
+                    return STOP_PROPAGATION;
+                });
 
-                MultiplayerPacket.sendPacket(peer, new SignalPacket(SignalPacketSignals.entityDestroyed, [entity]));
+            this.ingameState.core.root.signals.entityDestroyed.add(entity => {
+                if (this.multiplayerDestroy.includes(entity.uid))
+                    return this.multiplayerDestroy.splice(this.multiplayerDestroy.indexOf(entity.uid), 1);
+
+                MultiplayerPacket.sendPacket(
+                    peer,
+                    new SignalPacket(SignalPacketSignals.entityDestroyed, [entity])
+                );
             });
             //TODO: only constantSignal for now
             this.ingameState.core.root.signals.constantSignalChange.add((entity, constantSignalComponent) => {
-                if (this.multiplayerConstantSignalChange.includes(entity.uid)) return this.multiplayerConstantSignalChange.splice(this.multiplayerConstantSignalChange.indexOf(entity.uid), 1);
-                MultiplayerPacket.sendPacket(peer, new SignalPacket(SignalPacketSignals.entityComponentChanged, [entity, constantSignalComponent]));
+                if (this.multiplayerConstantSignalChange.includes(entity.uid))
+                    return this.multiplayerConstantSignalChange.splice(
+                        this.multiplayerConstantSignalChange.indexOf(entity.uid),
+                        1
+                    );
+                MultiplayerPacket.sendPacket(
+                    peer,
+                    new SignalPacket(SignalPacketSignals.entityComponentChanged, [
+                        entity,
+                        constantSignalComponent,
+                    ])
+                );
             });
-            this.ingameState.core.root.signals.entityGotNewComponent.add((entity) => {
-                if (this.multipalyerComponentAdd.includes(entity.uid)) return this.multipalyerComponentAdd.splice(this.multipalyerComponentAdd.indexOf(entity.uid), 1);
+            this.ingameState.core.root.signals.entityGotNewComponent.add(entity => {
+                if (this.multipalyerComponentAdd.includes(entity.uid))
+                    return this.multipalyerComponentAdd.splice(
+                        this.multipalyerComponentAdd.indexOf(entity.uid),
+                        1
+                    );
 
-                MultiplayerPacket.sendPacket(peer, new SignalPacket(SignalPacketSignals.entityComponentRemoved, [entity]));
+                MultiplayerPacket.sendPacket(
+                    peer,
+                    new SignalPacket(SignalPacketSignals.entityComponentRemoved, [entity])
+                );
             });
-            this.ingameState.core.root.signals.entityComponentRemoved.add((entity) => {
-                if (this.multipalyerComponentRemove.includes(entity.uid)) return this.multipalyerComponentRemove.splice(this.multipalyerComponentRemove.indexOf(entity.uid), 1);
+            this.ingameState.core.root.signals.entityComponentRemoved.add(entity => {
+                if (this.multipalyerComponentRemove.includes(entity.uid))
+                    return this.multipalyerComponentRemove.splice(
+                        this.multipalyerComponentRemove.indexOf(entity.uid),
+                        1
+                    );
 
-                MultiplayerPacket.sendPacket(peer, new SignalPacket(SignalPacketSignals.entityComponentRemoved, [entity]));
+                MultiplayerPacket.sendPacket(
+                    peer,
+                    new SignalPacket(SignalPacketSignals.entityComponentRemoved, [entity])
+                );
             });
-            this.ingameState.core.root.signals.upgradePurchased.add((upgradeId) => {
-                if (this.multipalyerUnlockUpgrade.includes(upgradeId)) return this.multipalyerUnlockUpgrade.splice(this.multipalyerUnlockUpgrade.indexOf(upgradeId), 1);
+            this.ingameState.core.root.signals.upgradePurchased.add(upgradeId => {
+                if (this.multipalyerUnlockUpgrade.includes(upgradeId))
+                    return this.multipalyerUnlockUpgrade.splice(
+                        this.multipalyerUnlockUpgrade.indexOf(upgradeId),
+                        1
+                    );
 
-                MultiplayerPacket.sendPacket(peer, new SignalPacket(SignalPacketSignals.upgradePurchased, [new StringSerializable(upgradeId)]));
+                MultiplayerPacket.sendPacket(
+                    peer,
+                    new SignalPacket(SignalPacketSignals.upgradePurchased, [
+                        new StringSerializable(upgradeId),
+                    ])
+                );
             });
             this.ingameState.core.root.hud.parts.buildingPlacer.signals.variantChanged.add(() => {
                 const metaBuilding = this.ingameState.core.root.hud.parts.buildingPlacer.currentMetaBuilding.get();
@@ -198,13 +270,17 @@ export class MultiplayerPeer {
                     this.user.worldPos = this.ingameState.core.root.camera.screenToWorld(mousePosition);
                     this.user.mouseTile = this.user.worldPos.toTileSpace();
                 }
-                MultiplayerPacket.sendPacket(peer, new TextPacket(TextPacketTypes.USER_UPDATE, JSON.stringify(this.user)));
+                MultiplayerPacket.sendPacket(
+                    peer,
+                    new TextPacket(TextPacketTypes.USER_UPDATE, JSON.stringify(this.user))
+                );
             });
 
             if (this.host) {
                 await this.ingameState.doSave();
 
-                var dataPackets = DataPacket.createFromData({
+                var dataPackets = DataPacket.createFromData(
+                    {
                         mods: shapezAPI.modOrder,
                         version: this.ingameState.savegame.getCurrentVersion(),
                         dump: this.ingameState.savegame.getCurrentDump(),
@@ -219,13 +295,17 @@ export class MultiplayerPeer {
                     MultiplayerPacket.sendPacket(peer, dataPackets[i]);
                 }
                 MultiplayerPacket.sendPacket(peer, new FlagPacket(FlagPacketFlags.ENDDATA));
-            } else MultiplayerPacket.sendPacket(peer, new TextPacket(TextPacketTypes.USER_JOINED, JSON.stringify(this.user)));
+            } else
+                MultiplayerPacket.sendPacket(
+                    peer,
+                    new TextPacket(TextPacketTypes.USER_JOINED, JSON.stringify(this.user))
+                );
         };
     }
 
     //Handels incomming packets
     onMessage(peerId = null) {
-        return (data) => {
+        return data => {
             var packet = JSON.parse(data);
             if (packet.type === MultiplayerPacketTypes.SIGNAL) {
                 packet.args = MultiplayerPacket.deserialize(packet.args, this.ingameState.core.root);
@@ -235,7 +315,11 @@ export class MultiplayerPeer {
                         // if (this.connections[i].peerId === peerId) continue;
                         // if (packet.signal === SignalPacketSignals.entityAdded && getBuildingDataFromCode(packet.args[0].components.StaticMapEntity.code).metaClass === shapezAPI.ingame.buildings.belt) continue;
                         // if (packet.signal === SignalPacketSignals.entityAdded && getBuildingDataFromCode(packet.args[0].components.StaticMapEntity.code).metaClass === shapezAPI.ingame.buildings.wire) continue;
-                        MultiplayerPacket.sendPacket(this.connections[i].peer, new SignalPacket(packet.signal, packet.args), this.connections);
+                        MultiplayerPacket.sendPacket(
+                            this.connections[i].peer,
+                            new SignalPacket(packet.signal, packet.args),
+                            this.connections
+                        );
                     }
                 }
 
@@ -244,13 +328,16 @@ export class MultiplayerPeer {
 
                     this.multiplayerPlace.push(entity.uid);
                     this.builder.tryPlaceCurrentBuildingAt(
-                        entity.components.StaticMapEntity.origin, {
+                        entity.components.StaticMapEntity.origin,
+                        {
                             origin: entity.components.StaticMapEntity.origin,
                             originalRotation: entity.components.StaticMapEntity.originalRotation,
                             rotation: entity.components.StaticMapEntity.rotation,
-                            rotationVariant: getBuildingDataFromCode(entity.components.StaticMapEntity.code).rotationVariant,
+                            rotationVariant: getBuildingDataFromCode(entity.components.StaticMapEntity.code)
+                                .rotationVariant,
                             variant: getBuildingDataFromCode(entity.components.StaticMapEntity.code).variant,
-                            building: getBuildingDataFromCode(entity.components.StaticMapEntity.code).metaInstance,
+                            building: getBuildingDataFromCode(entity.components.StaticMapEntity.code)
+                                .metaInstance,
                         },
                         entity.uid
                     );
@@ -284,19 +371,39 @@ export class MultiplayerPeer {
                     if (this.host) {
                         for (let i = 0; i < this.connections.length; i++) {
                             if (this.connections[i].peerId === peerId) continue;
-                            MultiplayerPacket.sendPacket(this.connections[i].peer, new TextPacket(TextPacketTypes.USER_JOINED, packet.text), this.connections);
+                            MultiplayerPacket.sendPacket(
+                                this.connections[i].peer,
+                                new TextPacket(TextPacketTypes.USER_JOINED, packet.text),
+                                this.connections
+                            );
                         }
 
-                        MultiplayerPacket.sendPacket(this.connections.find((x) => x.peerId === peerId).peer, new TextPacket(TextPacketTypes.HOST_USER, JSON.stringify(this.user)), this.connections);
+                        MultiplayerPacket.sendPacket(
+                            this.connections.find(x => x.peerId === peerId).peer,
+                            new TextPacket(TextPacketTypes.HOST_USER, JSON.stringify(this.user)),
+                            this.connections
+                        );
                     }
 
                     //Add user
                     this.users.push(user);
-                    if (this.host) this.connections.find((x) => x.peerId === peerId).user = user;
-                    this.ingameState.core.root.hud.parts.notifications.onNotification(shapezAPI.translations.multiplayer.user.joined.replaceAll("<username>", user.username), enumNotificationType.success);
+                    if (this.host) this.connections.find(x => x.peerId === peerId).user = user;
+                    this.ingameState.core.root.hud.parts.notifications.onNotification(
+                        shapezAPI.translations.multiplayer.user.joined.replaceAll(
+                            "<username>",
+                            user.username
+                        ),
+                        enumNotificationType.success
+                    );
                 } else if (packet.textType === TextPacketTypes.USER_DISCONNECTED) {
                     let user = JSON.parse(packet.text);
-                    this.ingameState.core.root.hud.parts.notifications.onNotification(shapezAPI.translations.multiplayer.user.disconnected.replaceAll("<username>", user.username), enumNotificationType.success);
+                    this.ingameState.core.root.hud.parts.notifications.onNotification(
+                        shapezAPI.translations.multiplayer.user.disconnected.replaceAll(
+                            "<username>",
+                            user.username
+                        ),
+                        enumNotificationType.success
+                    );
                     this.users.splice(this.users.indexOf(user), 1);
                 } else if (packet.textType === TextPacketTypes.HOST_USER) {
                     let user = JSON.parse(packet.text);
@@ -310,19 +417,26 @@ export class MultiplayerPeer {
                     if (this.host) {
                         for (let i = 0; i < this.connections.length; i++) {
                             if (this.connections[i].peerId === peerId) continue;
-                            MultiplayerPacket.sendPacket(this.connections[i].peer, new TextPacket(TextPacketTypes.USER_UPDATE, packet.text), this.connections);
+                            MultiplayerPacket.sendPacket(
+                                this.connections[i].peer,
+                                new TextPacket(TextPacketTypes.USER_UPDATE, packet.text),
+                                this.connections
+                            );
                         }
                     }
 
                     //Update user
-                    let index = this.users.findIndex((x) => x._id === user._id);
+                    let index = this.users.findIndex(x => x._id === user._id);
                     if (index >= 0) this.users[index] = user;
                     else this.users.push(user);
 
-                    if (this.host) this.connections.find((x) => x.peerId === peerId).user = user;
+                    if (this.host) this.connections.find(x => x.peerId === peerId).user = user;
                 } else if (packet.textType === TextPacketTypes.MESSAGE) {
                     // let user = this.connections.find((x) => x.peerId === peerId).user;
-                    this.ingameState.core.root.hud.parts.notifications.onNotification(packet.text, enumNotificationType.message);
+                    this.ingameState.core.root.hud.parts.notifications.onNotification(
+                        packet.text,
+                        enumNotificationType.message
+                    );
                 }
             }
         };
