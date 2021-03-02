@@ -217,10 +217,12 @@ export class WireSystem extends GameSystemWithFilter {
                 currentNetwork.uid,
                 ")"
             );
-        const entitiesToVisit = [{
-            entity: initialEntity,
-            slot,
-        }, ];
+        const entitiesToVisit = [
+            {
+                entity: initialEntity,
+                slot,
+            },
+        ];
 
         /**
          * Once we occur a wire, we store its variant so we don't connect to
@@ -245,13 +247,14 @@ export class WireSystem extends GameSystemWithFilter {
             //// WIRE
             if (wireComp) {
                 // Sanity check
-                assert(!wireComp.linkedNetwork || wireComp.linkedNetwork === currentNetwork,
+                assert(
+                    !wireComp.linkedNetwork || wireComp.linkedNetwork === currentNetwork,
                     "Mismatching wire network on wire entity " +
-                    (wireComp.linkedNetwork ? wireComp.linkedNetwork.uid : "<empty>") +
-                    " vs " +
-                    currentNetwork.uid +
-                    " @ " +
-                    staticComp.origin.toString()
+                        (wireComp.linkedNetwork ? wireComp.linkedNetwork.uid : "<empty>") +
+                        " vs " +
+                        currentNetwork.uid +
+                        " @ " +
+                        staticComp.origin.toString()
                 );
 
                 if (!wireComp.linkedNetwork) {
@@ -287,11 +290,12 @@ export class WireSystem extends GameSystemWithFilter {
                 }
 
                 // Sanity check
-                assert(!slot.linkedNetwork || slot.linkedNetwork === currentNetwork,
+                assert(
+                    !slot.linkedNetwork || slot.linkedNetwork === currentNetwork,
                     "Mismatching wire network on pin slot entity " +
-                    (slot.linkedNetwork ? slot.linkedNetwork.uid : "<empty>") +
-                    " vs " +
-                    currentNetwork.uid
+                        (slot.linkedNetwork ? slot.linkedNetwork.uid : "<empty>") +
+                        " vs " +
+                        currentNetwork.uid
                 );
                 if (!slot.linkedNetwork) {
                     // This one is new
@@ -567,7 +571,7 @@ export class WireSystem extends GameSystemWithFilter {
     /**
      * Returns the given tileset and opacity
      * @param {WireComponent} wireComp
-     * @returns {{ spriteSet: Object<enumWireType, import("../../core/draw_utils").AtlasSprite>, opacity: number}}
+     * @returns {{ spriteSet: Object<enumWireType, import("../../core/sprites").AtlasSprite>, opacity: number}}
      */
     getSpriteSetAndOpacityForWire(wireComp) {
         if (!wireComp.linkedNetwork) {
@@ -597,7 +601,7 @@ export class WireSystem extends GameSystemWithFilter {
 
     /**
      * Draws a given chunk
-     * @param {import("../../core/draw_utils").DrawParameters} parameters
+     * @param {import("../../core/draw_parameters").DrawParameters} parameters
      * @param {MapChunkView} chunk
      */
     drawChunk_WiresForegroundLayer(parameters, chunk) {
@@ -756,6 +760,6 @@ export class WireSystem extends GameSystemWithFilter {
             }
         }
     }
-}
 
-WireSystem.getForwardedTile = (tunnelComp, staticComp, offset) => staticComp.origin.add(offset);
+    static getForwardedTile = (tunnelComp, staticComp, offset) => staticComp.origin.add(offset);
+}

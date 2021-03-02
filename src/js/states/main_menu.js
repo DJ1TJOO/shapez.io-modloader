@@ -27,20 +27,24 @@ function capitalizeFirstLetter(string) {
 const trim = require("trim");
 
 export class MainMenuState extends GameState {
+    static extraTopButtons = [];
+    static extraSmallButtons = [];
+    static extraTrackClicks = [];
+
     constructor() {
         super("MainMenuState");
     }
 
     getInnerHTML() {
-            const bannerHtml = `
+        const bannerHtml = `
             <h3>${T.demoBanners.title}</h3>
             <p>${T.demoBanners.intro}</p>
             <a href="#" class="steamLink ${A_B_TESTING_LINK_TYPE}" target="_blank">Get the shapez.io standalone!</a>
         `;
 
-            const showDemoBadges = this.app.restrictionMgr.getIsStandaloneMarketingActive();
+        const showDemoBadges = this.app.restrictionMgr.getIsStandaloneMarketingActive();
 
-            return `
+        return `
             <div class="topButtons">
                 <button class="languageChoose" data-languageicon="${this.app.settings.getLanguage()}"></button>
                 <button class="settingsButton"></button>
@@ -663,8 +667,3 @@ export class MainMenuState extends GameState {
         this.dialogs.cleanup();
     }
 }
-
-MainMenuState.extraTopButtons = [];
-MainMenuState.extraSmallButtons = [];
-
-MainMenuState.extraTrackClicks = [];

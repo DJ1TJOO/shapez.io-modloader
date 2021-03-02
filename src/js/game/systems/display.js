@@ -12,7 +12,7 @@ export class DisplaySystem extends GameSystemWithFilter {
     constructor(root) {
         super(root, [DisplayComponent]);
 
-        /** @type {Object<string, import("../../core/draw_utils").AtlasSprite>} */
+        /** @type {Object<string, import("../../core/sprites").AtlasSprite>} */
         this.displaySprites = {};
 
         for (const colorId in enumColors) {
@@ -44,7 +44,7 @@ export class DisplaySystem extends GameSystemWithFilter {
 
     /**
      * Draws a given chunk
-     * @param {import("../../core/draw_utils").DrawParameters} parameters
+     * @param {import("../../core/draw_parameters").DrawParameters} parameters
      * @param {MapChunkView} chunk
      */
     drawChunk_ForegroundStaticLayer(parameters, chunk) {
@@ -70,38 +70,38 @@ export class DisplaySystem extends GameSystemWithFilter {
             }
         }
     }
+
+    static displaySprites = [];
+
+    static displayItemType = {
+        boolean: value => (isTrueItem(value) ? ColorItem.ITEM_SINGLETONS[enumColors.white] : null),
+
+        color: value =>
+            /**@type {ColorItem} */
+            (value).color === enumColors.uncolored ? null : /**@type {ColorItem} */ (value),
+
+        shape: value => value,
+    };
+
+    static displayItem = {
+        color: (parameters, value, origin, globalConfig) =>
+            DisplaySystem.displaySprites[/** @type {ColorItem} */ (value).color].drawCachedCentered(
+                parameters,
+                (origin.x + 0.5) * globalConfig.tileSize,
+                (origin.y + 0.5) * globalConfig.tileSize,
+                globalConfig.tileSize
+            ),
+
+        shape: (parameters, value, origin, globalConfig) =>
+            value.drawItemCenteredClipped(
+                (origin.x + 0.5) * globalConfig.tileSize,
+                (origin.y + 0.5) * globalConfig.tileSize,
+                parameters,
+                DisplaySystem.shapeRadius(),
+                DisplaySystem.shapeBackground()
+            ),
+    };
+
+    static shapeRadius = () => 30;
+    static shapeBackground = () => true;
 }
-
-DisplaySystem.displaySprites = [];
-
-DisplaySystem.displayItemType = {
-    boolean: value => (isTrueItem(value) ? ColorItem.ITEM_SINGLETONS[enumColors.white] : null),
-
-    color: value =>
-        /**@type {ColorItem} */
-        (value).color === enumColors.uncolored ? null : /**@type {ColorItem} */ (value),
-
-    shape: value => value,
-};
-
-DisplaySystem.displayItem = {
-    color: (parameters, value, origin, globalConfig) =>
-        DisplaySystem.displaySprites[ /** @type {ColorItem} */ (value).color].drawCachedCentered(
-            parameters,
-            (origin.x + 0.5) * globalConfig.tileSize,
-            (origin.y + 0.5) * globalConfig.tileSize,
-            globalConfig.tileSize
-        ),
-
-    shape: (parameters, value, origin, globalConfig) =>
-        value.drawItemCenteredClipped(
-            (origin.x + 0.5) * globalConfig.tileSize,
-            (origin.y + 0.5) * globalConfig.tileSize,
-            parameters,
-            DisplaySystem.shapeRadius(),
-            DisplaySystem.shapeBackground()
-        ),
-};
-
-DisplaySystem.shapeRadius = () => 30;
-DisplaySystem.shapeBackground = () => true;
