@@ -7,7 +7,8 @@ enumHubGoalRewards.reward_hyperlink = "reward_hyperlink";
 enumHubGoalRewards.reward_deep_miner = "reward_deep_miner";
 enumHubGoalRewards.reward_smart_stacker = "reward_smart_stacker";
 enumHubGoalRewards.reward_smart_cutter = "reward_smart_cutter";
-enumHubGoalRewards.reward_underground_belt_tier_3 = "reward_underground_belt_tier_3";
+enumHubGoalRewards.reward_underground_belt_tier_3 =
+    "reward_underground_belt_tier_3";
 
 const findNiceIntegerValue = shapezAPI.exports.findNiceIntegerValue;
 const GameMode = shapezAPI.exports.GameMode;
@@ -24,7 +25,9 @@ const tierGrowth = 3.5;
  * Generates all upgrades*/
 function generateUpgrades(limitedVersion = false) {
     const fixedImprovements = [0.5, 0.5, 0.5, 1, 1.5, 1.5, 1.5];
-    const numEndgameUpgrades = limitedVersion ? 0 : 1000 - fixedImprovements.length - 1;
+    const numEndgameUpgrades = limitedVersion
+        ? 0
+        : 1000 - fixedImprovements.length - 1;
 
     function generateInfiniteUnlocks() {
         return new Array(numEndgameUpgrades).fill(null).map((_, i) => ({
@@ -49,7 +52,8 @@ function generateUpgrades(limitedVersion = false) {
     }
 
     const upgrades = {
-        belt: [{
+        belt: [
+            {
                 required: [{ shape: "CuCuCuCu", amount: 150 }],
             },
             {
@@ -62,7 +66,9 @@ function generateUpgrades(limitedVersion = false) {
                 required: [{ shape: "CgCgCwCg:Cw------", amount: 5000 }],
             },
             {
-                required: [{ shape: "CwCcCwCc:--Cw--Cw:--Cc--Cc", amount: 10000 }],
+                required: [
+                    { shape: "CwCcCwCc:--Cw--Cw:--Cc--Cc", amount: 10000 },
+                ],
             },
             {
                 required: [{ shape: preparementShape, amount: 15000 }],
@@ -78,7 +84,8 @@ function generateUpgrades(limitedVersion = false) {
             ...generateInfiniteUnlocks(),
         ],
 
-        miner: [{
+        miner: [
+            {
                 required: [{ shape: "RuRuRuRu", amount: 150 }],
             },
             {
@@ -88,10 +95,17 @@ function generateUpgrades(limitedVersion = false) {
                 required: [{ shape: "RpRpRpRp", amount: 1500 }],
             },
             {
-                required: [{ shape: "RpRbRpRb:RbRpRbRp:RpRbRpRb", amount: 5000 }],
+                required: [
+                    { shape: "RpRbRpRb:RbRpRbRp:RpRbRpRb", amount: 5000 },
+                ],
             },
             {
-                required: [{ shape: "RpRbRpRb:RrRwRrRw:RpRbRpRb:RrRwRrRw", amount: 10000 }],
+                required: [
+                    {
+                        shape: "RpRbRpRb:RrRwRrRw:RpRbRpRb:RrRwRrRw",
+                        amount: 10000,
+                    },
+                ],
             },
             {
                 required: [{ shape: preparementShape, amount: 15000 }],
@@ -107,7 +121,8 @@ function generateUpgrades(limitedVersion = false) {
             ...generateInfiniteUnlocks(),
         ],
 
-        processors: [{
+        processors: [
+            {
                 required: [{ shape: "SuSuSuSu", amount: 150 }],
             },
             {
@@ -120,7 +135,9 @@ function generateUpgrades(limitedVersion = false) {
                 required: [{ shape: "----Sw--:--SpSwSp", amount: 5000 }],
             },
             {
-                required: [{ shape: "Sg----Sg:----SbSb:SuSuSu--", amount: 10000 }],
+                required: [
+                    { shape: "Sg----Sg:----SbSb:SuSuSu--", amount: 10000 },
+                ],
             },
             {
                 required: [{ shape: preparementShape, amount: 15000 }],
@@ -136,7 +153,8 @@ function generateUpgrades(limitedVersion = false) {
             ...generateInfiniteUnlocks(),
         ],
 
-        painting: [{
+        painting: [
+            {
                 required: [{ shape: "RbRb----", amount: 150 }],
             },
             {
@@ -149,7 +167,9 @@ function generateUpgrades(limitedVersion = false) {
                 required: [{ shape: "WrWgWbWw:WbWwWrWg", amount: 5000 }],
             },
             {
-                required: [{ shape: "----WwWy:Wp--Ww--:--WcWw--", amount: 10000 }],
+                required: [
+                    { shape: "----WwWy:Wp--Ww--:--WcWw--", amount: 10000 },
+                ],
             },
             {
                 required: [{ shape: preparementShape, amount: 15000 }],
@@ -205,7 +225,8 @@ function generateUpgrades(limitedVersion = false) {
  * @param {boolean} limitedVersion
  */
 export function generateLevelDefinitions(limitedVersion = false) {
-    const levelDefinitions = [{
+    const levelDefinitions = [
+        {
             //1
             shape: "CuCuCuCu", //belt t1
             required: 20,
@@ -451,8 +472,14 @@ export class SIGameMode extends GameMode {
         return "ShapezIndustries";
     }
 
+    static getType() {
+        return "defaultModeType";
+    }
+
     getUpgrades() {
-        return this.root.app.restrictionMgr.getHasExtendedUpgrades() ? fullVersionUpgrades : demoVersionUpgrades;
+        return this.root.app.restrictionMgr.getHasExtendedUpgrades()
+            ? fullVersionUpgrades
+            : demoVersionUpgrades;
     }
 
     getIsFreeplayAvailable() {
@@ -464,6 +491,8 @@ export class SIGameMode extends GameMode {
     }
 
     getLevelDefinitions() {
-        return this.root.app.restrictionMgr.getHasExtendedLevelsAndFreeplay() ? fullVersionLevels : demoVersionLevels;
+        return this.root.app.restrictionMgr.getHasExtendedLevelsAndFreeplay()
+            ? fullVersionLevels
+            : demoVersionLevels;
     }
 }
