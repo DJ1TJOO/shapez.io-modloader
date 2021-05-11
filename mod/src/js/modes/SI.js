@@ -11,7 +11,7 @@ enumHubGoalRewards.reward_underground_belt_tier_3 =
     "reward_underground_belt_tier_3";
 
 const findNiceIntegerValue = shapezAPI.exports.findNiceIntegerValue;
-const GameMode = shapezAPI.exports.GameMode;
+const RegularGameMode = shapezAPI.exports.RegularGameMode;
 
 const rocketShape = "Sb------:--Cb--Cb:3u------:----3r--";
 const finalGameShape = "Ru1w--1w:--1w--1w:----Ru--";
@@ -463,7 +463,7 @@ const demoVersionUpgrades = generateUpgrades(true);
 const fullVersionLevels = generateLevelDefinitions(false);
 const demoVersionLevels = generateLevelDefinitions(true);
 
-export class SIGameMode extends GameMode {
+export class SIGameMode extends RegularGameMode {
     constructor(root) {
         super(root);
     }
