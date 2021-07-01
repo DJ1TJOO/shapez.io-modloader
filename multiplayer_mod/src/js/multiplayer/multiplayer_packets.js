@@ -239,19 +239,32 @@ export class MultiplayerPacket {
 
     /**
      * Sends the packet over a peer via the datachannel
-     * @param {Peer} peer
+     * @param {Peer.Instance} peer
      * @param {MultiplayerPacket} packet
      * @param {Array} packet
      */
     static sendPacket(peer, packet, connections = undefined) {
-        if (!peer.connected) return;
-        try {
-            peer.send(JSON.stringify(packet));
-        } catch (error) {
-            if (connections)
-                connections.splice(connections.indexOf(connections.find(x => x.peer === peer)), 1);
-            console.log(error);
+        this._packetsToSend.push(() => {
+            if (!peer.connected) return;
+            try {
+                peer.send(JSON.stringify(packet));
+            } catch (error) {
+                if (connections)
+                    connections.splice(connections.indexOf(connections.find(x => x.peer === peer)), 1);
+                console.log(error);
+            }
+        });
+
+        if (this._packetsToSend.length <= 1) {
+            this.sendNextPacket();
         }
+    }
+
+    static sendNextPacket() {
+        if (this._packetsToSend.length < 1) return;
+
+        this._packetsToSend[0]();
+        this._packetsToSend.shift();
     }
 
     /**
@@ -280,15 +293,20 @@ export class MultiplayerPacket {
         var argsNew = [];
         for (let i = 0; i < args.length; i++) {
             const element = args[i];
+            // @ts-ignore
             var object = new MultiplayerPacketSerializableObject[element.class]({});
             if (object instanceof Entity)
                 object = new MultiplayerSerializerInternal().deserializeEntity(root, element.serialized);
+            // @ts-ignore
             else object.deserialize(element.serialized, root);
             argsNew.push(object);
         }
         return argsNew;
     }
 }
+
+/** @type {Array<Function>} */
+MultiplayerPacket._packetsToSend = [];
 
 export class DataPacket extends MultiplayerPacket {
     constructor(size, data) {
@@ -333,6 +351,7 @@ export class DataPacket extends MultiplayerPacket {
 export const FlagPacketFlags = {
     STARTDATA: 0,
     ENDDATA: 1,
+    RECEIVED_PACKET: 2,
 };
 
 export class FlagPacket extends MultiplayerPacket {

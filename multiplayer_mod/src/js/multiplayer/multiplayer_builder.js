@@ -15,7 +15,7 @@ export class MultiplayerBuilder {
         if (!this.ingameState.core.root.logic.canDeleteBuilding(building)) {
             return false;
         }
-        this.peer.multiplayerDestroy.push(building.uid);
+        this.peer.multiplayerDestroy.push(building.components.StaticMapEntity.origin);
         this.ingameState.core.root.map.removeStaticEntity(building);
         this.ingameState.core.root.entityMgr.destroyEntity(building);
         this.ingameState.core.root.entityMgr.processDestroyList();
@@ -79,8 +79,12 @@ export class MultiplayerBuilder {
         if (this.ingameState.core.root.logic.checkCanPlaceEntity(entity)) {
             this.freeEntityAreaBeforeBuild(entity);
             this.ingameState.core.root.map.placeStaticEntity(entity);
-            this.ingameState.core.root.entityMgr.registerEntity(entity, uid);
-            this.ingameState.core.root.entityMgr.nextUid = uid + 1;
+            if (uid) {
+                this.ingameState.core.root.entityMgr.registerEntity(entity, uid);
+                this.ingameState.core.root.entityMgr.nextUid = uid + 1;
+            } else {
+                this.ingameState.core.root.entityMgr.registerEntity(entity);
+            }
             return entity;
         }
         return null;
@@ -91,12 +95,7 @@ export class MultiplayerBuilder {
      * @param {Vector} tile
      */
     tryPlaceCurrentBuildingAt(tile, entityPayload, uid) {
-        if (this.ingameState.core.root.camera.zoomLevel < globalConfig.mapChunkOverviewMinZoom) {
-            // Dont allow placing in overview mode
-            return;
-        }
-
-        if (this.ingameState.core.root.entityMgr.findByUid(uid)) return false;
+        if (this.ingameState.core.root.entityMgr.findByUid(uid, false)) uid = null;
 
         const metaBuilding = entityPayload.building;
         const entity = this.tryPlaceBuilding(
@@ -116,5 +115,23 @@ export class MultiplayerBuilder {
         } else {
             return false;
         }
+    }
+
+    /**
+     * Finds an entity buy its location, kinda slow since it loops over all entities
+     * @param {Vector} origin
+     */
+    findByOrigin(entityMgr, origin) {
+        const arr = entityMgr.entities;
+        for (let i = 0, len = arr.length; i < len; ++i) {
+            const entity = arr[i];
+            if (entity.components.StaticMapEntity.origin.equals(origin)) {
+                if (entity.queuedForDestroy || entity.destroyed) {
+                    return null;
+                }
+                return entity;
+            }
+        }
+        return null;
     }
 }

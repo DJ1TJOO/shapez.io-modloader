@@ -26,7 +26,7 @@ const config = {
             urls: "stun:stun.1.google.com:19302",
         },
         {
-            url: "turn:numb.viagenie.ca",
+            urls: "turn:numb.viagenie.ca",
             credential: "muazkh",
             username: "webrtc@live.com",
         },
@@ -38,6 +38,7 @@ export class MultiplayerPeer {
      *
      * @param {import ("../states/multiplayer_ingame").InMultiplayerGameState} ingameState
      * @param {boolean} host
+     * @param {Peer} peer
      */
     constructor(ingameState, host = false, peer = null) {
         this.ingameState = ingameState;
@@ -97,7 +98,7 @@ export class MultiplayerPeer {
     setupClient(peer) {
         //Peer aleady connected, only add events
         this.onOpen(peer)();
-        peer.on("data", this.onMessage());
+        peer.on("data", this.onMessage(peer));
         peer.on("close", () => {
             console.log(this.connectionId + " closed");
             this.ingameState.goBackToMenu();
@@ -130,7 +131,7 @@ export class MultiplayerPeer {
 
         //Handle peer events
         peer.on("connect", this.onOpen(peer));
-        peer.on("data", this.onMessage(peerId));
+        peer.on("data", this.onMessage(peer, peerId));
         peer.on("close", () => {
             console.log(peerId + " closed");
             const connection = this.connections.find(x => x.peerId === peerId);
@@ -162,12 +163,18 @@ export class MultiplayerPeer {
         this.connections.push({ peer: peer, peerId: peerId });
     }
 
-    //Handels events and send packets
+    /**
+     * Handels events and send packets
+     * @param {Peer.Instance} peer
+     * @returns
+     */
     onOpen(peer) {
         return async event => {
             this.ingameState.core.root.signals.entityAdded.add(entity => {
-                if (this.multiplayerPlace.includes(entity.uid))
-                    return this.multiplayerPlace.splice(this.multiplayerPlace.indexOf(entity.uid), 1);
+                const multiplayerId = this.multiplayerPlace.findIndex(origin =>
+                    origin.equals(entity.components.StaticMapEntity.origin)
+                );
+                if (multiplayerId > -1) return this.multiplayerPlace.splice(multiplayerId, 1);
                 MultiplayerPacket.sendPacket(
                     peer,
                     new SignalPacket(SignalPacketSignals.entityAdded, [entity])
@@ -187,18 +194,12 @@ export class MultiplayerPeer {
                     entity.components.ConstantSignal = component;
                 }
             });
-            // if (!this.host)
-            //     this.ingameState.core.root.signals.prePlacementCheck.add((entity, offset, blueprint) => {
-            //         MultiplayerPacket.sendPacket(
-            //             peer,
-            //             new SignalPacket(SignalPacketSignals.entityAdded, [entity])
-            //         );
-            //         return STOP_PROPAGATION;
-            //     });
 
             this.ingameState.core.root.signals.entityDestroyed.add(entity => {
-                if (this.multiplayerDestroy.includes(entity.uid))
-                    return this.multiplayerDestroy.splice(this.multiplayerDestroy.indexOf(entity.uid), 1);
+                const multiplayerId = this.multiplayerDestroy.findIndex(origin =>
+                    origin.equals(entity.components.StaticMapEntity.origin)
+                );
+                if (multiplayerId > -1) return this.multiplayerDestroy.splice(multiplayerId, 1);
 
                 MultiplayerPacket.sendPacket(
                     peer,
@@ -207,11 +208,10 @@ export class MultiplayerPeer {
             });
             //TODO: only constantSignal for now
             this.ingameState.core.root.signals.constantSignalChange.add((entity, constantSignalComponent) => {
-                if (this.multiplayerConstantSignalChange.includes(entity.uid))
-                    return this.multiplayerConstantSignalChange.splice(
-                        this.multiplayerConstantSignalChange.indexOf(entity.uid),
-                        1
-                    );
+                const multiplayerId = this.multiplayerConstantSignalChange.findIndex(origin =>
+                    origin.equals(entity.components.StaticMapEntity.origin)
+                );
+                if (multiplayerId > -1) return this.multiplayerConstantSignalChange.splice(multiplayerId, 1);
                 MultiplayerPacket.sendPacket(
                     peer,
                     new SignalPacket(SignalPacketSignals.entityComponentChanged, [
@@ -221,11 +221,10 @@ export class MultiplayerPeer {
                 );
             });
             this.ingameState.core.root.signals.entityGotNewComponent.add(entity => {
-                if (this.multipalyerComponentAdd.includes(entity.uid))
-                    return this.multipalyerComponentAdd.splice(
-                        this.multipalyerComponentAdd.indexOf(entity.uid),
-                        1
-                    );
+                const multiplayerId = this.multipalyerComponentAdd.findIndex(origin =>
+                    origin.equals(entity.components.StaticMapEntity.origin)
+                );
+                if (multiplayerId > -1) return this.multipalyerComponentAdd.splice(multiplayerId, 1);
 
                 MultiplayerPacket.sendPacket(
                     peer,
@@ -233,11 +232,10 @@ export class MultiplayerPeer {
                 );
             });
             this.ingameState.core.root.signals.entityComponentRemoved.add(entity => {
-                if (this.multipalyerComponentRemove.includes(entity.uid))
-                    return this.multipalyerComponentRemove.splice(
-                        this.multipalyerComponentRemove.indexOf(entity.uid),
-                        1
-                    );
+                const multiplayerId = this.multipalyerComponentRemove.findIndex(origin =>
+                    origin.equals(entity.components.StaticMapEntity.origin)
+                );
+                if (multiplayerId > -1) return this.multipalyerComponentRemove.splice(multiplayerId, 1);
 
                 MultiplayerPacket.sendPacket(
                     peer,
@@ -281,7 +279,7 @@ export class MultiplayerPeer {
 
             if (this.host) {
                 await this.ingameState.doSave();
-
+                console.log(this.ingameState.savegame.getCurrentDump());
                 var dataPackets = DataPacket.createFromData(
                     {
                         mods: shapezAPI.modOrder,
@@ -307,9 +305,17 @@ export class MultiplayerPeer {
     }
 
     //Handels incomming packets
-    onMessage(peerId = null) {
+    onMessage(peer, peerId = null) {
         return data => {
             var packet = JSON.parse(data);
+            if (
+                packet.type === MultiplayerPacketTypes.FLAG &&
+                packet.flag === FlagPacketFlags.RECEIVED_PACKET
+            ) {
+                MultiplayerPacket.sendNextPacket();
+            } else {
+                MultiplayerPacket.sendPacket(peer, new FlagPacket(FlagPacketFlags.RECEIVED_PACKET));
+            }
             if (packet.type === MultiplayerPacketTypes.SIGNAL) {
                 packet.args = MultiplayerPacket.deserialize(packet.args, this.ingameState.core.root);
 
@@ -329,7 +335,7 @@ export class MultiplayerPeer {
                 if (packet.signal === SignalPacketSignals.entityAdded) {
                     var entity = packet.args[0];
 
-                    this.multiplayerPlace.push(entity.uid);
+                    this.multiplayerPlace.push(entity.components.StaticMapEntity.origin);
                     this.builder.tryPlaceCurrentBuildingAt(
                         entity.components.StaticMapEntity.origin,
                         {
@@ -346,17 +352,23 @@ export class MultiplayerPeer {
                     );
                 }
                 if (packet.signal === SignalPacketSignals.entityDestroyed) {
-                    let entity = this.ingameState.core.root.entityMgr.findByUid(packet.args[0].uid);
+                    let entity = this.builder.findByOrigin(
+                        this.ingameState.core.root.entityMgr,
+                        packet.args[0].components.StaticMapEntity.origin
+                    );
                     if (entity !== null) {
-                        this.multiplayerDestroy.push(entity.uid);
+                        this.multiplayerDestroy.push(entity.components.StaticMapEntity.origin);
                         this.ingameState.core.root.logic.tryDeleteBuilding(entity);
                     }
                 }
                 if (packet.signal === SignalPacketSignals.entityComponentChanged) {
-                    let entity = this.ingameState.core.root.entityMgr.findByUid(packet.args[0].uid);
+                    let entity = this.builder.findByOrigin(
+                        this.ingameState.core.root.entityMgr,
+                        packet.args[0].components.StaticMapEntity.origin
+                    );
                     let component = packet.args[1];
                     if (entity === null) return;
-                    this.multiplayerConstantSignalChange.push(entity.uid);
+                    this.multiplayerConstantSignalChange.push(entity.components.StaticMapEntity.origin);
                     for (const key in component) {
                         if (!component.hasOwnProperty(key)) continue;
                         entity.components[component.constructor.getId()][key] = component[key];
