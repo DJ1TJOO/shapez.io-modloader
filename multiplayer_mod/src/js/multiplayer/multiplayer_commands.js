@@ -31,7 +31,13 @@ export class MultiplayerCommandsHandler {
     executeCommand(cmd, args) {
         cmd = cmd.toLowerCase();
         if (!MultiplayerCommandsHandler.commands[cmd]) return false;
-        return MultiplayerCommandsHandler.commands[cmd](this.root, this.root.gameState.peer.user, this.root.gameState.peer, cmd, args);
+        return MultiplayerCommandsHandler.commands[cmd](
+            this.root,
+            this.root.gameState.peer.user,
+            this.root.gameState.peer,
+            cmd,
+            args
+        );
     }
 }
 
@@ -49,7 +55,10 @@ MultiplayerCommandsHandler.commands = {
             });
             root.hud.parts.dialogs.internalShowDialog(dialog);
         } else {
-            root.hud.parts.notifications.onNotification(shapezAPI.translations.multiplayer.hostOnly, enumNotificationType.error);
+            root.hud.parts.notifications.onNotification(
+                shapezAPI.translations.multiplayer.hostOnly,
+                enumNotificationType.error
+            );
         }
         return true;
     },

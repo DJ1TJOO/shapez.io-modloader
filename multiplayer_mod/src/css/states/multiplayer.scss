@@ -36,12 +36,10 @@
             background-size: 90%;
         }
         .languageChoose {
-            @include S(border-radius,
-            8px);
+            @include S(border-radius, 8px);
             border: solid #222428;
             background-color: #fff;
-            @include S(border-width,
-            2px);
+            @include S(border-width, 2px);
             background-size: cover;
             opacity: 0.8;
         }
@@ -73,13 +71,10 @@
         }
     }
     .mainWrapper {
-        @include S(padding,
-        0,
-        10px);
+        @include S(padding, 0, 10px);
         align-items: start;
         justify-items: center;
-        @include S(grid-column-gap,
-        10px);
+        @include S(grid-column-gap, 10px);
         display: grid;
         grid-template-columns: 1fr;
         &.demo {
@@ -87,27 +82,21 @@
         }
         .standaloneBanner {
             background: rgb(255, 75, 84);
-            @include S(border-radius,
-            $globalBorderRadius+4);
+            @include S(border-radius, $globalBorderRadius + 4);
             box-sizing: border-box;
             border: solid rgba(#fff, 0.15);
-            @include S(border-width,
-            4px);
-            @include S(padding,
-            15px);
+            @include S(border-width, 4px);
+            @include S(padding, 15px);
             display: flex;
             flex-direction: column;
             strong {
                 font-weight: bold;
-                @include S(margin,
-                0,
-                4px);
+                @include S(margin, 0, 4px);
             }
             h3 {
                 @include Heading;
                 font-weight: bold;
-                @include S(margin-bottom,
-                20px);
+                @include S(margin-bottom, 20px);
                 text-transform: uppercase;
                 color: #fff;
             }
@@ -116,10 +105,8 @@
                 color: #fff;
             }
             ul {
-                @include S(margin-top,
-                5px);
-                @include S(padding-left,
-                20px);
+                @include S(margin-top, 5px);
+                @include S(padding-left, 20px);
                 li {
                     @include Text;
                 }
@@ -128,23 +115,19 @@
                 align-self: center;
                 justify-self: center;
                 width: 100%;
-                @include S(height,
-                40px);
-                @include S(width,
-                180px);
+                @include S(height, 40px);
+                @include S(width, 180px);
                 background: #171a23 center center / contain no-repeat;
                 overflow: hidden;
                 display: block;
                 text-indent: -999em;
                 cursor: pointer;
-                @include S(margin-top,
-                30px);
+                @include S(margin-top, 30px);
                 pointer-events: all;
                 transition: all 0.12s ease-in;
                 transition-property: opacity, transform;
                 transform: skewX(-0.5deg);
-                @include S(border-radius,
-                $globalBorderRadius);
+                @include S(border-radius, $globalBorderRadius);
                 &:hover {
                     transform: scale(1.02);
                     opacity: 0.9;
@@ -158,20 +141,14 @@
         align-items: center;
         justify-content: center;
         flex-direction: column;
-        @include S(padding-top,
-        20px);
+        @include S(padding-top, 20px);
         img {
-            @include S(width,
-            350px);
+            @include S(width, 350px);
         }
         .demoBadge {
-            @include S(margin,
-            10px,
-            0);
-            @include S(width,
-            100px);
-            @include S(height,
-            30px);
+            @include S(margin, 10px, 0);
+            @include S(width, 100px);
+            @include S(height, 30px);
             & {
                 /* @load-async */
                 background: url("**{icons_demo_badge}**") center center / contain no-repeat;
@@ -185,10 +162,8 @@
             color: rgb(231, 78, 58);
             @include Heading;
             font-weight: bold;
-            @include S(right,
-            40px);
-            @include S(bottom,
-            20px);
+            @include S(right, 40px);
+            @include S(bottom, 20px);
             @include InlineAnimation(1.3s ease-in-out infinite) {
                 50% {
                     transform: translateX(50%) rotate(-7deg) scale(1.1);
@@ -200,31 +175,22 @@
         }
     }
     .betaWarning {
-        @include S(width,
-        400px);
+        @include S(width, 400px);
         @include PlainText;
         background: $colorRedBright;
-        @include S(padding,
-        10px);
-        @include S(border-radius,
-        $globalBorderRadius);
+        @include S(padding, 10px);
+        @include S(border-radius, $globalBorderRadius);
         color: #fff;
-        @include S(margin-top,
-        10px);
-        border: #{D(2px)} solid rgba(0,
-        10,
-        20,
-        0.1);
+        @include S(margin-top, 10px);
+        border: #{D(2px)} solid rgba(0, 10, 20, 0.1);
     }
     .sideContainer {
         display: flex;
         flex-direction: column;
-        @include S(width,
-        300px);
+        @include S(width, 300px);
         .standaloneBanner {
             flex-grow: 1;
-            @include S(margin-bottom,
-            10px);
+            @include S(margin-bottom, 10px);
         }
     }
     .mainContainer {
@@ -233,10 +199,8 @@
         justify-content: center;
         flex-direction: column;
         background: #fafafa;
-        @include S(padding,
-        20px);
-        @include S(border-radius,
-        $globalBorderRadius);
+        @include S(padding, 20px);
+        @include S(border-radius, $globalBorderRadius);
         // border: #{D(2px)} solid rgba(0, 10, 20, 0.1);
         height: 100%;
         width: 100%;
@@ -247,26 +211,19 @@
             align-items: center;
         }
         .browserWarning {
-            @include S(margin-bottom,
-            10px);
+            @include S(margin-bottom, 10px);
             background-color: $colorRedBright;
             @include PlainText;
             color: #fff;
-            @include S(border-radius,
-            $globalBorderRadius);
-            @include S(padding,
-            5px);
-            @include S(width,
-            300px);
+            @include S(border-radius, $globalBorderRadius);
+            @include S(padding, 5px);
+            @include S(width, 300px);
         }
         .playButton, // .backButton 
         .joinButton {
             @include SuperHeading;
-            @include S(min-width,
-            130px);
-            @include S(padding,
-            15px,
-            20px);
+            @include S(min-width, 130px);
+            @include S(padding, 15px, 20px);
             letter-spacing: 0.3em !important;
             @include IncreasedClickArea(0px);
             font-weight: bold;
@@ -282,45 +239,33 @@
             }
         }
         .backButton {
-            @include S(margin-top,
-            15px);
+            @include S(margin-top, 15px);
             @include IncreasedClickArea(0px);
         }
         .newGameButton {
             @include IncreasedClickArea(0px);
-            @include S(margin-top,
-            15px);
-            @include S(margin-left,
-            15px);
+            @include S(margin-top, 15px);
+            @include S(margin-left, 15px);
         }
         .savegames {
-            @include S(max-height,
-            105px);
+            @include S(max-height, 105px);
             overflow-y: auto;
-            @include S(width,
-            250px);
+            @include S(width, 250px);
             pointer-events: all;
-            @include S(padding-right,
-            5px);
+            @include S(padding-right, 5px);
             display: grid;
             grid-auto-flow: row;
-            @include S(grid-gap,
-            5px);
-            @include S(margin-top,
-            10px);
+            @include S(grid-gap, 5px);
+            @include S(margin-top, 10px);
             .savegame {
                 background: #eee;
-                @include S(border-radius,
-                $globalBorderRadius);
-                @include S(padding,
-                5px);
+                @include S(border-radius, $globalBorderRadius);
+                @include S(padding, 5px);
                 display: grid;
                 grid-template-columns: 1fr 1fr auto auto;
                 grid-template-rows: auto auto;
-                @include S(grid-column-gap,
-                4px);
-                @include S(grid-row-gap,
-                1px);
+                @include S(grid-column-gap, 4px);
+                @include S(grid-row-gap, 1px);
                 .playtime {
                     grid-column: 2 / 3;
                     grid-row: 2 / 3;
@@ -339,10 +284,9 @@
                     @include PlainText;
                     display: inline-flex;
                     align-items: center;
-                    >span {
+                    > span {
                         display: inline-flex;
-                        @include S(max-width,
-                        140px);
+                        @include S(max-width, 140px);
                         overflow: hidden;
                     }
                 }
@@ -371,11 +315,9 @@
                         /* @load-async */
                         background-image: url("**{icons_download}**");
                     }
-                    @include S(width,
-                    15px);
+                    @include S(width, 15px);
                     @include IncreasedClickArea(0px);
-                    @include S(height,
-                    15px);
+                    @include S(height, 15px);
                     background-size: 80%;
                     align-self: start;
                     opacity: 0.4;
@@ -393,10 +335,8 @@
                         /* @load-async */
                         background-image: url("**{icons_delete}**");
                     }
-                    @include S(width,
-                    15px);
-                    @include S(height,
-                    15px);
+                    @include S(width, 15px);
+                    @include S(height, 15px);
                     align-self: end;
                     background-size: 80%;
                     opacity: 0.4;
@@ -412,16 +352,13 @@
                         /* @load-async */
                         background-image: url("**{icons_edit_key}**");
                     }
-                    @include S(width,
-                    10px);
-                    @include S(height,
-                    10px);
+                    @include S(width, 10px);
+                    @include S(height, 10px);
                     align-self: center;
                     justify-self: center;
                     background-size: 90%;
                     opacity: 0.4;
-                    @include S(margin-left,
-                    4px);
+                    @include S(margin-left, 4px);
                     &:hover {
                         opacity: 0.5;
                     }
@@ -431,11 +368,9 @@
                     grid-column: 4 / 5;
                     grid-row: 1 / 3;
                     margin: 0;
-                    @include S(width,
-                    32px);
+                    @include S(width, 32px);
                     height: 100%;
-                    @include S(margin-left,
-                    4px);
+                    @include S(margin-left, 4px);
                     @include DarkThemeOverride {
                         background-color: lighten($darkModeControlsBackground, 10);
                     }
@@ -450,11 +385,9 @@
         align-items: flex-end;
         width: 100%;
         grid-template-columns: auto auto auto 1fr;
-        @include S(padding,
-        10px);
+        @include S(padding, 10px);
         box-sizing: border-box;
-        @include S(grid-gap,
-        4px);
+        @include S(grid-gap, 4px);
     }
     .gameLoadingOverlay {
         position: absolute;
@@ -483,8 +416,8 @@
             background: $darkModeGameBackground;
         }
         .footer {
-            >a,
-            .sidelinks>a {
+            > a,
+            .sidelinks > a {
                 background-color: $darkModeControlsBackground;
                 color: #eee;
                 &:hover {
@@ -493,7 +426,7 @@
             }
             .author {
                 color: #bdbdbd;
-                >a {
+                > a {
                     color: white;
                 }
             }

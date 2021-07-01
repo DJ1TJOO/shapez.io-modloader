@@ -203,7 +203,13 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
      */
     saveThenGoToState(stateId, payload) {
         if (this.stage === stages.leaving || this.stage === stages.destroyed) {
-            logger.warn("Tried to leave game twice or during destroy:", this.stage, "(attempted to move to", stateId, ")");
+            logger.warn(
+                "Tried to leave game twice or during destroy:",
+                this.stage,
+                "(attempted to move to",
+                stateId,
+                ")"
+            );
             return;
         }
         this.stageLeavingGame();
@@ -245,7 +251,9 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
                 this.core.initializeRoot(this, this.multiplayerSavegame);
 
                 //Remove listeners notifications
-                this.core.root.hud.signals.notification.remove(this.core.root.hud.parts.notifications.onNotification);
+                this.core.root.hud.signals.notification.remove(
+                    this.core.root.hud.parts.notifications.onNotification
+                );
                 this.core.root.signals.gameSaved.removeAll();
                 this.core.root.signals.gameSaved.add(this.core.root.hud.parts.gameMenu.onGameSaved, this);
 
@@ -264,9 +272,14 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
                 this.core.initializeRoot(this, this.savegame);
 
                 //Remove listeners notifications
-                this.core.root.hud.signals.notification.remove(this.core.root.hud.parts.notifications.onNotification);
+                this.core.root.hud.signals.notification.remove(
+                    this.core.root.hud.parts.notifications.onNotification
+                );
                 this.core.root.signals.gameSaved.removeAll();
-                this.core.root.signals.gameSaved.add(this.core.root.hud.parts.gameMenu.onGameSaved, this.core.root.hud.parts.gameMenu);
+                this.core.root.signals.gameSaved.add(
+                    this.core.root.hud.parts.gameMenu.onGameSaved,
+                    this.core.root.hud.parts.gameMenu
+                );
 
                 //Change to multiplayer notifications
                 this.core.root.hud.parts.notifications = new MultiplayerHUDNotifications(this.core.root);
@@ -412,26 +425,34 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
             }
 
             //Add buttons back
-            shapezAPI.exports.HUDSettingsMenu.buttons.splice(shapezAPI.exports.HUDSettingsMenu.buttons.findIndex((x) => x.id === "continue") + 1, 0, {
-                id: "settings",
-                action: (hudSettingsMenu) => () => hudSettingsMenu.goToSettings(),
-                options: {
-                    preventDefault: false,
-                },
-            });
-
-            if (this.modlist)
-                shapezAPI.exports.HUDSettingsMenu.buttons.splice(shapezAPI.exports.HUDSettingsMenu.buttons.findIndex((x) => x.id === "settings") + 1, 0, {
-                    id: "mods",
-                    action: (hudSettingsMenu) => () =>
-                        hudSettingsMenu.root.gameState.saveThenGoToState("ModsState", {
-                            backToStateId: hudSettingsMenu.root.gameState.key,
-                            backToStatePayload: hudSettingsMenu.root.gameState.creationPayload,
-                        }),
+            shapezAPI.exports.HUDSettingsMenu.buttons.splice(
+                shapezAPI.exports.HUDSettingsMenu.buttons.findIndex(x => x.id === "continue") + 1,
+                0,
+                {
+                    id: "settings",
+                    action: hudSettingsMenu => () => hudSettingsMenu.goToSettings(),
                     options: {
                         preventDefault: false,
                     },
-                });
+                }
+            );
+
+            if (this.modlist)
+                shapezAPI.exports.HUDSettingsMenu.buttons.splice(
+                    shapezAPI.exports.HUDSettingsMenu.buttons.findIndex(x => x.id === "settings") + 1,
+                    0,
+                    {
+                        id: "mods",
+                        action: hudSettingsMenu => () =>
+                            hudSettingsMenu.root.gameState.saveThenGoToState("ModsState", {
+                                backToStateId: hudSettingsMenu.root.gameState.key,
+                                backToStatePayload: hudSettingsMenu.root.gameState.creationPayload,
+                            }),
+                        options: {
+                            preventDefault: false,
+                        },
+                    }
+                );
         }
     }
 
@@ -477,11 +498,13 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
 
         let buttonIds = ["settings"];
         this.modlist = false;
-        if (shapezAPI.exports.HUDSettingsMenu.buttons.find((x) => x.id === "mods")) {
+        if (shapezAPI.exports.HUDSettingsMenu.buttons.find(x => x.id === "mods")) {
             buttonIds.push("mods");
             this.modlist = true;
         }
-        shapezAPI.exports.HUDSettingsMenu.buttons = shapezAPI.exports.HUDSettingsMenu.buttons.filter((x) => !buttonIds.includes(x.id));
+        shapezAPI.exports.HUDSettingsMenu.buttons = shapezAPI.exports.HUDSettingsMenu.buttons.filter(
+            x => !buttonIds.includes(x.id)
+        );
     }
 
     /**
@@ -540,7 +563,11 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
             return Promise.resolve();
         }
 
-        if (this.stage !== stages.s10_gameRunning && this.stage !== stages.s7_warmup && this.stage !== stages.leaving) {
+        if (
+            this.stage !== stages.s10_gameRunning &&
+            this.stage !== stages.s7_warmup &&
+            this.stage !== stages.leaving
+        ) {
             logger.warn("Skipping save because game is not ready");
             return Promise.resolve();
         }
@@ -554,7 +581,7 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
 
         this.currentSavePromise = this.savegame
             .writeSavegameAndMetadata()
-            .catch((err) => {
+            .catch(err => {
                 // Catch errors
                 logger.warn("Failed to save:", err);
             })

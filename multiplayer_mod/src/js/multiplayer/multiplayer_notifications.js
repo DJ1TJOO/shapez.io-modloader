@@ -21,7 +21,8 @@ export function makeDivElement(id = null, classes = [], innerHTML = "") {
 
 export function makeDivFirst(parent, id = null, classes = [], innerHTML = "") {
     const div = makeDivElement(id, classes, innerHTML);
-    if (parent.childNodes[0]) parent.childNodes[0].parentNode.insertBefore(div, parent.childNodes[0].parentNode.firstChild);
+    if (parent.childNodes[0])
+        parent.childNodes[0].parentNode.insertBefore(div, parent.childNodes[0].parentNode.firstChild);
     else parent.appendChild(div);
     return div;
 }
@@ -53,30 +54,32 @@ export class MultiplayerHUDNotifications extends shapezAPI.exports.BaseHUDPart {
     }
 
     createElements(parent) {
-        if (!document.getElementById("ingame_HUD_Notifications")) this.element = makeDiv(parent, "ingame_HUD_Notifications", [], ``);
+        if (!document.getElementById("ingame_HUD_Notifications"))
+            this.element = makeDiv(parent, "ingame_HUD_Notifications", [], ``);
         else this.element = document.getElementById("ingame_HUD_Notifications");
 
         this.inputElement = makeDiv(
             this.element,
-            "notificationInput", [],
+            "notificationInput",
+            [],
             `
             <input type="text" class="notificationInput" placeholder="Message">
             `
         );
 
-        this.inputElement.addEventListener("focusin", (e) => {
+        this.inputElement.addEventListener("focusin", e => {
             this.root.app.inputMgr.makeSureAttachedAndOnTop(this.inputReciever);
         });
 
-        this.inputElement.addEventListener("focusout", (e) => {
+        this.inputElement.addEventListener("focusout", e => {
             this.root.app.inputMgr.makeSureDetached(this.inputReciever);
         });
 
-        this.inputElement.addEventListener("blur", (e) => {
+        this.inputElement.addEventListener("blur", e => {
             this.root.app.inputMgr.makeSureDetached(this.inputReciever);
         });
 
-        this.element.addEventListener("mouseleave", (e) => {
+        this.element.addEventListener("mouseleave", e => {
             this.root.app.inputMgr.makeSureDetached(this.inputReciever);
             this.inputElement.blur();
             this.blurAll();
@@ -92,7 +95,9 @@ export class MultiplayerHUDNotifications extends shapezAPI.exports.BaseHUDPart {
         this.visibleNotificationElements = [];
 
         // Automatic notifications
-        this.root.signals.gameSaved.add(() => this.onNotification(T.ingame.notifications.gameSaved, enumNotificationType.saved));
+        this.root.signals.gameSaved.add(() =>
+            this.onNotification(T.ingame.notifications.gameSaved, enumNotificationType.saved)
+        );
 
         //To disable other inputs when typing
         this.inputReciever = new InputReceiver("notifications");
@@ -110,16 +115,30 @@ export class MultiplayerHUDNotifications extends shapezAPI.exports.BaseHUDPart {
         if (this.commandHandler.isCommandString(value)) {
             let command = this.commandHandler.getCommandFromCommandString(value);
             if (command && this.commandHandler.isCommand(command.cmd)) {
-                if (!this.commandHandler.executeCommand(command.cmd, command.args)) this.onNotification(shapezAPI.translations.multiplayer.commands.error.replaceAll("<cmd>", command.cmd), enumNotificationType.error);
-            } else this.onNotification(shapezAPI.translations.multiplayer.commands.doesNotExist.replaceAll("<cmd>", command.cmd), enumNotificationType.error);
+                if (!this.commandHandler.executeCommand(command.cmd, command.args))
+                    this.onNotification(
+                        shapezAPI.translations.multiplayer.commands.error.replaceAll("<cmd>", command.cmd),
+                        enumNotificationType.error
+                    );
+            } else
+                this.onNotification(
+                    shapezAPI.translations.multiplayer.commands.doesNotExist.replaceAll("<cmd>", command.cmd),
+                    enumNotificationType.error
+                );
         } else {
             let message = this.root.gameState.peer.user.username + ": " + value;
             if (this.root.gameState.peer.host) {
                 for (let i = 0; i < this.root.gameState.peer.connections.length; i++) {
-                    MultiplayerPacket.sendPacket(this.root.gameState.peer.connections[i].peer, new TextPacket(TextPacketTypes.MESSAGE, message));
+                    MultiplayerPacket.sendPacket(
+                        this.root.gameState.peer.connections[i].peer,
+                        new TextPacket(TextPacketTypes.MESSAGE, message)
+                    );
                 }
             } else if (this.root.gameState.peer.peer) {
-                MultiplayerPacket.sendPacket(this.root.gameState.peer.peer, new TextPacket(TextPacketTypes.MESSAGE, message));
+                MultiplayerPacket.sendPacket(
+                    this.root.gameState.peer.peer,
+                    new TextPacket(TextPacketTypes.MESSAGE, message)
+                );
             }
             this.onNotification(message, enumNotificationType.message);
         }

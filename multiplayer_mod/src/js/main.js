@@ -1,4 +1,4 @@
-String.prototype.replaceAll = function(search, replacement) {
+String.prototype.replaceAll = function (search, replacement) {
     var target = this;
     return target.split(search).join(replacement);
 };
@@ -129,11 +129,11 @@ registerMod({
         },
     },
     updateStaticSettings: () => {},
-    updateStaticTranslations: (id) => {},
-    gameInitializedRootClasses: (root) => {},
-    gameInitializedRootManagers: (root) => {},
-    gameBeforeFirstUpdate: (root) => {},
-    main: (config) => {
+    updateStaticTranslations: id => {},
+    gameInitializedRootClasses: root => {},
+    gameInitializedRootManagers: root => {},
+    gameBeforeFirstUpdate: root => {},
+    main: config => {
         shapezAPI.injectCss("**{css}**", modId);
         shapezAPI.states.MultiplayerState = MultiplayerState;
         shapezAPI.states.InMultiplayerGameState = InMultiplayerGameState;
@@ -161,8 +161,15 @@ registerMod({
             }
         };
 
-        shapezAPI.exports.GameHUD.prototype.draw = function(parameters) {
-            const partsOrder = ["massSelector", "buildingPlacer", "blueprintPlacer", "colorBlindHelper", "changesDebugger", "minerHighlight"];
+        shapezAPI.exports.GameHUD.prototype.draw = function (parameters) {
+            const partsOrder = [
+                "massSelector",
+                "buildingPlacer",
+                "blueprintPlacer",
+                "colorBlindHelper",
+                "changesDebugger",
+                "minerHighlight",
+            ];
 
             for (let i = 0; i < partsOrder.length; ++i) {
                 if (this.parts[partsOrder[i]]) {
@@ -173,7 +180,7 @@ registerMod({
             if (this.root.gameState.multiplayerHUD) this.root.gameState.multiplayerHUD.draw(parameters);
         };
 
-        shapezAPI.exports.GameHUD.prototype.update = function() {
+        shapezAPI.exports.GameHUD.prototype.update = function () {
             if (!this.root.gameInitialized) {
                 return;
             }
@@ -191,15 +198,15 @@ registerMod({
         };
         addMultiplayerButton(modId);
         shapezAPI.exports.MultiplayerCommandsHandler = MultiplayerCommandsHandler;
-        shapezAPI.exports.HUDSettingsMenu.prototype.shouldPauseGame = function() {
+        shapezAPI.exports.HUDSettingsMenu.prototype.shouldPauseGame = function () {
             if (this.root.gameState.peer) return false;
             else return this.visible;
         };
-        shapezAPI.exports.HUDSettingsMenu.prototype.shouldPauseRendering = function() {
+        shapezAPI.exports.HUDSettingsMenu.prototype.shouldPauseRendering = function () {
             if (this.root.gameState.peer) return false;
             else return this.visible;
         };
-        shapezAPI.exports.HUDModalDialogs.prototype.shouldPauseRendering = function() {
+        shapezAPI.exports.HUDModalDialogs.prototype.shouldPauseRendering = function () {
             if (this.root.gameState.peer) return false;
             else return this.dialogStack.length > 0;
         };

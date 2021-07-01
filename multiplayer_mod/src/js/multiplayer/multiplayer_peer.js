@@ -187,14 +187,14 @@ export class MultiplayerPeer {
                     entity.components.ConstantSignal = component;
                 }
             });
-            if (!this.host)
-                this.ingameState.core.root.signals.prePlacementCheck.add((entity, offset, blueprint) => {
-                    MultiplayerPacket.sendPacket(
-                        peer,
-                        new SignalPacket(SignalPacketSignals.entityAdded, [entity])
-                    );
-                    return STOP_PROPAGATION;
-                });
+            // if (!this.host)
+            //     this.ingameState.core.root.signals.prePlacementCheck.add((entity, offset, blueprint) => {
+            //         MultiplayerPacket.sendPacket(
+            //             peer,
+            //             new SignalPacket(SignalPacketSignals.entityAdded, [entity])
+            //         );
+            //         return STOP_PROPAGATION;
+            //     });
 
             this.ingameState.core.root.signals.entityDestroyed.add(entity => {
                 if (this.multiplayerDestroy.includes(entity.uid))
@@ -259,11 +259,14 @@ export class MultiplayerPeer {
                 );
             });
             this.ingameState.core.root.hud.parts.buildingPlacer.signals.variantChanged.add(() => {
-                const metaBuilding = this.ingameState.core.root.hud.parts.buildingPlacer.currentMetaBuilding.get();
+                const metaBuilding =
+                    this.ingameState.core.root.hud.parts.buildingPlacer.currentMetaBuilding.get();
                 if (!metaBuilding) this.user.currentMetaBuilding = undefined;
                 else this.user.currentMetaBuilding = metaBuilding.getId();
-                this.user.currentVariant = this.ingameState.core.root.hud.parts.buildingPlacer.currentVariant.get();
-                this.user.currentBaseRotation = this.ingameState.core.root.hud.parts.buildingPlacer.currentBaseRotation;
+                this.user.currentVariant =
+                    this.ingameState.core.root.hud.parts.buildingPlacer.currentVariant.get();
+                this.user.currentBaseRotation =
+                    this.ingameState.core.root.hud.parts.buildingPlacer.currentBaseRotation;
                 const mousePosition = this.ingameState.core.root.app.mousePosition;
                 if (!mousePosition) this.user.mouseTile = undefined;
                 else {

@@ -248,7 +248,8 @@ export class MultiplayerPacket {
         try {
             peer.send(JSON.stringify(packet));
         } catch (error) {
-            if (connections) connections.splice(connections.indexOf(connections.find((x) => x.peer === peer)), 1);
+            if (connections)
+                connections.splice(connections.indexOf(connections.find(x => x.peer === peer)), 1);
             console.log(error);
         }
     }
@@ -262,7 +263,10 @@ export class MultiplayerPacket {
         var argsNew = [];
         for (let i = 0; i < args.length; i++) {
             const element = args[i];
-            argsNew.push({ serialized: element.serialize(), class: element.constructor.name });
+            argsNew.push({
+                serialized: element.serialize(),
+                class: element.constructor.name,
+            });
         }
         return argsNew;
     }
@@ -277,7 +281,8 @@ export class MultiplayerPacket {
         for (let i = 0; i < args.length; i++) {
             const element = args[i];
             var object = new MultiplayerPacketSerializableObject[element.class]({});
-            if (object instanceof Entity) object = new MultiplayerSerializerInternal().deserializeEntity(root, element.serialized);
+            if (object instanceof Entity)
+                object = new MultiplayerSerializerInternal().deserializeEntity(root, element.serialized);
             else object.deserialize(element.serialized, root);
             argsNew.push(object);
         }

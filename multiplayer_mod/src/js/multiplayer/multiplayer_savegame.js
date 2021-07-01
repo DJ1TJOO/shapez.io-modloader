@@ -14,7 +14,10 @@ export class MultiplayerSavegame {
 
         this.currentData = gameData;
 
-        assert(savegameInterfaces[Savegame.getCurrentVersion()], "Savegame interface not defined: " + Savegame.getCurrentVersion());
+        assert(
+            savegameInterfaces[Savegame.getCurrentVersion()],
+            "Savegame interface not defined: " + Savegame.getCurrentVersion()
+        );
     }
 
     //////// RW Proxy Impl //////////

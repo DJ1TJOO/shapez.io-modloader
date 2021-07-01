@@ -1,129 +1,129 @@
 declare function registerMod(info: {
-	id: string;
-	title: string;
-	description: string;
-	authors: string[];
-	version: string;
-	gameVersion: string;
-	dependencies: string[];
-	incompatible: string[];
-	translations: {};
-	settings: {};
-	updateStaticSettings: Function;
-	updateStaticTranslations: Function;
-	gameInitializedRootClasses: Function;
-	gameInitializedRootManagers: Function;
-	gameBeforeFirstUpdate: Function;
-	main: Function;
+    id: string;
+    title: string;
+    description: string;
+    authors: string[];
+    version: string;
+    gameVersion: string;
+    dependencies: string[];
+    incompatible: string[];
+    translations: {};
+    settings: {};
+    updateStaticSettings: Function;
+    updateStaticTranslations: Function;
+    gameInitializedRootClasses: Function;
+    gameInitializedRootManagers: Function;
+    gameBeforeFirstUpdate: Function;
+    main: Function;
 });
 
 declare function assert(condition: boolean | object | string, ...errorMessage: string[]): void;
 declare function assertAlways(condition: boolean | object | string, ...errorMessage: string[]): void;
 
 declare interface ShapezAPI {
-	user;
-	exports;
-	KEYMAPPINGS: {
-		key: Function;
-	};
-	translations;
-	map;
-	ingame: {
-		buildings;
-		components;
-		//Must be array because of update order
-		systems; //is defaultBuildingVariant defined somewhere ? it says it is undefined on a
-		items;
-		levels;
-		themes;
-		//List of layer names
-		layers;
-		hub_goals;
-		gamespeed;
-		gamemodes;
-	};
-	firstState;
-	toolbars: {
-		buildings: {
-			primaryBuildings;
-			secondaryBuildings;
-			htmlElementId: string;
-		};
-		wires: {
-			primaryBuildings;
-			secondaryBuildings;
-			htmlElementId: string;
-		};
-	};
-	states;
-	clickDetectors;
-	themes;
-	mods;
-	modOrder;
+    user;
+    exports;
+    KEYMAPPINGS: {
+        key: Function;
+    };
+    translations;
+    map;
+    ingame: {
+        buildings;
+        components;
+        //Must be array because of update order
+        systems; //is defaultBuildingVariant defined somewhere ? it says it is undefined on a
+        items;
+        levels;
+        themes;
+        //List of layer names
+        layers;
+        hub_goals;
+        gamespeed;
+        gamemodes;
+    };
+    firstState;
+    toolbars: {
+        buildings: {
+            primaryBuildings;
+            secondaryBuildings;
+            htmlElementId: string;
+        };
+        wires: {
+            primaryBuildings;
+            secondaryBuildings;
+            htmlElementId: string;
+        };
+    };
+    states;
+    clickDetectors;
+    themes;
+    mods;
+    modOrder;
 
-	/**
-	 * Generates rotated variants of the matrix
-	 * @param {Array<number>} originalMatrix
-	 * @returns {Object<number, Array<number>>}
-	 */
-	generateMatrixRotations(originalMatrix);
+    /**
+     * Generates rotated variants of the matrix
+     * @param {Array<number>} originalMatrix
+     * @returns {Object<number, Array<number>>}
+     */
+    generateMatrixRotations(originalMatrix);
 
-	/**
-	 * Registers a new sprite
-	 * @param {string} spriteId
-	 * @param {HTMLImageElement|HTMLCanvasElement} sourceImage
-	 * @returns {RegularSprite}
-	 */
-	registerSprite(spriteId, sourceImage);
+    /**
+     * Registers a new sprite
+     * @param {string} spriteId
+     * @param {HTMLImageElement|HTMLCanvasElement} sourceImage
+     * @returns {RegularSprite}
+     */
+    registerSprite(spriteId, sourceImage);
 
-	/**
-	 * Returns a regular sprite by its id
-	 * @param {string} id
-	 * @returns {RegularSprite}
-	 */
-	getRegularSprite(id);
+    /**
+     * Returns a regular sprite by its id
+     * @param {string} id
+     * @returns {RegularSprite}
+     */
+    getRegularSprite(id);
 
-	/**
-	 * Returns a regular sprite by its id
-	 * @param {string} id
-	 * @returns {AtlasSprite}
-	 */
-	getSprite(id);
+    /**
+     * Returns a regular sprite by its id
+     * @param {string} id
+     * @returns {AtlasSprite}
+     */
+    getSprite(id);
 
-	/**
-	 * Registers a new atlas
-	 * @param {string} atlasDataString
-	 */
-	registerAtlas(atlasDataString);
+    /**
+     * Registers a new atlas
+     * @param {string} atlasDataString
+     */
+    registerAtlas(atlasDataString);
 
-	/**
-	 * Registers a new atlases
-	 * @param {string[]} atlasDataStrings
-	 */
-	registerAtlases(...atlasDataStrings);
+    /**
+     * Registers a new atlases
+     * @param {string[]} atlasDataStrings
+     */
+    registerAtlases(...atlasDataStrings);
 
-	/**
-	 * Adds css to the page
-	 * @param {string} css
-	 */
-	injectCss(css, id);
+    /**
+     * Adds css to the page
+     * @param {string} css
+     */
+    injectCss(css, id);
 
-	/**
-	 * Registers a new icon
-	 * @param {string} id
-	 * @param {string} iconDataURL
-	 */
-	registerIcon(id, iconDataURL);
+    /**
+     * Registers a new icon
+     * @param {string} id
+     * @param {string} iconDataURL
+     */
+    registerIcon(id, iconDataURL);
 
-	registerBuilding(buildingClass, iconDataURL, key, keyBindingName, buildingInfoText);
+    registerBuilding(buildingClass, iconDataURL, key, keyBindingName, buildingInfoText);
 
-	/**
-	 * Tracks clicks on a element (e.g. button). Useful because you should both support
-	 * touch and mouse events.
-	 * @param {HTMLElement} element
-	 * @param {function} clickHandler
-	 */
-	trackClicks(element, clickHandler);
+    /**
+     * Tracks clicks on a element (e.g. button). Useful because you should both support
+     * touch and mouse events.
+     * @param {HTMLElement} element
+     * @param {function} clickHandler
+     */
+    trackClicks(element, clickHandler);
 }
 
 declare let shapezAPI: ShapezAPI;
@@ -151,182 +151,182 @@ declare const G_IS_RELEASE: boolean;
 
 // Polyfills
 declare interface String {
-	replaceAll(search: string, replacement: string): string;
+    replaceAll(search: string, replacement: string): string;
 }
 
 declare interface CanvasRenderingContext2D {
-	beginRoundedRect(x: number, y: number, w: number, h: number, r: number): void;
-	beginCircle(x: number, y: number, r: number): void;
+    beginRoundedRect(x: number, y: number, w: number, h: number, r: number): void;
+    beginCircle(x: number, y: number, r: number): void;
 
-	msImageSmoothingEnabled: boolean;
-	mozImageSmoothingEnabled: boolean;
-	webkitImageSmoothingEnabled: boolean;
+    msImageSmoothingEnabled: boolean;
+    mozImageSmoothingEnabled: boolean;
+    webkitImageSmoothingEnabled: boolean;
 }
 
 // Just for compatibility with the shared code
 declare interface Logger {
-	log(...args);
-	warn(...args);
-	info(...args);
-	error(...args);
+    log(...args);
+    warn(...args);
+    info(...args);
+    error(...args);
 }
 
 // Cordova
 declare interface Device {
-	uuid: string;
-	platform: string;
-	available: boolean;
-	version: string;
-	cordova: string;
-	model: string;
-	manufacturer: string;
-	isVirtual: boolean;
-	serial: string;
+    uuid: string;
+    platform: string;
+    available: boolean;
+    version: string;
+    cordova: string;
+    model: string;
+    manufacturer: string;
+    isVirtual: boolean;
+    serial: string;
 }
 
 declare interface MobileAccessibility {
-	usePreferredTextZoom(boolean);
+    usePreferredTextZoom(boolean);
 }
 
 declare interface Window {
-	// Cordova
-	device: Device;
-	StatusBar: any;
-	AndroidFullScreen: any;
-	AndroidNotch: any;
-	plugins: any;
+    // Cordova
+    device: Device;
+    StatusBar: any;
+    AndroidFullScreen: any;
+    AndroidNotch: any;
+    plugins: any;
 
-	// Adinplay
-	aiptag: any;
-	adPlayer: any;
-	aipPlayer: any;
-	MobileAccessibility: MobileAccessibility;
-	LocalFileSystem: any;
+    // Adinplay
+    aiptag: any;
+    adPlayer: any;
+    aipPlayer: any;
+    MobileAccessibility: MobileAccessibility;
+    LocalFileSystem: any;
 
-	// Debugging
-	activeClickDetectors: Array<any>;
+    // Debugging
+    activeClickDetectors: Array<any>;
 
-	// Experimental/Newer apis
-	FontFace: any;
-	TouchEvent: undefined | TouchEvent;
+    // Experimental/Newer apis
+    FontFace: any;
+    TouchEvent: undefined | TouchEvent;
 
-	// Thirdparty
-	XPayStationWidget: any;
-	Sentry: any;
-	LogRocket: any;
-	grecaptcha: any;
-	gtag: any;
-	cpmstarAPI: any;
+    // Thirdparty
+    XPayStationWidget: any;
+    Sentry: any;
+    LogRocket: any;
+    grecaptcha: any;
+    gtag: any;
+    cpmstarAPI: any;
 
-	// Mods
-	registerMod: any;
-	anyModLoaded: any;
+    // Mods
+    registerMod: any;
+    anyModLoaded: any;
 
-	webkitRequestAnimationFrame();
+    webkitRequestAnimationFrame();
 
-	assert(condition: boolean, failureMessage: string);
+    assert(condition: boolean, failureMessage: string);
 
-	coreThreadLoadedCb();
+    coreThreadLoadedCb();
 }
 
 declare interface Navigator {
-	app: any;
-	device: any;
-	splashscreen: any;
+    app: any;
+    device: any;
+    splashscreen: any;
 }
 
 // FontFace
 declare interface Document {
-	fonts: any;
+    fonts: any;
 }
 
 // Webpack
 declare interface WebpackContext {
-	keys(): Array<string>;
+    keys(): Array<string>;
 }
 
 declare interface NodeRequire {
-	context(src: string, flag: boolean, regexp: RegExp): WebpackContext;
+    context(src: string, flag: boolean, regexp: RegExp): WebpackContext;
 }
 
 declare interface Object {
-	entries(obj: object): Array<[string, any]>;
+    entries(obj: object): Array<[string, any]>;
 }
 
 declare interface Math {
-	radians(number): number;
-	degrees(number): number;
+    radians(number): number;
+    degrees(number): number;
 }
 
 declare type Class<T = unknown> = new (...args: any[]) => T;
 
 declare interface String {
-	padStart(size: number, fill?: string): string;
-	padEnd(size: number, fill: string): string;
+    padStart(size: number, fill?: string): string;
+    padEnd(size: number, fill: string): string;
 }
 
 declare interface FactoryTemplate<T> {
-	entries: Array<Class<T>>;
-	entryIds: Array<string>;
-	idToEntry: any;
+    entries: Array<Class<T>>;
+    entryIds: Array<string>;
+    idToEntry: any;
 
-	getId(): string;
-	getAllIds(): Array<string>;
-	register(entry: Class<T>): void;
-	hasId(id: string): boolean;
-	findById(id: string): Class<T>;
-	getEntries(): Array<Class<T>>;
-	getNumEntries(): number;
+    getId(): string;
+    getAllIds(): Array<string>;
+    register(entry: Class<T>): void;
+    hasId(id: string): boolean;
+    findById(id: string): Class<T>;
+    getEntries(): Array<Class<T>>;
+    getNumEntries(): number;
 }
 
 declare interface SingletonFactoryTemplate<T> {
-	entries: Array<T>;
-	idToEntry: any;
+    entries: Array<T>;
+    idToEntry: any;
 
-	getId(): string;
-	getAllIds(): Array<string>;
-	register(classHandle: Class<T>): void;
-	hasId(id: string): boolean;
-	findById(id: string): T;
-	findByClass(classHandle: Class<T>): T;
-	getEntries(): Array<T>;
-	getNumEntries(): number;
+    getId(): string;
+    getAllIds(): Array<string>;
+    register(classHandle: Class<T>): void;
+    hasId(id: string): boolean;
+    findById(id: string): T;
+    findByClass(classHandle: Class<T>): T;
+    getEntries(): Array<T>;
+    getNumEntries(): number;
 }
 
 declare interface SignalTemplate0 {
-	add(receiver: () => string | void, scope: null | any);
-	dispatch(): string | void;
-	remove(receiver: () => string | void);
-	removeAll();
+    add(receiver: () => string | void, scope: null | any);
+    dispatch(): string | void;
+    remove(receiver: () => string | void);
+    removeAll();
 }
 
 declare class TypedTrackedState<T> {
-	constructor(callbackMethod?: (value: T) => void, callbackScope?: any);
+    constructor(callbackMethod?: (value: T) => void, callbackScope?: any);
 
-	set(value: T, changeHandler?: (value: T) => void, changeScope?: any): void;
+    set(value: T, changeHandler?: (value: T) => void, changeScope?: any): void;
 
-	setSilent(value: any): void;
-	get(): T;
+    setSilent(value: any): void;
+    get(): T;
 }
 
 declare const STOP_PROPAGATION = "stop_propagation";
 
 declare interface TypedSignal<T extends Array<any>> {
-	add(receiver: (...args: T) => /* STOP_PROPAGATION */ string | void, scope?: object);
-	remove(receiver: (...args: T) => /* STOP_PROPAGATION */ string | void);
+    add(receiver: (...args: T) => /* STOP_PROPAGATION */ string | void, scope?: object);
+    remove(receiver: (...args: T) => /* STOP_PROPAGATION */ string | void);
 
-	dispatch(...args: T): /* STOP_PROPAGATION */ string | void;
+    dispatch(...args: T): /* STOP_PROPAGATION */ string | void;
 
-	removeAll();
+    removeAll();
 }
 
 declare type Layer = "regular" | "wires";
 declare type ItemType = "shape" | "color" | "boolean";
 
 declare module "worker-loader?inline=true&fallback=false!*" {
-	class WebpackWorker extends Worker {
-		constructor();
-	}
+    class WebpackWorker extends Worker {
+        constructor();
+    }
 
-	export default WebpackWorker;
+    export default WebpackWorker;
 }

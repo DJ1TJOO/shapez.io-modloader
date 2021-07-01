@@ -20,31 +20,62 @@ export class MultiplayerHUD {
         const metaBuilding = this.ingameState.core.root.hud.parts.buildingPlacer.currentMetaBuilding.get();
         if (!metaBuilding) this.ingameState.peer.user.currentMetaBuilding = undefined;
         else this.ingameState.peer.user.currentMetaBuilding = metaBuilding.getId();
-        this.ingameState.peer.user.currentVariant = this.ingameState.core.root.hud.parts.buildingPlacer.currentVariant.get();
-        this.ingameState.peer.user.currentBaseRotation = this.ingameState.core.root.hud.parts.buildingPlacer.currentBaseRotation;
+        this.ingameState.peer.user.currentVariant =
+            this.ingameState.core.root.hud.parts.buildingPlacer.currentVariant.get();
+        this.ingameState.peer.user.currentBaseRotation =
+            this.ingameState.core.root.hud.parts.buildingPlacer.currentBaseRotation;
         const mousePosition = this.ingameState.core.root.app.mousePosition;
         if (!mousePosition) this.ingameState.peer.user.mouseTile = undefined;
         else {
-            this.ingameState.peer.user.worldPos = this.ingameState.core.root.camera.screenToWorld(mousePosition);
+            this.ingameState.peer.user.worldPos =
+                this.ingameState.core.root.camera.screenToWorld(mousePosition);
             this.ingameState.peer.user.mouseTile = this.ingameState.peer.user.worldPos.toTileSpace();
         }
 
         if (this.ingameState.peer.host) {
             for (let i = 0; i < this.ingameState.peer.connections.length; i++) {
-                MultiplayerPacket.sendPacket(this.ingameState.peer.connections[i].peer, new TextPacket(TextPacketTypes.USER_UPDATE, JSON.stringify(this.ingameState.peer.user)));
+                MultiplayerPacket.sendPacket(
+                    this.ingameState.peer.connections[i].peer,
+                    new TextPacket(TextPacketTypes.USER_UPDATE, JSON.stringify(this.ingameState.peer.user))
+                );
             }
         } else if (this.ingameState.peer.peer) {
-            MultiplayerPacket.sendPacket(this.ingameState.peer.peer, new TextPacket(TextPacketTypes.USER_UPDATE, JSON.stringify(this.ingameState.peer.user)));
+            MultiplayerPacket.sendPacket(
+                this.ingameState.peer.peer,
+                new TextPacket(TextPacketTypes.USER_UPDATE, JSON.stringify(this.ingameState.peer.user))
+            );
         }
     }
 
     draw(parameters) {
-        if (!this.ingameState || !this.ingameState.peer || !this.ingameState.peer.users || !shapezAPI.mods.get(modId).settings.showOtherPlayers.value) return;
+        if (
+            !this.ingameState ||
+            !this.ingameState.peer ||
+            !this.ingameState.peer.users ||
+            !shapezAPI.mods.get(modId).settings.showOtherPlayers.value
+        )
+            return;
         for (let i = 0; i < this.ingameState.peer.users.length; i++) {
             const user = this.ingameState.peer.users[i];
-            if (typeof user.currentMetaBuilding === "undefined" || typeof user.currentVariant === "undefined" || typeof user.currentBaseRotation === "undefined" || typeof user.mouseTile === "undefined" || typeof user.worldPos === "undefined") continue;
-            const metaBuilding = shapezAPI.exports.gMetaBuildingRegistry.findByClass(shapezAPI.ingame.buildings[user.currentMetaBuilding]);
-            this.drawRegularPlacementSetup(parameters, metaBuilding, user.currentVariant, user.currentBaseRotation, new Vector(user.mouseTile.x, user.mouseTile.y), new Vector(user.worldPos.x, user.worldPos.y));
+            if (
+                typeof user.currentMetaBuilding === "undefined" ||
+                typeof user.currentVariant === "undefined" ||
+                typeof user.currentBaseRotation === "undefined" ||
+                typeof user.mouseTile === "undefined" ||
+                typeof user.worldPos === "undefined"
+            )
+                continue;
+            const metaBuilding = shapezAPI.exports.gMetaBuildingRegistry.findByClass(
+                shapezAPI.ingame.buildings[user.currentMetaBuilding]
+            );
+            this.drawRegularPlacementSetup(
+                parameters,
+                metaBuilding,
+                user.currentVariant,
+                user.currentBaseRotation,
+                new Vector(user.mouseTile.x, user.mouseTile.y),
+                new Vector(user.worldPos.x, user.worldPos.y)
+            );
         }
     }
 
@@ -62,24 +93,43 @@ export class MultiplayerHUD {
         );
         metaBuilding.updateVariants(fakeEntity, 0, variant);
 
-        this.drawRegularPlacement(parameters, metaBuilding, variant, baseRotation, fakeEntity, mouseTile, worldPos);
+        this.drawRegularPlacement(
+            parameters,
+            metaBuilding,
+            variant,
+            baseRotation,
+            fakeEntity,
+            mouseTile,
+            worldPos
+        );
     }
 
-    drawRegularPlacement(parameters, metaBuilding, currentVariant, currentBaseRotation, fakeEntity, mouseTile, worldPos) {
+    drawRegularPlacement(
+        parameters,
+        metaBuilding,
+        currentVariant,
+        currentBaseRotation,
+        fakeEntity,
+        mouseTile,
+        worldPos
+    ) {
         // Compute best rotation variant
-        const { rotation, rotationVariant, connectedEntities } = metaBuilding.computeOptimalDirectionAndRotationVariantAtTile({
-            root: this.ingameState.core.root,
-            tile: mouseTile,
-            rotation: currentBaseRotation,
-            variant: currentVariant,
-            layer: metaBuilding.getLayer(this.ingameState.core.root, currentVariant),
-        });
+        const { rotation, rotationVariant, connectedEntities } =
+            metaBuilding.computeOptimalDirectionAndRotationVariantAtTile({
+                root: this.ingameState.core.root,
+                tile: mouseTile,
+                rotation: currentBaseRotation,
+                variant: currentVariant,
+                layer: metaBuilding.getLayer(this.ingameState.core.root, currentVariant),
+            });
 
         // Check if there are connected entities
         if (connectedEntities) {
             for (let i = 0; i < connectedEntities.length; ++i) {
                 const connectedEntity = connectedEntities[i];
-                const connectedWsPoint = connectedEntity.components.StaticMapEntity.getTileSpaceBounds().getCenter().toWorldSpace();
+                const connectedWsPoint = connectedEntity.components.StaticMapEntity.getTileSpaceBounds()
+                    .getCenter()
+                    .toWorldSpace();
 
                 const startWsPoint = mouseTile.toWorldSpaceCenterOfTile();
 
@@ -110,7 +160,11 @@ export class MultiplayerHUD {
         staticComp.origin = mouseTile;
         staticComp.rotation = rotation;
         metaBuilding.updateVariants(fakeEntity, rotationVariant, currentVariant);
-        staticComp.code = shapezAPI.exports.getCodeFromBuildingData(metaBuilding, currentVariant, rotationVariant);
+        staticComp.code = shapezAPI.exports.getCodeFromBuildingData(
+            metaBuilding,
+            currentVariant,
+            rotationVariant
+        );
 
         const canBuild = this.ingameState.core.root.logic.checkCanPlaceEntity(fakeEntity);
 
@@ -128,7 +182,13 @@ export class MultiplayerHUD {
             parameters.context.fillStyle = "rgba(255, 0, 0, 0.2)";
         }
 
-        parameters.context.beginRoundedRect(entityBounds.x * globalConfig.tileSize - drawBorder, entityBounds.y * globalConfig.tileSize - drawBorder, entityBounds.w * globalConfig.tileSize + 2 * drawBorder, entityBounds.h * globalConfig.tileSize + 2 * drawBorder, 4);
+        parameters.context.beginRoundedRect(
+            entityBounds.x * globalConfig.tileSize - drawBorder,
+            entityBounds.y * globalConfig.tileSize - drawBorder,
+            entityBounds.w * globalConfig.tileSize + 2 * drawBorder,
+            entityBounds.h * globalConfig.tileSize + 2 * drawBorder,
+            4
+        );
         parameters.context.stroke();
         // parameters.context.fill();
         parameters.context.globalAlpha = 1;
@@ -184,18 +244,27 @@ export class MultiplayerHUD {
             const acceptorSlotWsPos = acceptorSlotWsTile.toWorldSpaceCenterOfTile();
 
             // Go over all slots
-            for (let acceptorDirectionIndex = 0; acceptorDirectionIndex < slot.directions.length; ++acceptorDirectionIndex) {
+            for (
+                let acceptorDirectionIndex = 0;
+                acceptorDirectionIndex < slot.directions.length;
+                ++acceptorDirectionIndex
+            ) {
                 const direction = slot.directions[acceptorDirectionIndex];
                 const worldDirection = staticComp.localDirectionToWorld(direction);
 
                 // Figure out which tile ejects to this slot
-                const sourceTile = acceptorSlotWsTile.add(shapezAPI.exports.enumDirectionToVector[worldDirection]);
+                const sourceTile = acceptorSlotWsTile.add(
+                    shapezAPI.exports.enumDirectionToVector[worldDirection]
+                );
 
                 let isBlocked = false;
                 let isConnected = false;
 
                 // Find all entities which are on that tile
-                const sourceEntities = this.ingameState.core.root.map.getLayersContentsMultipleXY(sourceTile.x, sourceTile.y);
+                const sourceEntities = this.ingameState.core.root.map.getLayersContentsMultipleXY(
+                    sourceTile.x,
+                    sourceTile.y
+                );
 
                 // Check for every entity:
                 for (let i = 0; i < sourceEntities.length; ++i) {
@@ -210,7 +279,11 @@ export class MultiplayerHUD {
                     if (sourceEjector && sourceEjector.anySlotEjectsToLocalTile(ejectorAcceptLocalTile)) {
                         // This one is connected, all good
                         isConnected = true;
-                    } else if (sourceBeltComp && sourceStaticComp.localDirectionToWorld(sourceBeltComp.direction) === shapezAPI.exports.enumInvertedDirections[worldDirection]) {
+                    } else if (
+                        sourceBeltComp &&
+                        sourceStaticComp.localDirectionToWorld(sourceBeltComp.direction) ===
+                            shapezAPI.exports.enumInvertedDirections[worldDirection]
+                    ) {
                         // Belt connected
                         isConnected = true;
                     } else {
@@ -228,7 +301,11 @@ export class MultiplayerHUD {
                     sprite,
                     x: acceptorSlotWsPos.x,
                     y: acceptorSlotWsPos.y,
-                    angle: Math.radians(shapezAPI.exports.enumDirectionToAngle[shapezAPI.exports.enumInvertedDirections[worldDirection]]),
+                    angle: Math.radians(
+                        shapezAPI.exports.enumDirectionToAngle[
+                            shapezAPI.exports.enumInvertedDirections[worldDirection]
+                        ]
+                    ),
                     size: 13,
                     offsetY: offsetShift + 13,
                 });
@@ -240,7 +317,9 @@ export class MultiplayerHUD {
         for (let ejectorSlotIndex = 0; ejectorSlotIndex < ejectorSlots.length; ++ejectorSlotIndex) {
             const slot = ejectorSlots[ejectorSlotIndex];
 
-            const ejectorSlotLocalTile = slot.pos.add(shapezAPI.exports.enumDirectionToVector[slot.direction]);
+            const ejectorSlotLocalTile = slot.pos.add(
+                shapezAPI.exports.enumDirectionToVector[slot.direction]
+            );
             const ejectorSlotWsTile = staticComp.localTileToWorld(ejectorSlotLocalTile);
 
             const ejectorSLotWsPos = ejectorSlotWsTile.toWorldSpaceCenterOfTile();
@@ -250,7 +329,10 @@ export class MultiplayerHUD {
             let isConnected = false;
 
             // Find all entities which are on that tile
-            const destEntities = this.ingameState.core.root.map.getLayersContentsMultipleXY(ejectorSlotWsTile.x, ejectorSlotWsTile.y);
+            const destEntities = this.ingameState.core.root.map.getLayersContentsMultipleXY(
+                ejectorSlotWsTile.x,
+                ejectorSlotWsTile.y
+            );
 
             // Check for every entity:
             for (let i = 0; i < destEntities.length; ++i) {
@@ -264,7 +346,10 @@ export class MultiplayerHUD {
                 if (destAcceptor && destAcceptor.findMatchingSlot(destLocalTile, destLocalDir)) {
                     // This one is connected, all good
                     isConnected = true;
-                } else if (destEntity.components.Belt && destLocalDir === shapezAPI.exports.enumDirection.top) {
+                } else if (
+                    destEntity.components.Belt &&
+                    destLocalDir === shapezAPI.exports.enumDirection.top
+                ) {
                     // Connected to a belt
                     isConnected = true;
                 } else if (minerComp && minerComp.chainable && destMiner && destMiner.chainable) {

@@ -34,7 +34,12 @@ export class MultiplayerBuilder {
             for (let y = rect.y; y < rect.y + rect.h; ++y) {
                 const contents = this.ingameState.core.root.map.getLayerContentXY(x, y, entity.layer);
                 if (contents) {
-                    assertAlways(contents.components.StaticMapEntity.getMetaBuilding().getIsReplaceable(getBuildingDataFromCode(contents.components.StaticMapEntity.code).variant), "Tried to replace non-repleaceable entity");
+                    assertAlways(
+                        contents.components.StaticMapEntity.getMetaBuilding().getIsReplaceable(
+                            getBuildingDataFromCode(contents.components.StaticMapEntity.code).variant
+                        ),
+                        "Tried to replace non-repleaceable entity"
+                    );
                     if (!this.tryDeleteBuilding(contents)) {
                         assertAlways(false, "Tried to replace non-repleaceable entity #2");
                     }
@@ -94,7 +99,8 @@ export class MultiplayerBuilder {
         if (this.ingameState.core.root.entityMgr.findByUid(uid)) return false;
 
         const metaBuilding = entityPayload.building;
-        const entity = this.tryPlaceBuilding({
+        const entity = this.tryPlaceBuilding(
+            {
                 origin: tile,
                 rotation: entityPayload.rotation,
                 rotationVariant: entityPayload.rotationVariant,
