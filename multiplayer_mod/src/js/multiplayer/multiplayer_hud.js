@@ -13,20 +13,61 @@ export class MultiplayerHUD {
         this.lastTimeUpdated = Date.now();
     }
 
+    lerp(start, end, time) {
+        return start + (end - start) * time;
+    }
+
     update() {
-        if (Date.now() - this.lastTimeUpdated < 0.1 * 1000) return;
-        this.lastTimeUpdated = Date.now();
         if (!this.ingameState || !this.ingameState.peer || !this.ingameState.peer.user) return;
+
+        for (let i = 0; i < this.ingameState.peer.users.length; i++) {
+            const user = this.ingameState.peer.users[i];
+
+            if (typeof user.worldPos === "undefined") continue;
+
+            const tracing = new Vector(user.worldPos.x, user.worldPos.y);
+
+            if (!user.velocity || !user.currentWorldPos) {
+                user.velocity = new Vector(0, 0);
+                user.currentWorldPos = tracing;
+            }
+
+            /**
+             * Shrimps code for curved paths (maybe for later)
+             */
+            // const pos = tracing.sub(user.currentWorldPos);
+            // const norm = pos.normalize();
+            // const acc = norm.multiplyScalar(6);
+            // user.velocity.addInplace(acc);
+            // user.velocity = user.velocity.min(new Vector(5, 5));
+            // user.velocity = user.velocity.multiplyScalar(0.95);
+            // if (user.velocity.x > 1 || user.velocity.y > 1) user.currentWorldPos.addInplace(user.velocity);
+
+            user.currentWorldPos.x = this.lerp(user.currentWorldPos.x, tracing.x, 0.03);
+            user.currentWorldPos.y = this.lerp(user.currentWorldPos.y, tracing.y, 0.03);
+        }
+
+        if (Date.now() - this.lastTimeUpdated < 0.5 * 1000) return;
+        this.lastTimeUpdated = Date.now();
         const metaBuilding = this.ingameState.core.root.hud.parts.buildingPlacer.currentMetaBuilding.get();
-        if (!metaBuilding) this.ingameState.peer.user.currentMetaBuilding = undefined;
-        else this.ingameState.peer.user.currentMetaBuilding = metaBuilding.getId();
+
+        if (!metaBuilding) {
+            this.ingameState.peer.user.currentMetaBuilding = undefined;
+        } else {
+            this.ingameState.peer.user.currentMetaBuilding = metaBuilding.getId();
+        }
+
         this.ingameState.peer.user.currentVariant =
             this.ingameState.core.root.hud.parts.buildingPlacer.currentVariant.get();
+
         this.ingameState.peer.user.currentBaseRotation =
             this.ingameState.core.root.hud.parts.buildingPlacer.currentBaseRotation;
+
         const mousePosition = this.ingameState.core.root.app.mousePosition;
-        if (!mousePosition) this.ingameState.peer.user.mouseTile = undefined;
-        else {
+
+        if (!mousePosition) {
+            this.ingameState.peer.user.mouseTile = undefined;
+        } else {
             this.ingameState.peer.user.worldPos =
                 this.ingameState.core.root.camera.screenToWorld(mousePosition);
             this.ingameState.peer.user.mouseTile = this.ingameState.peer.user.worldPos.toTileSpace();
@@ -55,6 +96,7 @@ export class MultiplayerHUD {
             !shapezAPI.mods.get(modId).settings.showOtherPlayers.value
         )
             return;
+
         for (let i = 0; i < this.ingameState.peer.users.length; i++) {
             const user = this.ingameState.peer.users[i];
             if (
@@ -65,16 +107,18 @@ export class MultiplayerHUD {
                 typeof user.worldPos === "undefined"
             )
                 continue;
+
             const metaBuilding = shapezAPI.exports.gMetaBuildingRegistry.findByClass(
                 shapezAPI.ingame.buildings[user.currentMetaBuilding]
             );
+
             this.drawRegularPlacementSetup(
                 parameters,
                 metaBuilding,
                 user.currentVariant,
                 user.currentBaseRotation,
                 new Vector(user.mouseTile.x, user.mouseTile.y),
-                new Vector(user.worldPos.x, user.worldPos.y)
+                user.currentWorldPos
             );
         }
     }

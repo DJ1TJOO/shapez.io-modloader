@@ -112,7 +112,7 @@ export class MultiplayerPeer {
         peer.on("close", () => {
             console.log(this.connectionId + " closed");
             this.ingameState.stageLeavingGame();
-            this.ingameState.saveThenGoToState("MainMenuState", {
+            this.ingameState.moveToState("MainMenuState", {
                 loadError: "Host disconnected",
             });
         });
@@ -494,8 +494,11 @@ export class MultiplayerPeer {
 
                     //Update user
                     const index = this.users.findIndex(x => x._id === user._id);
-                    if (index >= 0) this.users[index] = user;
-                    else this.users.push(user);
+                    if (index >= 0) {
+                        for (const key in user) {
+                            this.users[index][key] = user[key];
+                        }
+                    } else this.users.push(user);
 
                     if (this.host) this.connections.find(x => x.peerId === peerId).user = user;
                 } else if (packet.textType === TextPacketTypes.MESSAGE) {
