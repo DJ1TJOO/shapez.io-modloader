@@ -591,6 +591,9 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
 
                 // When confirmed, create connection
                 dialog.buttonSignals.ok.add(() => {
+                    this.loadingOverlay = new GameLoadingOverlay(this.app, this.getDivElement());
+                    this.loadingOverlay.showBasic();
+
                     let connectionId = trim(connectIdInput.getValue());
 
                     // @ts-ignore
@@ -598,6 +601,18 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
                     var socketId = undefined;
                     var socketConnectionId = undefined;
                     var peerId = undefined;
+
+                    socket.on("connect_error", () => {
+                        this.loadingOverlay.removeIfAttached();
+                        //Show error message of connection
+                        this.dialogs.showWarning(
+                            shapezAPI.translations.multiplayer.multiplayerGameConnectionError.title,
+                            shapezAPI.translations.multiplayer.multiplayerGameConnectionError.desc.replace(
+                                "<host>",
+                                host
+                            )
+                        );
+                    });
 
                     socket.on("connect", () => {
                         console.log("Connected to the signalling server");
@@ -607,6 +622,7 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
                             socket.emit("joinRoom", connectionId, socketId);
                         });
                         socket.on("error", () => {
+                            this.loadingOverlay.removeIfAttached();
                             this.dialogs.showWarning(
                                 shapezAPI.translations.multiplayer.multiplayerGameError.title,
                                 shapezAPI.translations.multiplayer.multiplayerGameError.desc + "<br><br>"
@@ -619,7 +635,7 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
                                     urls: "stun:stun.1.google.com:19302",
                                 },
                                 {
-                                    url: "turn:numb.viagenie.ca",
+                                    urls: "turn:numb.viagenie.ca",
                                     credential: "muazkh",
                                     username: "webrtc@live.com",
                                 },
@@ -661,7 +677,8 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
                         var canceled = (title, description) => {
                             pc.destroy();
                             this.loadingOverlay.removeIfAttached();
-                            //Show uuid of room
+
+                            //Show error message of room
                             let dialog = new Dialog({
                                 app: this.app,
                                 title: title,
@@ -717,8 +734,6 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
                                 packet.flag === FlagPacketFlags.STARTDATA
                             ) {
                                 gameDataState = 0;
-                                this.loadingOverlay = new GameLoadingOverlay(this.app, this.getDivElement());
-                                this.loadingOverlay.showBasic();
                             }
                         };
 

@@ -35,31 +35,34 @@ const config = {
 
 export class MultiplayerPeer {
     /**
-     *
      * @param {import ("../states/multiplayer_ingame").InMultiplayerGameState} ingameState
-     * @param {boolean} host
-     * @param {Peer} peer
+     * @param {Peer.Instance | null} peer
      */
-    constructor(ingameState, host = false, peer = null) {
+    constructor(ingameState, peer = null) {
         this.ingameState = ingameState;
-        this.host = host;
         this.multiplayerPlace = [];
         this.multiplayerDestroy = [];
         this.multipalyerComponentAdd = [];
         this.multipalyerComponentRemove = [];
         this.multipalyerUnlockUpgrade = [];
         this.multiplayerConstantSignalChange = [];
+
         this.user = {
             _id: uuidv4(),
             username: shapezAPI.user.username,
         };
         this.users = [];
-        if (this.host) this.connections = [];
-        else this.peer = peer;
-        this.builder = new MultiplayerBuilder(this.ingameState, this);
 
-        if (this.host) this.setupHost();
-        else this.setupClient(peer);
+        this.host = !!peer;
+        if (this.host) {
+            this.setupHost();
+            this.connections = [];
+        } else {
+            this.peer = peer;
+            this.setupClient(this.peer);
+        }
+
+        this.builder = new MultiplayerBuilder(this.ingameState, this);
     }
 
     setupHost() {
@@ -81,6 +84,10 @@ export class MultiplayerPeer {
             socket.on("createPeer", async data => {
                 this.createPeer(socket, socketId, data);
             });
+        });
+
+        socket.on("connect_error", () => {
+            this.ingameState.onInitializationFailure("Failed to connect to server: " + this.ingameState.host);
         });
 
         //Show uuid of room

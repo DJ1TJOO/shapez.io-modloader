@@ -43,7 +43,7 @@ export const gameCreationAction = {
 // Typehints
 export class MultiplayerConnection {
     constructor(peer, gameData) {
-        /** @type {Peer} */
+        /** @type {Peer.Instance} */
         this.peer = peer;
 
         /** @type {object} */
@@ -391,8 +391,8 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
             this.core.resize(this.app.screenWidth, this.app.screenHeight);
 
             //Connect
-            if (this.connectionId) this.peer = new MultiplayerPeer(this, false, this.connection.peer);
-            else this.peer = new MultiplayerPeer(this, true);
+            if (this.connectionId) this.peer = new MultiplayerPeer(this, this.connection.peer);
+            else this.peer = new MultiplayerPeer(this);
         }
     }
 

@@ -58,6 +58,10 @@ registerMod({
                     title: "Game not found",
                     desc: "The multiplayer game you wanted to join is not found or does not exist.",
                 },
+                multiplayerGameConnectionError: {
+                    title: "Failed to connect",
+                    desc: "Failed to connect to the server: <host>",
+                },
                 notSameMods: {
                     title: "Not same mods installed",
                     desc: "You don't have the same mods installed as the owner",
