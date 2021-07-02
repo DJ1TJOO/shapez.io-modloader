@@ -737,6 +737,17 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
                                 gameDataState = 0;
                             }
                         };
+                        setTimeout(() => {
+                            if (gameDataState === 1) return;
+                            canceled(
+                                shapezAPI.translations.multiplayer.multiplayerGameError
+                                    .multiplayerGameConnectionError,
+                                shapezAPI.translations.multiplayer.multiplayerGameError.multiplayerGameConnectionError.replace(
+                                    "<host>",
+                                    host + ": Connection timed out"
+                                )
+                            );
+                        }, 1000 * 60);
 
                         pc.on("data", onMessage);
                     });

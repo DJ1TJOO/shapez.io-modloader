@@ -43,8 +43,9 @@ export class MultiplayerHUD {
             // user.velocity = user.velocity.multiplyScalar(0.95);
             // if (user.velocity.x > 1 || user.velocity.y > 1) user.currentWorldPos.addInplace(user.velocity);
 
-            user.currentWorldPos.x = this.lerp(user.currentWorldPos.x, tracing.x, 0.03);
-            user.currentWorldPos.y = this.lerp(user.currentWorldPos.y, tracing.y, 0.03);
+            user.currentWorldPos.x = Math.floor(this.lerp(user.currentWorldPos.x, tracing.x, 0.13));
+            user.currentWorldPos.y = Math.floor(this.lerp(user.currentWorldPos.y, tracing.y, 0.13));
+            user.currentMouseTile = user.currentWorldPos.toTileSpace();
         }
 
         if (Date.now() - this.lastTimeUpdated < 0.5 * 1000) return;
@@ -65,12 +66,9 @@ export class MultiplayerHUD {
 
         const mousePosition = this.ingameState.core.root.app.mousePosition;
 
-        if (!mousePosition) {
-            this.ingameState.peer.user.mouseTile = undefined;
-        } else {
+        if (mousePosition) {
             this.ingameState.peer.user.worldPos =
                 this.ingameState.core.root.camera.screenToWorld(mousePosition);
-            this.ingameState.peer.user.mouseTile = this.ingameState.peer.user.worldPos.toTileSpace();
         }
 
         if (this.ingameState.peer.host) {
@@ -103,8 +101,9 @@ export class MultiplayerHUD {
                 typeof user.currentMetaBuilding === "undefined" ||
                 typeof user.currentVariant === "undefined" ||
                 typeof user.currentBaseRotation === "undefined" ||
-                typeof user.mouseTile === "undefined" ||
-                typeof user.worldPos === "undefined"
+                typeof user.currentMouseTile === "undefined" ||
+                typeof user.currentWorldPos === "undefined" ||
+                user.currentMetaBuilding === null
             )
                 continue;
 
@@ -117,7 +116,7 @@ export class MultiplayerHUD {
                 metaBuilding,
                 user.currentVariant,
                 user.currentBaseRotation,
-                new Vector(user.mouseTile.x, user.mouseTile.y),
+                user.currentMouseTile,
                 user.currentWorldPos
             );
         }

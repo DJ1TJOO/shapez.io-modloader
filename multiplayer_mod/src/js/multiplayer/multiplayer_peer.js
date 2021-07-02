@@ -18,6 +18,8 @@ const wrtc = require("wrtc");
 const Peer = require("simple-peer");
 const io = require("socket.io-client");
 const getBuildingDataFromCode = shapezAPI.exports.getBuildingDataFromCode;
+const types = shapezAPI.exports.types;
+const Vector = shapezAPI.exports.Vector;
 const Dialog = shapezAPI.exports.Dialog;
 
 const config = {
@@ -188,9 +190,16 @@ export class MultiplayerPeer {
                     origin.equals(entity.components.StaticMapEntity.origin)
                 );
                 if (multiplayerId > -1) return this.multiplayerPlace.splice(multiplayerId, 1);
+
+                const staticMapEntity = entity.components.StaticMapEntity;
                 MultiplayerPacket.sendPacket(
                     peer,
-                    new SignalPacket(SignalPacketSignals.entityAdded, [entity])
+                    new SignalPacket(SignalPacketSignals.entityAdded, [
+                        types.tileVector.serialize(staticMapEntity.origin),
+                        types.float.serialize(staticMapEntity.originalRotation),
+                        types.float.serialize(staticMapEntity.rotation),
+                        types.string.serialize(staticMapEntity.code),
+                    ])
                 );
 
                 if (entity.components.ConstantSignal) {
@@ -216,7 +225,9 @@ export class MultiplayerPeer {
 
                 MultiplayerPacket.sendPacket(
                     peer,
-                    new SignalPacket(SignalPacketSignals.entityDestroyed, [entity])
+                    new SignalPacket(SignalPacketSignals.entityDestroyed, [
+                        types.tileVector.serialize(entity.components.StaticMapEntity.origin),
+                    ])
                 );
             });
             //TODO: only constantSignal for now
@@ -228,33 +239,36 @@ export class MultiplayerPeer {
                 MultiplayerPacket.sendPacket(
                     peer,
                     new SignalPacket(SignalPacketSignals.entityComponentChanged, [
-                        entity,
+                        types.tileVector.serialize(entity.components.StaticMapEntity.origin),
                         constantSignalComponent,
                     ])
                 );
             });
-            this.ingameState.core.root.signals.entityGotNewComponent.add(entity => {
-                const multiplayerId = this.multipalyerComponentAdd.findIndex(origin =>
-                    origin.equals(entity.components.StaticMapEntity.origin)
-                );
-                if (multiplayerId > -1) return this.multipalyerComponentAdd.splice(multiplayerId, 1);
 
-                MultiplayerPacket.sendPacket(
-                    peer,
-                    new SignalPacket(SignalPacketSignals.entityComponentRemoved, [entity])
-                );
-            });
-            this.ingameState.core.root.signals.entityComponentRemoved.add(entity => {
-                const multiplayerId = this.multipalyerComponentRemove.findIndex(origin =>
-                    origin.equals(entity.components.StaticMapEntity.origin)
-                );
-                if (multiplayerId > -1) return this.multipalyerComponentRemove.splice(multiplayerId, 1);
+            //TODO: not know why this was here
+            // this.ingameState.core.root.signals.entityGotNewComponent.add(entity => {
+            //     const multiplayerId = this.multipalyerComponentAdd.findIndex(origin =>
+            //         origin.equals(entity.components.StaticMapEntity.origin)
+            //     );
+            //     if (multiplayerId > -1) return this.multipalyerComponentAdd.splice(multiplayerId, 1);
 
-                MultiplayerPacket.sendPacket(
-                    peer,
-                    new SignalPacket(SignalPacketSignals.entityComponentRemoved, [entity])
-                );
-            });
+            //     MultiplayerPacket.sendPacket(
+            //         peer,
+            //         new SignalPacket(SignalPacketSignals.entityComponentRemoved, [entity])
+            //     );
+            // });
+            // this.ingameState.core.root.signals.entityComponentRemoved.add(entity => {
+            //     const multiplayerId = this.multipalyerComponentRemove.findIndex(origin =>
+            //         origin.equals(entity.components.StaticMapEntity.origin)
+            //     );
+            //     if (multiplayerId > -1) return this.multipalyerComponentRemove.splice(multiplayerId, 1);
+
+            //     MultiplayerPacket.sendPacket(
+            //         peer,
+            //         new SignalPacket(SignalPacketSignals.entityComponentRemoved, [entity])
+            //     );
+            // });
+
             this.ingameState.core.root.signals.upgradePurchased.add(upgradeId => {
                 if (this.multipalyerUnlockUpgrade.includes(upgradeId))
                     return this.multipalyerUnlockUpgrade.splice(
@@ -317,10 +331,17 @@ export class MultiplayerPeer {
     }
 
     resetTileTo(origin, entity) {
+        const staticMapEntity = entity.components.StaticMapEntity;
+
         for (let i = 0; i < this.connections.length; i++) {
             MultiplayerPacket.sendPacket(
                 this.connections[i].peer,
-                new SignalPacket(SignalPacketSignals.setTile, [origin, entity]),
+                new SignalPacket(SignalPacketSignals.setTile, [
+                    types.tileVector.serialize(origin),
+                    types.float.serialize(staticMapEntity.originalRotation),
+                    types.float.serialize(staticMapEntity.rotation),
+                    types.string.serialize(staticMapEntity.code),
+                ]),
                 this.connections
             );
         }
@@ -354,69 +375,69 @@ export class MultiplayerPeer {
                     }
                 }
                 if (packet.signal === SignalPacketSignals.setTile) {
-                    const origin = packet.args[0];
-                    const setEntity = packet.args[1];
+                    const origin = new Vector(packet.args[0].x, packet.args[0].y);
+
+                    const originalRotation = packet.args[1];
+                    const rotation = packet.args[2];
+                    const buildingData = getBuildingDataFromCode(packet.args[3]);
+
                     const entity = this.builder.findByOrigin(this.ingameState.core.root.entityMgr, origin);
                     if (entity !== null) {
                         this.builder.freeEntityAreaBeforeBuild(entity);
                     }
-                    if (setEntity) {
-                        this.builder.tryPlaceCurrentBuildingAt(setEntity.components.StaticMapEntity.origin, {
-                            origin: setEntity.components.StaticMapEntity.origin,
-                            originalRotation: setEntity.components.StaticMapEntity.originalRotation,
-                            rotation: setEntity.components.StaticMapEntity.rotation,
-                            rotationVariant: getBuildingDataFromCode(
-                                setEntity.components.StaticMapEntity.code
-                            ).rotationVariant,
-                            variant: getBuildingDataFromCode(setEntity.components.StaticMapEntity.code)
-                                .variant,
-                            building: getBuildingDataFromCode(setEntity.components.StaticMapEntity.code)
-                                .metaInstance,
+
+                    if (originalRotation && rotation && buildingData) {
+                        this.builder.tryPlaceCurrentBuildingAt(origin, {
+                            origin: origin,
+                            originalRotation: originalRotation,
+                            rotation: rotation,
+                            rotationVariant: buildingData.rotationVariant,
+                            variant: buildingData.variant,
+                            building: buildingData.metaInstance,
                         });
                     }
                 }
                 if (packet.signal === SignalPacketSignals.entityAdded) {
-                    const entity = packet.args[0];
+                    const origin = new Vector(packet.args[0].x, packet.args[0].y);
+                    const originalRotation = packet.args[1];
+                    const rotation = packet.args[2];
+                    const buildingData = getBuildingDataFromCode(packet.args[3]);
 
-                    this.multiplayerPlace.push(entity.components.StaticMapEntity.origin);
+                    this.multiplayerPlace.push(origin);
                     if (
-                        !this.builder.tryPlaceCurrentBuildingAt(entity.components.StaticMapEntity.origin, {
-                            origin: entity.components.StaticMapEntity.origin,
-                            originalRotation: entity.components.StaticMapEntity.originalRotation,
-                            rotation: entity.components.StaticMapEntity.rotation,
-                            rotationVariant: getBuildingDataFromCode(entity.components.StaticMapEntity.code)
-                                .rotationVariant,
-                            variant: getBuildingDataFromCode(entity.components.StaticMapEntity.code).variant,
-                            building: getBuildingDataFromCode(entity.components.StaticMapEntity.code)
-                                .metaInstance,
+                        !this.builder.tryPlaceCurrentBuildingAt(origin, {
+                            origin: origin,
+                            originalRotation: originalRotation,
+                            rotation: rotation,
+                            rotationVariant: buildingData.rotationVariant,
+                            variant: buildingData.variant,
+                            building: buildingData.metaInstance,
                         }) &&
                         this.host
                     ) {
                         const entity = this.builder.findByOrigin(
                             this.ingameState.core.root.entityMgr,
-                            packet.args[0].components.StaticMapEntity.origin
+                            origin
                         );
-                        this.resetTileTo(entity.components.StaticMapEntity.origin, entity);
+                        this.resetTileTo(origin, entity);
                     }
                 }
                 if (packet.signal === SignalPacketSignals.entityDestroyed) {
-                    const entity = this.builder.findByOrigin(
-                        this.ingameState.core.root.entityMgr,
-                        packet.args[0].components.StaticMapEntity.origin
-                    );
+                    const origin = new Vector(packet.args[0].x, packet.args[0].y);
+                    const entity = this.builder.findByOrigin(this.ingameState.core.root.entityMgr, origin);
                     if (entity !== null) {
-                        this.multiplayerDestroy.push(entity.components.StaticMapEntity.origin);
+                        this.multiplayerDestroy.push(origin);
                         if (!this.ingameState.core.root.logic.tryDeleteBuilding(entity) && this.host) {
-                            this.resetTileTo(entity.components.StaticMapEntity.origin, entity);
+                            this.resetTileTo(origin, entity);
                         }
                     } else if (this.host) {
-                        this.resetTileTo(entity.components.StaticMapEntity.origin);
+                        this.resetTileTo(origin);
                     }
                 }
                 if (packet.signal === SignalPacketSignals.entityComponentChanged) {
                     const entity = this.builder.findByOrigin(
                         this.ingameState.core.root.entityMgr,
-                        packet.args[0].components.StaticMapEntity.origin
+                        packet.args[0]
                     );
                     const component = packet.args[1];
                     if (entity === null) return;

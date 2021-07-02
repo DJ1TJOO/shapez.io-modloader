@@ -276,10 +276,17 @@ export class MultiplayerPacket {
         const argsNew = [];
         for (let i = 0; i < args.length; i++) {
             const element = args[i];
-            argsNew.push({
-                serialized: element.serialize(),
-                class: element.constructor.name,
-            });
+            if (element.serialize) {
+                argsNew.push({
+                    serialized: element.serialize(),
+                    class: element.constructor.name,
+                });
+            } else {
+                argsNew.push({
+                    serialized: element,
+                    class: null,
+                });
+            }
         }
         return argsNew;
     }
@@ -293,13 +300,17 @@ export class MultiplayerPacket {
         const argsNew = [];
         for (let i = 0; i < args.length; i++) {
             const element = args[i];
-            // @ts-ignore
-            let object = new MultiplayerPacketSerializableObject[element.class]({});
-            if (object instanceof Entity)
-                object = new MultiplayerSerializerInternal().deserializeEntity(root, element.serialized);
-            // @ts-ignore
-            else object.deserialize(element.serialized, root);
-            argsNew.push(object);
+            if (element.class === null) {
+                argsNew.push(element.serialized);
+            } else {
+                // @ts-ignore
+                let object = new MultiplayerPacketSerializableObject[element.class]({});
+                if (object instanceof Entity)
+                    object = new MultiplayerSerializerInternal().deserializeEntity(root, element.serialized);
+                // @ts-ignore
+                else object.deserialize(element.serialized, root);
+                argsNew.push(object);
+            }
         }
         return argsNew;
     }
