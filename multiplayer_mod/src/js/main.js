@@ -13,7 +13,7 @@ registerMod({
     id: modId,
     description: "A mod that adds multiplayer to shapez.io",
     authors: ["DJ1TJOO"],
-    version: "0.0.6",
+    version: "0.0.8",
     gameVersion: "ML01",
     dependencies: [],
     incompatible: [],
@@ -113,6 +113,14 @@ registerMod({
                 multiplayerGameError: {
                     title: "Spel niet gevonden",
                     desc: "Het multiplayer spel waaraan je wilde deelnemen, is niet gevonden of bestaat niet.",
+                },
+                multiplayerGameConnectionError: {
+                    title: "Verbinden gefaald",
+                    desc: "Gefaald om met de server verbinging te maken: <host>",
+                },
+                notSameMods: {
+                    title: "Niet dezelfde mods geïnstalleerd",
+                    desc: "Je hebt niet de zelfde mods de geïnstalleerd als de owner",
                 },
                 user: {
                     disconnected: "<username> heeft het spel verlaten",
