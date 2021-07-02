@@ -87,7 +87,10 @@ export class MultiplayerPeer {
         });
 
         socket.on("connect_error", () => {
-            this.ingameState.onInitializationFailure("Failed to connect to server: " + this.ingameState.host);
+            this.ingameState.saveThenGoToState("MainMenuState", {
+                loadError: "Failed to connect to server: " + this.ingameState.host,
+            });
+            socket.reconnection(false);
         });
 
         //Show uuid of room
@@ -108,7 +111,10 @@ export class MultiplayerPeer {
         peer.on("data", this.onMessage(peer));
         peer.on("close", () => {
             console.log(this.connectionId + " closed");
-            this.ingameState.onInitializationFailure("Host disconnected");
+            this.ingameState.stageLeavingGame();
+            this.ingameState.saveThenGoToState("MainMenuState", {
+                loadError: "Host disconnected",
+            });
         });
         peer.on("error", err => {
             console.error(err);

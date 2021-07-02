@@ -612,6 +612,7 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
                                 host
                             )
                         );
+                        socket.reconnection(false);
                     });
 
                     socket.on("connect", () => {

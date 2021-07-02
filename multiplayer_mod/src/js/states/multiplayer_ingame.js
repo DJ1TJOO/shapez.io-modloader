@@ -389,8 +389,10 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
      */
     stageDestroyed() {
         if (this.switchStage(stages.destroyed)) {
-            // Cleanup all api calls
-            this.cancelAllAsyncOperations();
+            try {
+                // Cleanup all api calls
+                this.cancelAllAsyncOperations();
+            } catch (error) {}
 
             if (this.syncer) {
                 this.syncer.cancelSync();
@@ -403,12 +405,14 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
                 this.core = null;
             }
 
-            //Disconnect peers
-            if (this.connectionId) {
-                this.connection.peer.destroy();
-            } else {
-                for (let i = 0; i < this.peer.connections.length; i++) {
-                    this.peer.connections[i].peer.destroy();
+            if (this.peer) {
+                //Disconnect peers
+                if (this.connectionId) {
+                    this.connection.peer.destroy();
+                } else {
+                    for (let i = 0; i < this.peer.connections.length; i++) {
+                        this.peer.connections[i].peer.destroy();
+                    }
                 }
             }
 
