@@ -47,7 +47,7 @@ export class MultiplayerHUDNotifications extends shapezAPI.exports.BaseHUDPart {
         super(root);
     }
     blurAll() {
-        var tmp = document.createElement("input");
+        const tmp = document.createElement("input");
         document.body.appendChild(tmp);
         tmp.focus();
         document.body.removeChild(tmp);

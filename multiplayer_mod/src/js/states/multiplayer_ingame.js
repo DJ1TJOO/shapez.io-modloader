@@ -314,19 +314,7 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
     stage4bResumeGame() {
         if (this.switchStage(stages.s4_B_resumeGame)) {
             if (this.core.initExistingGame().isBad()) {
-                var errorJSON = this.core.initExistingGame().reason;
-                // if (errorJSON.status) {
-                //     this.onInitializationFailure("Savegame is corrupt and can not be restored.");
-                //     //TODO: load game without mod
-                //     // if (errorJSON.status === "missing")
-                //     //     this.core.root.hud.parts.dialogs.showOptionChooser(
-                //     //     "Missing " + errorJSON.type + " with id " + errorJSON.id, {
-                //     //         options: [{ value: "Test", text: "TEst" }],
-                //     //     }
-                //     // );
-                // } else {
                 this.onInitializationFailure("Savegame is corrupt and can not be restored.");
-                // }
                 return;
             }
             this.app.gameAnalytics.handleGameResumed();
@@ -496,7 +484,7 @@ export class InMultiplayerGameState extends shapezAPI.exports.GameState {
 
         this.asyncChannel.watch(waitNextFrame()).then(() => this.stage3CreateCore());
 
-        let buttonIds = ["settings"];
+        const buttonIds = ["settings"];
         this.modlist = false;
         if (shapezAPI.exports.HUDSettingsMenu.buttons.find(x => x.id === "mods")) {
             buttonIds.push("mods");

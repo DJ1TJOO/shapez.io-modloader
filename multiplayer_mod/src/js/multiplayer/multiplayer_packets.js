@@ -273,7 +273,7 @@ export class MultiplayerPacket {
      * @returns {Array<SerializedObject>}
      */
     static serialize(args) {
-        var argsNew = [];
+        const argsNew = [];
         for (let i = 0; i < args.length; i++) {
             const element = args[i];
             argsNew.push({
@@ -290,11 +290,11 @@ export class MultiplayerPacket {
      * @returns {Array<BasicSerializableObject>}
      */
     static deserialize(args, root) {
-        var argsNew = [];
+        const argsNew = [];
         for (let i = 0; i < args.length; i++) {
             const element = args[i];
             // @ts-ignore
-            var object = new MultiplayerPacketSerializableObject[element.class]({});
+            let object = new MultiplayerPacketSerializableObject[element.class]({});
             if (object instanceof Entity)
                 object = new MultiplayerSerializerInternal().deserializeEntity(root, element.serialized);
             // @ts-ignore
@@ -341,8 +341,8 @@ export class DataPacket extends MultiplayerPacket {
      * @param {number} size
      */
     static createFromData(data, size) {
-        var chunks = this.chunkSubstr(JSON.stringify(data), size);
-        var dataPackets = [];
+        const chunks = this.chunkSubstr(JSON.stringify(data), size);
+        const dataPackets = [];
         for (let i = 0; i < chunks.length; i++) dataPackets[i] = new DataPacket(size, chunks[i]);
         return dataPackets;
     }
@@ -372,11 +372,13 @@ export const SignalPacketSignals = {
     entityQueuedForDestroy: 5,
     entityDestroyed: 6,
 
-    storyGoalCompleted: 7,
-    upgradePurchased: 8,
+    setTile: 7,
 
-    shapeDelivered: 9,
-    itemProduced: 10,
+    storyGoalCompleted: 8,
+    upgradePurchased: 9,
+
+    shapeDelivered: 10,
+    itemProduced: 11,
 };
 
 export class SignalPacket extends MultiplayerPacket {

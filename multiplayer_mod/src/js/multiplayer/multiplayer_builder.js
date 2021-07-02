@@ -1,5 +1,4 @@
 const Vector = shapezAPI.exports.Vector;
-const globalConfig = shapezAPI.exports.globalConfig;
 const getBuildingDataFromCode = shapezAPI.exports.getBuildingDataFromCode;
 
 export class MultiplayerBuilder {
@@ -54,7 +53,7 @@ export class MultiplayerBuilder {
     /**
      * Attempts to place the given building
      */
-    tryPlaceBuilding({ origin, rotation, rotationVariant, originalRotation, variant, building }, uid) {
+    tryPlaceBuilding({ origin, rotation, rotationVariant, originalRotation, variant, building }) {
         const entity = building.createEntity({
             root: this.ingameState.core.root,
             origin,
@@ -79,12 +78,7 @@ export class MultiplayerBuilder {
         if (this.ingameState.core.root.logic.checkCanPlaceEntity(entity)) {
             this.freeEntityAreaBeforeBuild(entity);
             this.ingameState.core.root.map.placeStaticEntity(entity);
-            if (uid) {
-                this.ingameState.core.root.entityMgr.registerEntity(entity, uid);
-                this.ingameState.core.root.entityMgr.nextUid = uid + 1;
-            } else {
-                this.ingameState.core.root.entityMgr.registerEntity(entity);
-            }
+            this.ingameState.core.root.entityMgr.registerEntity(entity);
             return entity;
         }
         return null;
@@ -94,21 +88,16 @@ export class MultiplayerBuilder {
      * Tries to place the current building at the given tile
      * @param {Vector} tile
      */
-    tryPlaceCurrentBuildingAt(tile, entityPayload, uid) {
-        if (this.ingameState.core.root.entityMgr.findByUid(uid, false)) uid = null;
-
+    tryPlaceCurrentBuildingAt(tile, entityPayload) {
         const metaBuilding = entityPayload.building;
-        const entity = this.tryPlaceBuilding(
-            {
-                origin: tile,
-                rotation: entityPayload.rotation,
-                rotationVariant: entityPayload.rotationVariant,
-                originalRotation: entityPayload.originalRotation,
-                building: metaBuilding,
-                variant: entityPayload.variant,
-            },
-            uid
-        );
+        const entity = this.tryPlaceBuilding({
+            origin: tile,
+            rotation: entityPayload.rotation,
+            rotationVariant: entityPayload.rotationVariant,
+            originalRotation: entityPayload.originalRotation,
+            building: metaBuilding,
+            variant: entityPayload.variant,
+        });
 
         if (entity) {
             return true;

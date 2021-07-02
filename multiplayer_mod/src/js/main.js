@@ -1,5 +1,5 @@
 String.prototype.replaceAll = function (search, replacement) {
-    var target = this;
+    const target = this;
     return target.split(search).join(replacement);
 };
 

@@ -568,7 +568,7 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
 
             // When confirmed, create connection
             hostDialog.buttonSignals.ok.add(() => {
-                var host = trim(hostInput.getValue());
+                const host = trim(hostInput.getValue());
 
                 //UUID v4 regex
                 const uuid = /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
@@ -597,10 +597,10 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
                     let connectionId = trim(connectIdInput.getValue());
 
                     // @ts-ignore
-                    var socket = io(host, { transport: ["websocket"] });
-                    var socketId = undefined;
-                    var socketConnectionId = undefined;
-                    var peerId = undefined;
+                    const socket = io(host, { transport: ["websocket"] });
+                    let socketId = undefined;
+                    let socketConnectionId = undefined;
+                    let peerId = undefined;
 
                     socket.on("connect_error", () => {
                         this.loadingOverlay.removeIfAttached();
@@ -671,10 +671,10 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
                             });
                         });
 
-                        var gameDataState = -1;
-                        var gameData = "";
+                        let gameDataState = -1;
+                        let gameData = "";
 
-                        var canceled = (title, description) => {
+                        const canceled = (title, description) => {
                             pc.destroy();
                             this.loadingOverlay.removeIfAttached();
 
@@ -688,8 +688,8 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
                             this.dialogs.internalShowDialog(dialog);
                         };
 
-                        var onMessage = data => {
-                            var packet = JSON.parse(data);
+                        const onMessage = data => {
+                            const packet = JSON.parse(data);
 
                             //When data ends
                             if (
@@ -717,7 +717,7 @@ export class MultiplayerState extends shapezAPI.exports.GameState {
                                         );
                                 }
 
-                                var connection = new MultiplayerConnection(pc, gameDataJson);
+                                const connection = new MultiplayerConnection(pc, gameDataJson);
                                 this.moveToState("InMultiplayerGameState", {
                                     connection,
                                     connectionId,
