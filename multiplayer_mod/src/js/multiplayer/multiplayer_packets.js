@@ -43,6 +43,8 @@ const Vector = shapezAPI.exports.Vector;
 const getBuildingDataFromCode = shapezAPI.exports.getBuildingDataFromCode;
 const globalConfig = shapezAPI.exports.globalConfig;
 const createLogger = shapezAPI.exports.createLogger;
+const compressX64 = shapezAPI.exports.compressX64;
+const decompressX64 = shapezAPI.exports.decompressX64;
 
 const Peer = require("simple-peer");
 /**
@@ -270,7 +272,7 @@ export class MultiplayerPacket {
     /**
      * Serializes data
      * @param {Array<BasicSerializableObject>} args
-     * @returns {Array<SerializedObject>}
+     * @returns {String}
      */
     static serialize(args) {
         const argsNew = [];
@@ -288,18 +290,20 @@ export class MultiplayerPacket {
                 });
             }
         }
-        return argsNew;
+        return compressX64(JSON.stringify({ a: argsNew }));
     }
 
     /**
      * Deserializes data
-     * @param {Array<SerializedObject>} args
+     * @param {String} args
      * @returns {Array<BasicSerializableObject>}
      */
     static deserialize(args, root) {
         const argsNew = [];
-        for (let i = 0; i < args.length; i++) {
-            const element = args[i];
+        const decompressedArgs = JSON.parse(decompressX64(args)).a;
+
+        for (let i = 0; i < decompressedArgs.length; i++) {
+            const element = decompressedArgs[i];
             if (element.class === null) {
                 argsNew.push(element.serialized);
             } else {
@@ -312,6 +316,7 @@ export class MultiplayerPacket {
                 argsNew.push(object);
             }
         }
+
         return argsNew;
     }
 }
@@ -404,7 +409,7 @@ export class SignalPacket extends MultiplayerPacket {
         /** @type {number} */
         this.signal = signal;
 
-        /** @type {Array<SerializedObject>} */
+        /** @type {String} */
         this.args = MultiplayerPacket.serialize(args);
     }
 }
@@ -430,6 +435,10 @@ export class TextPacket extends MultiplayerPacket {
         this.textType = textType;
 
         /** @type {string} */
-        this.text = text;
+        this.text = compressX64(text);
+    }
+
+    static decompress(text) {
+        return decompressX64(text);
     }
 }

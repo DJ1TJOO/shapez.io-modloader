@@ -1,2 +1,2 @@
-cd ./modloader/gulp
-gulp
+cd ./modloader/
+yarn dev

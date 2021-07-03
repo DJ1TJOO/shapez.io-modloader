@@ -452,6 +452,7 @@ export class MultiplayerPeer {
                     this.ingameState.core.root.hubGoals.tryUnlockUpgrade(packet.args[0].value);
                 }
             } else if (packet.type === MultiplayerPacketTypes.TEXT) {
+                packet.text = TextPacket.decompress(packet.text);
                 if (packet.textType === TextPacketTypes.USER_JOINED) {
                     const user = JSON.parse(packet.text);
 
