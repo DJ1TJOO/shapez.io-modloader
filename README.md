@@ -44,7 +44,7 @@ If existing instance:
 4. Open a terminal/cmd [in the folder](https://www.groovypost.com/howto/open-command-window-terminal-window-specific-folder-windows-mac-linux/) and run `yarn`
 5. Then to start run `node server`
 6. The game server is `ws://localhost:8889`
-7. Port foreward to play with friends
+7. Port forward to play with friends
 
 <hr>
 
