@@ -22,13 +22,13 @@ jobs:
             - uses: actions/download-artifact@master
               with:
                   name: build
-                  path: mod/build/bundle.js
+                  path: ./mod/build/bundle.js
 
             - name: Upload build to release
               uses: svenstaro/upload-release-action@v2
               with:
                   repo_token: ${{ secrets.GITHUB_TOKEN }}
-                  file: mod/build/bundle.js
+                  file: ./mod/build/bundle.js
                   asset_name: ${{ steps.tag.outputs.tag }}.js
                   tag: ${{ github.ref }}
     build:
@@ -53,7 +53,8 @@ jobs:
               run: |
                   cd mod/
                   node make.js
-            - uses: actions/upload-artifact@master
+            - name: Upload artifacts
+              uses: actions/upload-artifact@master
               with:
                   name: build
-                  path: mod/build/bundle.js
+                  path: ./mod/build/bundle.js
