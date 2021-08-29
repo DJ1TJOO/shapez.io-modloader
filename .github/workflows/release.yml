@@ -42,4 +42,6 @@ jobs:
                   cd mod/
                   yarn
             - name: Build
-              run: node make.js
+              run: |
+                  cd mod/
+                  node make.js
