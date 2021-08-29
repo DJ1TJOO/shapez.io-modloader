@@ -20,7 +20,7 @@ module.exports = ({
     standalone = false,
 }) => {
     var icons = new Map();
-    try {
+    if (fs.existsSync(themesPath)) {
         var iconFiles = fs.readdirSync(iconsPath);
         for (let i = 0; i < iconFiles.length; i++) {
             const filename = iconFiles[i];
@@ -30,11 +30,11 @@ module.exports = ({
                     Buffer.from(fs.readFileSync(path.join(iconsPath, filename))).toString("base64")
             );
         }
-    } catch {}
+    }
 
     var themes = new Map();
-    var themeFiles = fs.readdirSync(themesPath);
-    try {
+    if (fs.existsSync(themesPath)) {
+        var themeFiles = fs.readdirSync(themesPath);
         for (let i = 0; i < themeFiles.length; i++) {
             const filename = themeFiles[i];
             themes.set(
@@ -42,11 +42,11 @@ module.exports = ({
                 fs.readFileSync(path.join(themesPath, filename), "utf8")
             );
         }
-    } catch {}
+    }
 
     var atlases = new Map();
     var atlasJsons = new Map();
-    try {
+    if (fs.existsSync(atlasPath)) {
         var atlasFiles = fs.readdirSync(atlasPath);
         for (let i = 0; i < atlasFiles.length; i++) {
             const filename = atlasFiles[i];
@@ -63,7 +63,7 @@ module.exports = ({
                 atlasJsons.set(name, JSON.parse(fs.readFileSync(readPath, "utf8")));
             }
         }
-    } catch {}
+    }
 
     css = css.toString("utf8");
     return {
