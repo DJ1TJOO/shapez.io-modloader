@@ -52,7 +52,7 @@ jobs:
             - name: Build
               run: |
                   cd mod/
-                  node make.js
+                  yarn build
             - name: Upload artifacts
               uses: actions/upload-artifact@master
               with:

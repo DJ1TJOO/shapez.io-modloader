@@ -16,6 +16,7 @@ let server = cb => {
     });
 };
 
+exports.build = make;
 exports.default = () => {
     gulp.series(make, server)();
     gulp.watch("./src", make);
