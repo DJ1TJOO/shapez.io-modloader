@@ -7,36 +7,64 @@ const CircularDependencyPlugin = require("circular-dependency-plugin");
 const StringReplacePlugin = require("string-replace-webpack-plugin");
 const FriendlyErrorsWebpackPlugin = require("friendly-errors-webpack-plugin");
 
-module.exports = ({ es6 = false, bundlePath = "./build", bundle = "bundle.js", dir = "./src/js", mainFile = "./src/js/main.js", iconsPath = "./icons", atlasPath = "./atlas", themesPath = "./themes", css = "", standalone = false }) => {
+module.exports = ({
+    es6 = false,
+    bundlePath = "./build",
+    bundle = "bundle.js",
+    dir = "./src/js",
+    mainFile = "./src/js/main.js",
+    iconsPath = "./icons",
+    atlasPath = "./atlas",
+    themesPath = "./themes",
+    css = "",
+    standalone = false,
+}) => {
     var icons = new Map();
-    var iconFiles = fs.readdirSync(iconsPath);
-    for (let i = 0; i < iconFiles.length; i++) {
-        const filename = iconFiles[i];
-        icons.set(path.basename(filename, path.extname(filename)), "data:image/png;base64," + Buffer.from(fs.readFileSync(path.join(iconsPath, filename))).toString("base64"));
-    }
+    try {
+        var iconFiles = fs.readdirSync(iconsPath);
+        for (let i = 0; i < iconFiles.length; i++) {
+            const filename = iconFiles[i];
+            icons.set(
+                path.basename(filename, path.extname(filename)),
+                "data:image/png;base64," +
+                    Buffer.from(fs.readFileSync(path.join(iconsPath, filename))).toString("base64")
+            );
+        }
+    } catch {}
 
     var themes = new Map();
     var themeFiles = fs.readdirSync(themesPath);
-    for (let i = 0; i < themeFiles.length; i++) {
-        const filename = themeFiles[i];
-        themes.set(path.basename(filename, path.extname(filename)), fs.readFileSync(path.join(themesPath, filename), "utf8"));
-    }
+    try {
+        for (let i = 0; i < themeFiles.length; i++) {
+            const filename = themeFiles[i];
+            themes.set(
+                path.basename(filename, path.extname(filename)),
+                fs.readFileSync(path.join(themesPath, filename), "utf8")
+            );
+        }
+    } catch {}
 
     var atlases = new Map();
     var atlasJsons = new Map();
-    var atlasFiles = fs.readdirSync(atlasPath);
-    for (let i = 0; i < atlasFiles.length; i++) {
-        const filename = atlasFiles[i];
-        const ext = path.extname(filename);
-        const name = path.basename(filename, ext);
-        const readPath = path.join(atlasPath, filename);
+    try {
+        var atlasFiles = fs.readdirSync(atlasPath);
+        for (let i = 0; i < atlasFiles.length; i++) {
+            const filename = atlasFiles[i];
+            const ext = path.extname(filename);
+            const name = path.basename(filename, ext);
+            const readPath = path.join(atlasPath, filename);
 
-        if (ext === ".png") {
-            atlases.set(name, "data:image/png;base64," + Buffer.from(fs.readFileSync(readPath)).toString("base64"));
-        } else if (ext === ".json") {
-            atlasJsons.set(name, JSON.parse(fs.readFileSync(readPath, "utf8")));
+            if (ext === ".png") {
+                atlases.set(
+                    name,
+                    "data:image/png;base64," + Buffer.from(fs.readFileSync(readPath)).toString("base64")
+                );
+            } else if (ext === ".json") {
+                atlasJsons.set(name, JSON.parse(fs.readFileSync(readPath, "utf8")));
+            }
         }
-    }
+    } catch {}
+
     css = css.toString("utf8");
     return {
         entry: path.resolve(__dirname, mainFile),
@@ -49,10 +77,13 @@ module.exports = ({ es6 = false, bundlePath = "./build", bundle = "bundle.js", d
             new webpack.DefinePlugin({
                 assert: "window.assert",
                 assertAlways: "window.assert",
-                abstract: "window.assert(false, 'abstract method called of: ' + (this.name || (this.constructor && this.constructor.name)));",
+                abstract:
+                    "window.assert(false, 'abstract method called of: ' + (this.name || (this.constructor && this.constructor.name)));",
                 G_HAVE_ASSERT: "true",
                 G_APP_ENVIRONMENT: JSON.stringify("dev"),
-                G_TRACKING_ENDPOINT: JSON.stringify(lzString.compressToEncodedURIComponent("http://localhost:10005/v1")),
+                G_TRACKING_ENDPOINT: JSON.stringify(
+                    lzString.compressToEncodedURIComponent("http://localhost:10005/v1")
+                ),
                 G_IS_DEV: "true",
                 G_IS_RELEASE: "false",
                 G_IS_MOBILE_APP: "false",
@@ -86,17 +117,20 @@ module.exports = ({ es6 = false, bundlePath = "./build", bundle = "bundle.js", d
             },
         },
         module: {
-            rules: [{
+            rules: [
+                {
                     test: /\.js$/,
                     enforce: "pre",
                     exclude: /node_modules/,
-                    use: [{
-                        loader: "webpack-strip-block",
-                        options: {
-                            start: "typehints:start",
-                            end: "typehints:end",
+                    use: [
+                        {
+                            loader: "webpack-strip-block",
+                            options: {
+                                start: "typehints:start",
+                                end: "typehints:end",
+                            },
                         },
-                    }, ],
+                    ],
                 },
                 {
                     test: /\.js$/,
@@ -105,12 +139,15 @@ module.exports = ({ es6 = false, bundlePath = "./build", bundle = "bundle.js", d
                         {
                             loader: "babel-loader?cacheDirectory",
                             options: {
-                                configFile: require.resolve(es6 ? "./babel-es6.config.js" : "./babel.config.js"),
+                                configFile: require.resolve(
+                                    es6 ? "./babel-es6.config.js" : "./babel.config.js"
+                                ),
                             },
                         },
                         "uglify-template-string-loader", // Finally found this plugin
                         StringReplacePlugin.replace({
-                            replacements: [{
+                            replacements: [
+                                {
                                     pattern: /"\*\*\{css\}\*\*"/g,
                                     replacement: (match, p1) => {
                                         return "`" + css + "`";
