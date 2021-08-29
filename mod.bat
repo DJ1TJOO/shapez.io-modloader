@@ -1,2 +1,2 @@
-cd ./multiplayer_mod
+cd ./mod
 gulp
