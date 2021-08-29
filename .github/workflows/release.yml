@@ -34,7 +34,7 @@ jobs:
               id: download
               with:
                   name: build
-                  path: ./mod/build/bundle.js
+                  path: ./mod/build/
 
             - name: Check dir
               run: ls -R
