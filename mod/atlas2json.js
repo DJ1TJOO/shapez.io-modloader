@@ -1,5 +1,5 @@
 const { join, resolve } = require("path");
-const { readFileSync, readdirSync, writeFileSync } = require("fs");
+const { readFileSync, readdirSync, writeFileSync, existsSync } = require("fs");
 
 const suffixToScale = {
     lq: "0.25",
@@ -9,6 +9,11 @@ const suffixToScale = {
 
 function convert(srcDir) {
     const full = resolve(srcDir);
+
+    if (!existsSync(full)) {
+        return;
+    }
+
     const srcFiles = readdirSync(full)
         .filter(n => n.endsWith(".atlas"))
         .map(n => join(full, n));
