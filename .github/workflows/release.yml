@@ -36,6 +36,9 @@ jobs:
                   name: build
                   path: ./mod/build/bundle.js
 
+            - name: Check dir
+              run: ls -R
+
             - name: Upload build to release
               uses: actions/upload-release-asset@v1
               env:
@@ -71,3 +74,5 @@ jobs:
               with:
                   name: build
                   path: ./mod/build/bundle.js
+            - name: Check dir
+              run: ls -R
