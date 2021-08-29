@@ -1,9 +1,8 @@
 name: Release build
 
 on:
-    push:
-        tags:
-            - "*"
+    release:
+        types: [created]
 
 jobs:
     upload-release:
@@ -12,12 +11,14 @@ jobs:
         needs: build
 
         steps:
-            - name: Get release name
-              id: tag
-              run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
-
             - name: Checkout repo
               uses: actions/checkout@v2
+
+            - name: Get release
+              id: get_release
+              uses: bruceadams/get-release@v1.2.3
+              env:
+                  GITHUB_TOKEN: ${{ github.token }}
 
             - uses: actions/download-artifact@master
               with:
@@ -25,14 +26,14 @@ jobs:
                   path: ./mod/build/bundle.js
 
             - name: Upload build to release
-              uses: svenstaro/upload-release-action@v2
+              uses: actions/upload-release-asset@v1.0.2
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
-                  repo_token: ${{ secrets.GITHUB_TOKEN }}
-                  file: ./mod/build/bundle.js
-                  asset_name: ${{ steps.tag.outputs.tag }}.js
-                  tag: ${{ github.ref }}
-                  overwrite: true
-                  body: "This is my release text"
+                  upload_url: ${{ steps.get_release.outputs.upload_url }}
+                  asset_path: ./mod/build/bundle.js
+                  asset_name: ${{ steps.get_release.outputs.tag_name }}.js
+                  asset_content_type: application/javascript
     build:
         name: Building mod
         runs-on: ubuntu-latest
