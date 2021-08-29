@@ -27,7 +27,7 @@ jobs:
                   upload_url: ${{ steps.upload_url.outputs.upload_url }}
               with:
                   script: |
-                      core.setOutput('upload_url', upload_url.slice(0, -13))
+                      core.setOutput('upload_url', process.env.upload_url.slice(0, -13))
 
             - uses: actions/download-artifact@v2
               id: download
