@@ -31,6 +31,8 @@ jobs:
                   file: ./mod/build/bundle.js
                   asset_name: ${{ steps.tag.outputs.tag }}.js
                   tag: ${{ github.ref }}
+                  overwrite: true
+                  body: "This is my release text"
     build:
         name: Building mod
         runs-on: ubuntu-latest
