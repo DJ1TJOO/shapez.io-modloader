@@ -1,0 +1,46 @@
+name: Release build
+
+on:
+    push:
+        tags:
+            - "*"
+
+jobs:
+    upload-release:
+        name: Upload release
+        runs-on: ubuntu-latest
+        needs: build
+
+        steps:
+            - name: Get release name
+              id: tag
+              run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+
+            - name: Upload build to release
+              uses: svenstaro/upload-release-action@v2
+              with:
+                  repo_token: ${{ secrets.GITHUB_TOKEN }}
+                  file: ./build/bundle.js
+                  asset_name: ${{ steps.tag.outputs.tag }}.js
+                  tag: ${{ github.ref }}
+    build:
+        name: Building mod
+        runs-on: ubuntu-latest
+        if: github.event.base_ref == 'refs/heads/MultiplayerMod'
+
+        steps:
+            - name: Setup Node
+            - uses: actions/setup-node@v2
+              with:
+                  node-version: "10.x"
+
+            - name: Checkout repo
+              uses: actions/checkout@v2
+
+            - name: Install Yarn Dependencies
+              run: |
+                  cd mod/
+                  yarn
+
+            - name: Build
+              run: node make.js
