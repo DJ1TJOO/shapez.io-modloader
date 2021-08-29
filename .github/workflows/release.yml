@@ -20,7 +20,8 @@ jobs:
               env:
                   GITHUB_TOKEN: ${{ github.token }}
 
-            - uses: actions/download-artifact@master
+            - uses: actions/download-artifact@v2
+              id: download
               with:
                   name: build
                   path: ./mod/build/bundle.js
@@ -31,7 +32,7 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
                   upload_url: ${{ steps.get_release.outputs.upload_url }}
-                  asset_path: ./mod/build/bundle.js
+                  asset_path: ${{steps.download.outputs.download-path}}
                   asset_name: ${{ steps.get_release.outputs.tag_name }}.js
                   asset_content_type: application/javascript
     build:
@@ -56,7 +57,7 @@ jobs:
                   cd mod/
                   yarn build
             - name: Upload artifacts
-              uses: actions/upload-artifact@master
+              uses: actions/upload-artifact@v2
               with:
                   name: build
                   path: ./mod/build/bundle.js
