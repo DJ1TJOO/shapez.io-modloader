@@ -29,14 +29,15 @@ jobs:
                   script: |
                       core.setOutput('upload_url', process.env.upload_url.slice(0, -13))
 
-            - uses: actions/download-artifact@v2
+            - name: Download artifacts
+              uses: actions/download-artifact@v2
               id: download
               with:
                   name: build
                   path: ./mod/build/bundle.js
 
             - name: Upload build to release
-              uses: actions/upload-release-asset@v1.0.2
+              uses: actions/upload-release-asset@v1
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
