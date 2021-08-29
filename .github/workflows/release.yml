@@ -16,6 +16,14 @@ jobs:
               id: tag
               run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
 
+            - name: Checkout repo
+              uses: actions/checkout@v2
+
+            - uses: actions/download-artifact@master
+              with:
+                  name: build
+                  path: mod/build/bundle.js
+
             - name: Upload build to release
               uses: svenstaro/upload-release-action@v2
               with:
@@ -45,3 +53,7 @@ jobs:
               run: |
                   cd mod/
                   node make.js
+            - uses: actions/upload-artifact@master
+              with:
+                  name: build
+                  path: mod/build/bundle.js
