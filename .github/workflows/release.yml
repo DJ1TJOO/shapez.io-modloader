@@ -37,7 +37,6 @@ jobs:
     build:
         name: Building mod
         runs-on: ubuntu-latest
-        if: github.event.base_ref == 'refs/heads/MultiplayerMod'
 
         steps:
             - name: Setup Node
