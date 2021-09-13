@@ -39,7 +39,7 @@ If existing instance:
 
 ## Setting up a server
 1. Have nodejs and yarn installed (https://nodejs.org/en/download/, https://classic.yarnpkg.com/en/docs/install/#windows-stable)
-2. [Download zipped server files](https://download-directory.github.io/?url=https://github.com/DJ1TJOO/shapez.io-modloader/tree/MultiplayerMod/multiplayer_server) or download the files from https://github.com/DJ1TJOO/shapez.io-modloader/tree/MultiplayerMod/multiplayer_server
+2. [Download zipped server files](https://download-directory.github.io/?url=https://github.com/DJ1TJOO/shapez.io-modloader/tree/MultiplayerMod/server) or download the files from https://github.com/DJ1TJOO/shapez.io-modloader/tree/MultiplayerMod/server
 3. Change secure, in server.js, too true/false depening on if you have a ssl certificate.
 4. Open a terminal/cmd [in the folder](https://www.groovypost.com/howto/open-command-window-terminal-window-specific-folder-windows-mac-linux/) and run `yarn`
 5. Then to start run `node server`
