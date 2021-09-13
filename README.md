@@ -47,10 +47,11 @@ If existing instance:
 
 1. Have nodejs installed (https://nodejs.org/en/download/)
 2. [Download zipped server files](https://download-directory.github.io/?url=https://github.com/DJ1TJOO/shapez.io-modloader/tree/MultiplayerMod/server) or download the files from https://github.com/DJ1TJOO/shapez.io-modloader/tree/MultiplayerMod/server
-3. Change secure, in server.js, too true/false depening on if you have a ssl certificate.
-4. Then run `start.bat`
-5. The game server is `ws://localhost:8889`
-6. Port forward to play with friends
+3. Unpack the .zip file
+4. Change secure, in server.js, too true/false depening on if you have a ssl certificate.
+5. Then run `start.bat`
+6. The game server is `ws://localhost:8889`
+7. Port forward to play with friends
 
 <hr>
 
